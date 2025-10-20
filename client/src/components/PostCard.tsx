@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, ExternalLink, Download } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -114,16 +114,8 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
 
       {/* Post Message */}
       {post.message && (
-        <div className="px-4 pb-3 relative group">
+        <div className="px-4 pb-3">
           <p className="text-sm line-clamp-3">{post.message}</p>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={handleCopyCaption}
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
         </div>
       )}
 
@@ -143,8 +135,16 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
             <span className="text-gray-300 font-medium">{shares.toLocaleString()}</span>
           </div>
         </div>
-        {post.link && (
-          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+        {post.message && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+            onClick={handleCopyCaption}
+            title="Copy caption"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
         )}
       </div>
 
