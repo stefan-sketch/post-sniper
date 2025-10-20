@@ -92,12 +92,6 @@ export default function Home() {
   }, [timer]);
 
   const alertsListQuery = trpc.alerts.list.useQuery();
-  const createAlertMutation = trpc.alerts.create.useMutation({
-    onSuccess: () => {
-      utils.alerts.list.invalidate();
-      utils.alerts.unreadCount.invalidate();
-    },
-  });
 
   // Process and organize posts
   const { livePosts, popularPosts } = useMemo(() => {
@@ -109,8 +103,8 @@ export default function Home() {
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     postsQuery.data.forEach((pageData: any) => {
-      if (pageData.data?.posts) {
-        pageData.data.posts.forEach((post: any) => {
+      if (pageData.posts) {
+        pageData.posts.forEach((post: any) => {
           const postDate = new Date(post.date);
           const reactions = post.kpi?.page_posts_reactions?.value || 0;
           
@@ -125,32 +119,6 @@ export default function Home() {
             postDate,
             reactions,
           });
-
-          // Check if alert should be triggered
-          if (
-            pageData.alertEnabled &&
-            reactions >= pageData.alertThreshold &&
-            postDate >= tenMinutesAgo // Only check recent posts
-          ) {
-            // Check if alert already exists for this post
-            const existingAlert = alertsListQuery.data?.find(
-              (alert) => alert.postId === post.id && alert.pageId === pageData.pageId
-            );
-            
-            if (!existingAlert) {
-              // Create alert
-              createAlertMutation.mutate({
-                pageId: pageData.pageId,
-                postId: post.id,
-                postLink: post.link,
-                postMessage: post.message,
-                postImage: post.image,
-                reactionCount: reactions,
-                threshold: pageData.alertThreshold,
-                postDate: postDate,
-              });
-            }
-          }
         });
       }
     });

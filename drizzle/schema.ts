@@ -75,3 +75,26 @@ export const alerts = mysqlTable("alerts", {
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
 
+/**
+ * Cached posts from social media
+ */
+export const posts = mysqlTable("posts", {
+  id: varchar("id", { length: 255 }).primaryKey(), // Post ID from social network
+  pageId: varchar("pageId", { length: 64 }).notNull(),
+  pageName: text("pageName").notNull(),
+  network: varchar("network", { length: 32 }).default("facebook"),
+  message: text("message"),
+  image: text("image"),
+  link: text("link"),
+  postDate: timestamp("postDate").notNull(),
+  reactions: int("reactions").default(0),
+  comments: int("comments").default(0),
+  shares: int("shares").default(0),
+  rawData: text("rawData"), // Store full JSON response
+  lastUpdated: timestamp("lastUpdated").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
+});
+
+export type Post = typeof posts.$inferSelect;
+export type InsertPost = typeof posts.$inferInsert;
+
