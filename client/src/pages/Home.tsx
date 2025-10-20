@@ -73,7 +73,7 @@ export default function Home() {
 
     const allPosts: any[] = [];
     const now = new Date();
-    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     postsQuery.data.forEach((pageData: any) => {
@@ -126,9 +126,9 @@ export default function Home() {
     // Sort all posts by date (newest first) for live posts
     const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
 
-    // Filter posts from last 2 hours and sort by reactions for popular posts
+    // Filte    // Popular posts: posts from last 6 hours sorted by reactions (highest first)
     const popular = allPosts
-      .filter(post => post.postDate >= twoHoursAgo)
+      .filter(post => post.postDate >= sixHoursAgo)
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
@@ -242,7 +242,7 @@ export default function Home() {
             )}
             {!postsQuery.isLoading && popularPosts.length === 0 && (
               <div className="glass-card p-6 rounded-xl text-center">
-                <p className="text-muted-foreground">No popular posts in the last 2 hours.</p>
+                <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
               </div>
             )}
             {popularPosts.map((post, index) => (

@@ -158,10 +158,21 @@ export const appRouter = router({
           }));
         }
 
+        // Calculate date range for last 24 hours
+        const now = new Date();
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const formatDate = (date: Date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        const period = `${formatDate(oneDayAgo)}_${formatDate(now)}`;
+
         const baseUrl = "https://app.fanpagekarma.com/api/v1";
         const results = await Promise.allSettled(
           pages.map(async (page) => {
-            const url = `${baseUrl}/${page.network}/${page.profileId}/posts?token=${apiToken}`;
+            const url = `${baseUrl}/${page.network}/${page.profileId}/posts?token=${apiToken}&period=${period}`;
             const response = await fetch(url);
             
             if (!response.ok) {
