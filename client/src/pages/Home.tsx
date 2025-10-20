@@ -10,6 +10,7 @@ import PostCard from "@/components/PostCard";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
@@ -58,6 +59,14 @@ export default function Home() {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, [timer]);
 
+  const alertsListQuery = trpc.alerts.list.useQuery(undefined, { enabled: isAuthenticated });
+  const createAlertMutation = trpc.alerts.create.useMutation({
+    onSuccess: () => {
+      utils.alerts.list.invalidate();
+      utils.alerts.unreadCount.invalidate();
+    },
+  });
+
   // Process and organize posts
   const { livePosts, popularPosts } = useMemo(() => {
     if (!postsQuery.data) return { livePosts: [], popularPosts: [] };
@@ -65,6 +74,7 @@ export default function Home() {
     const allPosts: any[] = [];
     const now = new Date();
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     postsQuery.data.forEach((pageData: any) => {
       if (pageData.data?.posts) {
@@ -83,6 +93,32 @@ export default function Home() {
             postDate,
             reactions,
           });
+
+          // Check if alert should be triggered
+          if (
+            pageData.alertEnabled &&
+            reactions >= pageData.alertThreshold &&
+            postDate >= tenMinutesAgo // Only check recent posts
+          ) {
+            // Check if alert already exists for this post
+            const existingAlert = alertsListQuery.data?.find(
+              (alert) => alert.postId === post.id && alert.pageId === pageData.pageId
+            );
+            
+            if (!existingAlert) {
+              // Create alert
+              createAlertMutation.mutate({
+                pageId: pageData.pageId,
+                postId: post.id,
+                postLink: post.link,
+                postMessage: post.message,
+                postImage: post.image,
+                reactionCount: reactions,
+                threshold: pageData.alertThreshold,
+                postDate: postDate,
+              });
+            }
+          }
         });
       }
     });
