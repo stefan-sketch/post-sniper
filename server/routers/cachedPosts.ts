@@ -38,7 +38,7 @@ export const cachedPostsRouter = router({
           alertEnabled: monitoredPages.alertEnabled,
         })
         .from(cachedPosts)
-        .leftJoin(monitoredPages, eq(cachedPosts.pageId, monitoredPages.profileId))
+        .leftJoin(monitoredPages, eq(cachedPosts.pageId, monitoredPages.id))
         .where(gte(cachedPosts.postDate, oneDayAgo))
         .orderBy(desc(cachedPosts.postDate));
 
