@@ -241,7 +241,7 @@ export default function Home() {
       </div>
 
       {/* Desktop: Two Column Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-3">
+      <div className="hidden md:grid grid-cols-2 gap-6">
         {/* Live Posts Column */}
         <div>
           <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">

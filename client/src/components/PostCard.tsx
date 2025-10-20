@@ -114,7 +114,7 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
 
       {/* Post Image */}
       {post.image && (
-        <div className="relative w-full aspect-video overflow-hidden group/image">
+        <div className="relative w-full aspect-[4/5] overflow-hidden group/image">
           <img 
             src={post.image} 
             alt="Post content"
