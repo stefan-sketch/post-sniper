@@ -47,6 +47,7 @@ export const userSettings = mysqlTable("user_settings", {
   useMockData: boolean("useMockData").default(false), // Use real API by default
   isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
   lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
+  dismissedPosts: text("dismissedPosts"), // JSON array of dismissed post IDs
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });

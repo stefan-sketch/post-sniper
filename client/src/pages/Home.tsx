@@ -92,6 +92,21 @@ export default function Home() {
   }, [timer]);
 
   const alertsListQuery = trpc.alerts.list.useQuery();
+  const dismissPostMutation = trpc.settings.dismissPost.useMutation({
+    onSuccess: () => {
+      utils.settings.get.invalidate();
+    },
+  });
+
+  // Get dismissed posts
+  const dismissedPostIds = useMemo(() => {
+    if (!settingsQuery.data?.dismissedPosts) return [];
+    try {
+      return JSON.parse(settingsQuery.data.dismissedPosts);
+    } catch {
+      return [];
+    }
+  }, [settingsQuery.data?.dismissedPosts]);
 
   // Process and organize posts
   const { livePosts, popularPosts } = useMemo(() => {
@@ -126,13 +141,17 @@ export default function Home() {
     // Sort all posts by date (newest first) for live posts
     const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
 
-    // Filte    // Popular posts: posts from last 6 hours sorted by reactions (highest first)
+    // Filter posts from last 6 hours, exclude dismissed, and sort by reactions for popular posts
     const popular = allPosts
-      .filter(post => post.postDate >= sixHoursAgo)
+      .filter(post => post.postDate >= sixHoursAgo && !dismissedPostIds.includes(post.id))
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data]);
+  }, [postsQuery.data, dismissedPostIds]);
+
+  const handleDismissPost = (postId: string) => {
+    dismissPostMutation.mutate({ postId });
+  };
 
   // No authentication required - removed loading and login screens
 
@@ -227,7 +246,12 @@ export default function Home() {
               </div>
             )}
             {popularPosts.map((post, index) => (
-              <PostCard key={`${post.pageId}-${post.id}-popular-${index}`} post={post} />
+              <PostCard 
+                key={`${post.pageId}-${post.id}-popular-${index}`} 
+                post={post} 
+                showDismiss={true}
+                onDismiss={handleDismissPost}
+              />
             ))}
           </div>
         </div>
