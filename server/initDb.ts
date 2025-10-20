@@ -11,23 +11,25 @@ export async function initializeDatabase() {
   try {
     console.log("[InitDB] Initializing database tables...");
     
-    // Drop existing tables to recreate with correct schema
-    await db.execute(sql`DROP TABLE IF EXISTS cached_posts CASCADE`);
-    await db.execute(sql`DROP TABLE IF EXISTS monitored_pages CASCADE`);
-    await db.execute(sql`DROP TABLE IF EXISTS alerts CASCADE`);
-    await db.execute(sql`DROP TABLE IF EXISTS user_settings CASCADE`);
-    await db.execute(sql`DROP TABLE IF EXISTS users CASCADE`);
-    console.log("[InitDB] Dropped existing tables");
+    // Add missing columns to existing tables if needed (for schema updates)
+    try {
+      await db.execute(sql`ALTER TABLE monitored_pages ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW()`);
+      await db.execute(sql`ALTER TABLE cached_posts ADD COLUMN IF NOT EXISTS "fetchedAt" TIMESTAMP DEFAULT NOW()`);
+      console.log("[InitDB] Updated existing table schemas");
+    } catch (e) {
+      // Tables might not exist yet, will be created below
+    }
 
     // Create users table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
+        id VARCHAR(64) PRIMARY KEY,
         name TEXT,
-        email TEXT,
-        "loginMethod" TEXT,
-        "lastSignedIn" TIMESTAMP,
-        "createdAt" TIMESTAMP DEFAULT NOW()
+        email VARCHAR(320),
+        "loginMethod" VARCHAR(64),
+        role VARCHAR(10) DEFAULT 'user' NOT NULL,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "lastSignedIn" TIMESTAMP DEFAULT NOW()
       )
     `);
 
@@ -51,7 +53,7 @@ export async function initializeDatabase() {
     // Create user_settings table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS user_settings (
-        "userId" TEXT PRIMARY KEY,
+        "userId" VARCHAR(64) PRIMARY KEY,
         "fanpageKarmaToken" TEXT,
         "autoRefreshEnabled" BOOLEAN DEFAULT true,
         "refreshInterval" INTEGER DEFAULT 600,
@@ -67,10 +69,10 @@ export async function initializeDatabase() {
     // Create alerts table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS alerts (
-        id TEXT PRIMARY KEY,
-        "userId" TEXT NOT NULL,
-        "pageId" TEXT NOT NULL,
-        "postId" TEXT NOT NULL,
+        id VARCHAR(64) PRIMARY KEY,
+        "userId" VARCHAR(64) NOT NULL,
+        "pageId" VARCHAR(64) NOT NULL,
+        "postId" VARCHAR(255) NOT NULL,
         "postLink" TEXT,
         "postMessage" TEXT,
         "postImage" TEXT,
