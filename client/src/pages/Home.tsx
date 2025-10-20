@@ -226,7 +226,7 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-3">
         {/* Live Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-primary">Live Posts</h2>
+          <h2 className="text-lg font-semibold mb-3 text-primary text-center">Live Posts</h2>
           <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
@@ -246,7 +246,7 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-secondary">Popular Posts</h2>
+          <h2 className="text-lg font-semibold mb-3 text-secondary text-center">Popular Posts</h2>
           <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
