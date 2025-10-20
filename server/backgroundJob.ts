@@ -27,9 +27,18 @@ export class BackgroundJobService {
     await this.fetchAndCachePosts();
 
     // Then run every 10 minutes
+    const intervalMs = 10 * 60 * 1000; // 10 minutes
+    console.log(`[BackgroundJob] Setting up interval to run every ${intervalMs / 1000 / 60} minutes`);
+    
     this.intervalId = setInterval(async () => {
+      console.log(`[BackgroundJob] Interval triggered at ${new Date().toISOString()}`);
       await this.fetchAndCachePosts();
-    }, 10 * 60 * 1000); // 10 minutes
+    }, intervalMs);
+    
+    console.log(`[BackgroundJob] Interval ID: ${this.intervalId}`);
+    
+    // Keep the interval alive (prevent Node.js from exiting)
+    this.intervalId.ref();
   }
 
   stop() {
