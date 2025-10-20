@@ -1,0 +1,23 @@
+{
+  "query": "SELECT * FROM monitored_pages WHERE userId = 'public';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT * FROM monitored_pages WHERE userId = 'public';",
+  "rows": [
+    {
+      "id": "emHNYwEladhXx0SsLzobQ",
+      "userId": "public",
+      "profileId": "639087909492017",
+      "profileName": "The Football Community ",
+      "profilePicture": "https://scontent.flhr10-2.fna.fbcdn.net/v/t39.30808-6/459351223_1085614216561438_1284027308712577514_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=e7_1QuxmEfQQ7kNvwFKOeU-&_nc_oc=AdmmNkJN7v7vFycUdllsyLBcmd2PLRcpDqGlOlKs0330r0k2Pc9dHRZOhUNAPknfktw&_nc_zt=23&_nc_ht=scontent.flhr10-2.fna&_nc_gid=YTPN71e3iKfsLWz4rsQ04Q&oh=00_AfewlvD05pdE69cElzvg7-WAY-uzw4CpE1dLTgoUZ4pPyg&oe=68FC5098",
+      "borderColor": "#22d3ee",
+      "network": "facebook",
+      "alertThreshold": "300",
+      "alertEnabled": "1",
+      "createdAt": "2025-10-20 19:57:21",
+      "updatedAt": "2025-10-20 20:10:30"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tprofileId\tprofileName\tprofilePicture\tborderColor\tnetwork\talertThreshold\talertEnabled\tcreatedAt\tupdatedAt\nemHNYwEladhXx0SsLzobQ\tpublic\t639087909492017\tThe Football Community \thttps://scontent.flhr10-2.fna.fbcdn.net/v/t39.30808-6/459351223_1085614216561438_1284027308712577514_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=e7_1QuxmEfQQ7kNvwFKOeU-&_nc_oc=AdmmNkJN7v7vFycUdllsyLBcmd2PLRcpDqGlOlKs0330r0k2Pc9dHRZOhUNAPknfktw&_nc_zt=23&_nc_ht=scontent.flhr10-2.fna&_nc_gid=YTPN71e3iKfsLWz4rsQ04Q&oh=00_AfewlvD05pdE69cElzvg7-WAY-uzw4CpE1dLTgoUZ4pPyg&oe=68FC5098\t#22d3ee\tfacebook\t300\t1\t2025-10-20 19:57:21\t2025-10-20 20:10:30\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}

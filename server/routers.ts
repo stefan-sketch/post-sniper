@@ -147,8 +147,14 @@ export const appRouter = router({
         }
 
         // Fetch real data from Fanpage Karma API
+        // Calculate date range for last 24 hours
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const endDate = now.toISOString().split('T')[0];
+        const startDate = yesterday.toISOString().split('T')[0];
+        
         const response = await fetch(
-          `https://app.fanpagekarma.com/api/v1/${input.network}/${input.profileId}/posts?token=${apiToken}&period=1d`,
+          `https://app.fanpagekarma.com/api/v1/${input.network}/${input.profileId}/posts?token=${apiToken}&period=${startDate}_${endDate}`,
           { method: "GET" }
         );
 
@@ -180,10 +186,16 @@ export const appRouter = router({
         }
 
         // Fetch real data from Fanpage Karma API for all pages
+        // Calculate date range for last 24 hours
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const endDate = now.toISOString().split('T')[0];
+        const startDate = yesterday.toISOString().split('T')[0];
+        
         const results = await Promise.allSettled(
           pages.map(async (page) => {
             const response = await fetch(
-              `https://app.fanpagekarma.com/api/v1/${page.network}/${page.profileId}/posts?token=${apiToken}&period=1d`,
+              `https://app.fanpagekarma.com/api/v1/${page.network}/${page.profileId}/posts?token=${apiToken}&period=${startDate}_${endDate}`,
               { method: "GET" }
             );
 

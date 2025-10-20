@@ -1,0 +1,14 @@
+{
+  "query": "SELECT LENGTH(fanpageKarmaToken) as token_length, isPlaying FROM user_settings WHERE userId = 'public';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT LENGTH(fanpageKarmaToken) as token_length, isPlaying FROM user_settings WHERE userId = 'public';",
+  "rows": [
+    {
+      "token_length": "54",
+      "isPlaying": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "token_length\tisPlaying\n54\t0\n",
+  "stderr": "",
+  "execution_time_ms": 44
+}

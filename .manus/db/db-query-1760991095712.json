@@ -1,0 +1,16 @@
+{
+  "query": "SELECT userId, fanpageKarmaToken, isPlaying, useMockData FROM user_settings WHERE userId = 'public';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT userId, fanpageKarmaToken, isPlaying, useMockData FROM user_settings WHERE userId = 'public';",
+  "rows": [
+    {
+      "userId": "public",
+      "fanpageKarmaToken": "2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB",
+      "isPlaying": "0",
+      "useMockData": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "userId\tfanpageKarmaToken\tisPlaying\tuseMockData\npublic\t2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 47
+}
