@@ -131,6 +131,22 @@ export const appRouter = router({
         await db.upsertUserSettings({ userId: PUBLIC_USER_ID, dismissedPosts: JSON.stringify(dismissed) });
         return { success: true };
       }),
+
+    clearAllPosts: publicProcedure
+      .mutation(async () => {
+        await db.clearAllCachedPosts();
+        return { success: true };
+      }),
+
+    resyncPosts: publicProcedure
+      .mutation(async () => {
+        // Clear all cached posts
+        await db.clearAllCachedPosts();
+        // Trigger background job to fetch fresh data
+        const { backgroundJobService } = await import("./backgroundJob");
+        await backgroundJobService.fetchAndCachePosts();
+        return { success: true };
+      }),
   }),
 
   posts: router({

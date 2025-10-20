@@ -192,3 +192,13 @@ export async function deleteAlert(id: string): Promise<void> {
   await db.delete(alerts).where(eq(alerts.id, id));
 }
 
+
+// Cached Posts
+export async function clearAllCachedPosts(): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { cachedPosts } = await import("../drizzle/schema");
+  await db.delete(cachedPosts);
+}
+

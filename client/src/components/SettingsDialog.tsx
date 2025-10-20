@@ -49,6 +49,8 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
       toast.success("Page removed successfully");
     },
   });
+  const clearAllPostsMutation = trpc.settings.clearAllPosts.useMutation();
+  const resyncPostsMutation = trpc.settings.resyncPosts.useMutation();
 
   useEffect(() => {
     if (pagesQuery.data) {
@@ -129,6 +131,40 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Data Management Section */}
+          <div className="space-y-4">
+            <Label>Data Management</Label>
+            <div className="flex gap-3">
+              <Button
+                onClick={async () => {
+                  if (confirm("Are you sure you want to clear all posts? This will remove all cached posts from the dashboard.")) {
+                    await clearAllPostsMutation.mutateAsync();
+                    utils.cachedPosts.getAll.invalidate();
+                    toast.success("All posts cleared");
+                  }
+                }}
+                variant="destructive"
+                size="sm"
+                disabled={clearAllPostsMutation.isPending}
+              >
+                Clear All Posts
+              </Button>
+              <Button
+                onClick={async () => {
+                  await resyncPostsMutation.mutateAsync();
+                  utils.cachedPosts.getAll.invalidate();
+                  utils.settings.get.invalidate();
+                  toast.success("Posts resynced successfully");
+                }}
+                variant="outline"
+                size="sm"
+                disabled={resyncPostsMutation.isPending}
+              >
+                {resyncPostsMutation.isPending ? "Resyncing..." : "Resync Posts"}
+              </Button>
+            </div>
+          </div>
+
           {/* Monitored Pages Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
