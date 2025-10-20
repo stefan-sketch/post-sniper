@@ -32,14 +32,29 @@ export default function Home() {
       setPlayingMutation.mutate({ isPlaying });
     }
   }, [isPlaying, isAuthenticated]);
-  const apiCheckQuery = trpc.posts.checkApi.useQuery(undefined, { 
-    enabled: isAuthenticated && isPlaying,
-    refetchInterval: 60000 // Check API status every minute
-  });
+  const [apiStatus, setApiStatus] = useState<"success" | "error">("success");
+  const [retryTimer, setRetryTimer] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+
   const postsQuery = trpc.posts.fetchAll.useQuery(undefined, {
     enabled: isAuthenticated && isPlaying,
-    refetchInterval: (settingsQuery.data?.refreshInterval || 600) * 1000,
+    refetchInterval: isRetrying ? 120000 : (settingsQuery.data?.refreshInterval || 600) * 1000, // 2 min retry or 10 min normal
   });
+
+  // Track API status based on postsQuery success/error
+  useEffect(() => {
+    if (postsQuery.isSuccess && postsQuery.data) {
+      setApiStatus("success");
+      setIsRetrying(false);
+      setRetryTimer(0);
+    } else if (postsQuery.isError) {
+      setApiStatus("error");
+      if (!isRetrying) {
+        setIsRetrying(true);
+        setRetryTimer(120); // Start 2-minute retry countdown
+      }
+    }
+  }, [postsQuery.isSuccess, postsQuery.isError, postsQuery.data, isRetrying]);
   const unreadCountQuery = trpc.alerts.unreadCount.useQuery(undefined, {
     enabled: isAuthenticated,
     refetchInterval: 30000, // Check every 30 seconds
@@ -83,6 +98,29 @@ export default function Home() {
   });
 
   // Process and organize posts
+  // Retry timer countdown
+  useEffect(() => {
+    if (!isRetrying || retryTimer === 0) return;
+
+    const countdown = setInterval(() => {
+      setRetryTimer(prev => {
+        if (prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [isRetrying, retryTimer]);
+
+  // Format retry timer as MM:SS
+  const formattedRetryTimer = useMemo(() => {
+    const minutes = Math.floor(retryTimer / 60);
+    const seconds = retryTimer % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }, [retryTimer]);
+
   const { livePosts, popularPosts } = useMemo(() => {
     if (!postsQuery.data) return { livePosts: [], popularPosts: [] };
 
@@ -171,14 +209,12 @@ export default function Home() {
     );
   }
 
-  const apiStatus = apiCheckQuery.data?.status || "unknown";
-
   return (
     <div className="min-h-screen w-full" style={{ width: '770px', margin: '0 auto' }}>
       {/* Header */}
-      <header className="glass-card p-4 mb-6 rounded-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Post Sniper 🎯</h1>
+      <header className="glass-card p-3 mb-4 rounded-xl">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Post Sniper 🎯</h1>
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -218,18 +254,20 @@ export default function Home() {
                   apiStatus === "success" ? "bg-green-500 glow-cyan" : "bg-red-500"
                 }`}
               />
-              <span className="text-sm font-mono">{formattedTimer}</span>
+              <span className="text-sm font-mono">
+                {isRetrying && retryTimer > 0 ? formattedRetryTimer : formattedTimer}
+              </span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Live Posts Column */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-primary">Live Posts</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-semibold mb-3 text-primary">Live Posts</h2>
+          <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -248,8 +286,8 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-secondary">Popular Posts</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-semibold mb-3 text-secondary">Popular Posts</h2>
+          <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
