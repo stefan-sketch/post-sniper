@@ -16,6 +16,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
+  const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -85,12 +86,26 @@ export default function Home() {
     return () => clearInterval(countdown);
   }, [isPlaying, settingsQuery.data?.refreshInterval, settingsQuery.data?.lastFetchedAt]);
 
-  // Format timer as MM:SS
-  const formattedTimer = useMemo(() => {
-    const minutes = Math.floor(timer / 60);
-    const seconds = timer % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }, [timer]);
+  // Calculate minutes since last update
+  useEffect(() => {
+    const updateMinutes = () => {
+      const lastFetched = postsQuery.data?.lastFetchedAt;
+      if (!lastFetched) {
+        setMinutesSinceUpdate(0);
+        return;
+      }
+      
+      const now = Date.now();
+      const lastFetchTime = new Date(lastFetched).getTime();
+      const elapsed = Math.floor((now - lastFetchTime) / 1000 / 60); // minutes
+      setMinutesSinceUpdate(elapsed);
+    };
+
+    updateMinutes();
+    const interval = setInterval(updateMinutes, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [postsQuery.data?.lastFetchedAt]);
 
   const alertsListQuery = trpc.alerts.list.useQuery();
   const dismissPostMutation = trpc.settings.dismissPost.useMutation({
@@ -158,7 +173,14 @@ export default function Home() {
       {/* Header */}
       <header className="glass-card p-3 mb-4 rounded-xl">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Post Sniper 🎯</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold">Post Sniper 🎯</h1>
+            {postsQuery.data?.lastFetchedAt && (
+              <span className="text-sm text-white/60">
+                Last updated: {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
