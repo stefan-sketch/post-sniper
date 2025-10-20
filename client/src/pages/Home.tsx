@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2 } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -221,11 +221,15 @@ export default function Home() {
             </Button>
 
             <div className="flex items-center gap-2">
-              <div 
-                className={`h-3 w-3 rounded-full ${
-                  apiStatus === "success" ? "bg-green-500 glow-cyan" : "bg-red-500"
-                }`}
-              />
+              {postsQuery.isFetching ? (
+                <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
+              ) : (
+                <div 
+                  className={`h-3 w-3 rounded-full ${
+                    apiStatus === "success" ? "bg-green-500 glow-cyan" : "bg-red-500"
+                  }`}
+                />
+              )}
               <span className="text-sm font-mono">{formattedTimer}</span>
             </div>
           </div>
