@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -226,7 +226,13 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-3">
         {/* Live Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-primary text-center">Live Posts</h2>
+          <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            Live Posts
+          </h2>
           <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
@@ -246,7 +252,10 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-secondary text-center">Popular Posts</h2>
+          <h2 className="text-lg font-semibold mb-3 text-secondary text-center flex items-center justify-center gap-2">
+            <TrendingUp className="h-5 w-5 text-secondary" />
+            Popular Posts
+          </h2>
           <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
