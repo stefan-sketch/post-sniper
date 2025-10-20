@@ -68,7 +68,7 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
   return (
     <div 
       className="glass-card rounded-xl overflow-hidden transition-all hover:scale-[1.02] cursor-pointer"
-      style={{ borderLeft: `4px solid ${post.borderColor}` }}
+      style={{ border: `2px solid ${post.borderColor}` }}
       onClick={handleOpenPost}
     >
       {/* Profile Header */}
