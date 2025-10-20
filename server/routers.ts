@@ -81,6 +81,7 @@ export const appRouter = router({
           useMockData: false,
           isPlaying: false,
           lastFetchedAt: null,
+          dismissedPosts: null,
         };
       }
       return settings;
@@ -110,6 +111,20 @@ export const appRouter = router({
     updateLastFetched: publicProcedure
       .mutation(async () => {
         await db.upsertUserSettings({ userId: PUBLIC_USER_ID, lastFetchedAt: new Date() });
+        return { success: true };
+      }),
+
+    dismissPost: publicProcedure
+      .input(z.object({
+        postId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const settings = await db.getUserSettings(PUBLIC_USER_ID);
+        const dismissed = settings?.dismissedPosts ? JSON.parse(settings.dismissedPosts) : [];
+        if (!dismissed.includes(input.postId)) {
+          dismissed.push(input.postId);
+        }
+        await db.upsertUserSettings({ userId: PUBLIC_USER_ID, dismissedPosts: JSON.stringify(dismissed) });
         return { success: true };
       }),
   }),

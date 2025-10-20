@@ -64,6 +64,13 @@
       "when": 1760990309163,
       "tag": "0008_chemical_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1760990535637,
+      "tag": "0009_messy_red_wolf",
+      "breakpoints": true
     }
   ]
 }

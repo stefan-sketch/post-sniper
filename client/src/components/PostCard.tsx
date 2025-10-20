@@ -2,6 +2,7 @@ import { Heart, MessageCircle, Share2, Copy, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 
 interface PostCardProps {
   post: {
@@ -20,9 +21,11 @@ interface PostCardProps {
       page_posts_shares_count?: { value: number };
     };
   };
+  showDismiss?: boolean;
+  onDismiss?: () => void;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
@@ -80,6 +83,20 @@ export default function PostCard({ post }: PostCardProps) {
           <p className="font-semibold truncate">{post.pageName}</p>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
+        {showDismiss && onDismiss && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss();
+              toast.success("Post dismissed");
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Post Image */}

@@ -92,6 +92,11 @@ export default function Home() {
   }, [timer]);
 
   const alertsListQuery = trpc.alerts.list.useQuery();
+  const dismissPostMutation = trpc.settings.dismissPost.useMutation({
+    onSuccess: () => {
+      settingsQuery.refetch();
+    },
+  });
   const createAlertMutation = trpc.alerts.create.useMutation({
     onSuccess: () => {
       utils.alerts.list.invalidate();
@@ -158,9 +163,14 @@ export default function Home() {
     // Sort all posts by date (newest first) for live posts
     const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
 
-    // Filte    // Popular posts: posts from last 6 hours sorted by reactions (highest first)
+    // Filte    // Get dismissed post IDs
+    const dismissedIds = settingsQuery.data?.dismissedPosts 
+      ? JSON.parse(settingsQuery.data.dismissedPosts) 
+      : [];
+
+    // Popular posts: posts from last 6 hours sorted by reactions (highest first), excluding dismissed
     const popular = allPosts
-      .filter(post => post.postDate >= sixHoursAgo)
+      .filter(post => post.postDate >= sixHoursAgo && !dismissedIds.includes(post.id))
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
@@ -268,7 +278,12 @@ export default function Home() {
               </div>
             )}
             {popularPosts.map((post, index) => (
-              <PostCard key={`${post.pageId}-${post.id}-popular-${index}`} post={post} />
+              <PostCard 
+                key={`${post.pageId}-${post.id}-popular-${index}`} 
+                post={post} 
+                showDismiss={true}
+                onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
+              />
             ))}
           </div>
         </div>
