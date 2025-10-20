@@ -1,6 +1,18 @@
-import { eq, and, or, desc, gte } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, monitoredPages, InsertMonitoredPage, MonitoredPage, userSettings, InsertUserSettings, UserSettings, alerts, InsertAlert, Alert, posts, InsertPost, Post } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users, 
+  monitoredPages, 
+  InsertMonitoredPage,
+  MonitoredPage,
+  userSettings,
+  InsertUserSettings,
+  UserSettings,
+  alerts,
+  InsertAlert,
+  Alert
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -173,72 +185,5 @@ export async function deleteAlert(id: string): Promise<void> {
   if (!db) throw new Error("Database not available");
   
   await db.delete(alerts).where(eq(alerts.id, id));
-}
-
-export async function getAlertByPostId(userId: string, postId: string, pageId: string): Promise<Alert | undefined> {
-  const db = await getDb();
-  if (!db) return undefined;
-  
-  const result = await db.select().from(alerts)
-    .where(and(
-      eq(alerts.userId, userId),
-      eq(alerts.postId, postId),
-      eq(alerts.pageId, pageId)
-    ))
-    .limit(1);
-  
-  return result.length > 0 ? result[0] : undefined;
-}
-
-// Posts
-export async function upsertPost(post: InsertPost): Promise<void> {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  
-  await db.insert(posts).values(post).onDuplicateKeyUpdate({
-    set: {
-      message: post.message,
-      image: post.image,
-      link: post.link,
-      reactions: post.reactions,
-      comments: post.comments,
-      shares: post.shares,
-      rawData: post.rawData,
-      lastUpdated: new Date(),
-    }
-  });
-}
-
-export async function getPosts(pageIds?: string[], limit: number = 100): Promise<Post[]> {
-  const db = await getDb();
-  if (!db) return [];
-  
-  let query = db.select().from(posts).orderBy(desc(posts.postDate)).limit(limit);
-  
-  if (pageIds && pageIds.length > 0) {
-    // Filter by page IDs if provided
-    const conditions = pageIds.map(pageId => eq(posts.pageId, pageId));
-    query = query.where(or(...conditions)) as any;
-  }
-  
-  return await query;
-}
-
-export async function getPostsByTimeRange(hoursAgo: number, pageIds?: string[]): Promise<Post[]> {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const timeThreshold = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
-  
-  let conditions = [gte(posts.postDate, timeThreshold)];
-  
-  if (pageIds && pageIds.length > 0) {
-    const pageConditions = pageIds.map(pageId => eq(posts.pageId, pageId));
-    conditions.push(or(...pageConditions) as any);
-  }
-  
-  return await db.select().from(posts)
-    .where(and(...conditions))
-    .orderBy(desc(posts.postDate));
 }
 

@@ -92,21 +92,12 @@ export default function Home() {
   }, [timer]);
 
   const alertsListQuery = trpc.alerts.list.useQuery();
-  const dismissPostMutation = trpc.settings.dismissPost.useMutation({
+  const createAlertMutation = trpc.alerts.create.useMutation({
     onSuccess: () => {
-      utils.settings.get.invalidate();
+      utils.alerts.list.invalidate();
+      utils.alerts.unreadCount.invalidate();
     },
   });
-
-  // Get dismissed posts
-  const dismissedPostIds = useMemo(() => {
-    if (!settingsQuery.data?.dismissedPosts) return [];
-    try {
-      return JSON.parse(settingsQuery.data.dismissedPosts);
-    } catch {
-      return [];
-    }
-  }, [settingsQuery.data?.dismissedPosts]);
 
   // Process and organize posts
   const { livePosts, popularPosts } = useMemo(() => {
@@ -118,8 +109,8 @@ export default function Home() {
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     postsQuery.data.forEach((pageData: any) => {
-      if (pageData.posts) {
-        pageData.posts.forEach((post: any) => {
+      if (pageData.data?.posts) {
+        pageData.data.posts.forEach((post: any) => {
           const postDate = new Date(post.date);
           const reactions = post.kpi?.page_posts_reactions?.value || 0;
           
@@ -134,6 +125,32 @@ export default function Home() {
             postDate,
             reactions,
           });
+
+          // Check if alert should be triggered
+          if (
+            pageData.alertEnabled &&
+            reactions >= pageData.alertThreshold &&
+            postDate >= tenMinutesAgo // Only check recent posts
+          ) {
+            // Check if alert already exists for this post
+            const existingAlert = alertsListQuery.data?.find(
+              (alert) => alert.postId === post.id && alert.pageId === pageData.pageId
+            );
+            
+            if (!existingAlert) {
+              // Create alert
+              createAlertMutation.mutate({
+                pageId: pageData.pageId,
+                postId: post.id,
+                postLink: post.link,
+                postMessage: post.message,
+                postImage: post.image,
+                reactionCount: reactions,
+                threshold: pageData.alertThreshold,
+                postDate: postDate,
+              });
+            }
+          }
         });
       }
     });
@@ -141,17 +158,13 @@ export default function Home() {
     // Sort all posts by date (newest first) for live posts
     const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
 
-    // Filter posts from last 6 hours, exclude dismissed, and sort by reactions for popular posts
+    // Filte    // Popular posts: posts from last 6 hours sorted by reactions (highest first)
     const popular = allPosts
-      .filter(post => post.postDate >= sixHoursAgo && !dismissedPostIds.includes(post.id))
+      .filter(post => post.postDate >= sixHoursAgo)
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data, dismissedPostIds]);
-
-  const handleDismissPost = (postId: string) => {
-    dismissPostMutation.mutate({ postId });
-  };
+  }, [postsQuery.data]);
 
   // No authentication required - removed loading and login screens
 
@@ -246,12 +259,7 @@ export default function Home() {
               </div>
             )}
             {popularPosts.map((post, index) => (
-              <PostCard 
-                key={`${post.pageId}-${post.id}-popular-${index}`} 
-                post={post} 
-                showDismiss={true}
-                onDismiss={handleDismissPost}
-              />
+              <PostCard key={`${post.pageId}-${post.id}-popular-${index}`} post={post} />
             ))}
           </div>
         </div>

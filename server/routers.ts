@@ -81,7 +81,6 @@ export const appRouter = router({
           useMockData: false,
           isPlaying: false,
           lastFetchedAt: null,
-          dismissedPosts: null,
         };
       }
       return settings;
@@ -111,32 +110,6 @@ export const appRouter = router({
     updateLastFetched: publicProcedure
       .mutation(async () => {
         await db.upsertUserSettings({ userId: PUBLIC_USER_ID, lastFetchedAt: new Date() });
-        return { success: true };
-      }),
-
-    dismissPost: publicProcedure
-      .input(z.object({ postId: z.string() }))
-      .mutation(async ({ input }) => {
-        const settings = await db.getUserSettings(PUBLIC_USER_ID);
-        const dismissed = settings?.dismissedPosts ? JSON.parse(settings.dismissedPosts) : [];
-        
-        if (!dismissed.includes(input.postId)) {
-          dismissed.push(input.postId);
-          await db.upsertUserSettings({
-            userId: PUBLIC_USER_ID,
-            dismissedPosts: JSON.stringify(dismissed),
-          });
-        }
-        
-        return { success: true };
-      }),
-
-    undismissAll: publicProcedure
-      .mutation(async () => {
-        await db.upsertUserSettings({
-          userId: PUBLIC_USER_ID,
-          dismissedPosts: JSON.stringify([]),
-        });
         return { success: true };
       }),
   }),
@@ -172,42 +145,6 @@ export const appRouter = router({
       }),
 
     fetchAll: publicProcedure.query(async () => {
-        // Fetch posts from database instead of API
-        const pages = await db.getMonitoredPages(PUBLIC_USER_ID);
-        const pageIds = pages.map(p => p.profileId);
-        const allPosts = await db.getPosts(pageIds);
-        
-        // Group posts by page
-        const result = pages.map(page => {
-          const pagePosts = allPosts.filter(post => post.pageId === page.profileId);
-          
-          return {
-            pageId: page.profileId,
-            pageName: page.profileName,
-            borderColor: page.borderColor,
-            profilePicture: page.profilePicture,
-            alertThreshold: page.alertThreshold,
-            alertEnabled: page.alertEnabled,
-            posts: pagePosts.map(post => ({
-              id: post.id,
-              message: post.message,
-              image: post.image,
-              link: post.link,
-              date: post.postDate,
-              kpi: {
-                page_posts_reactions: { value: post.reactions },
-                page_posts_comments_count: { value: post.comments },
-                page_posts_shares_count: { value: post.shares },
-              }
-            }))
-          };
-        });
-        
-        return result;
-      }),
-
-    // Legacy API fetch (kept for compatibility)
-    fetchAllFromApi: publicProcedure.query(async () => {
         const pages = await db.getMonitoredPages(PUBLIC_USER_ID);
         const settings = await db.getUserSettings(PUBLIC_USER_ID);
         const useMockData = settings?.useMockData ?? false;

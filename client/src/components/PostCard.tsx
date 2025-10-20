@@ -20,11 +20,9 @@ interface PostCardProps {
       page_posts_shares_count?: { value: number };
     };
   };
-  onDismiss?: (postId: string) => void;
-  showDismiss?: boolean;
 }
 
-export default function PostCard({ post, onDismiss, showDismiss = false }: PostCardProps) {
+export default function PostCard({ post }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
@@ -52,23 +50,11 @@ export default function PostCard({ post, onDismiss, showDismiss = false }: PostC
   };
 
   return (
-    <div
-      className="glass-card p-3 rounded-lg hover:scale-[1.02] transition-transform cursor-pointer relative"
-      style={{ borderLeft: `3px solid ${post.borderColor}` }}
-      onClick={() => window.open(post.link, '_blank')}
+    <div 
+      className="glass-card rounded-xl overflow-hidden transition-all hover:scale-[1.02] cursor-pointer"
+      style={{ borderLeft: `4px solid ${post.borderColor}` }}
+      onClick={handleOpenPost}
     >
-      {showDismiss && onDismiss && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDismiss(post.id);
-          }}
-          className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-red-500/80 hover:bg-red-600 text-white text-xs font-bold transition-colors"
-          title="Dismiss from Popular Posts"
-        >
-          ✕
-        </button>
-      )}
       {/* Profile Header */}
       <div className="p-4 flex items-center gap-3">
         <div 
