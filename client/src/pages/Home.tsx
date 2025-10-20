@@ -202,19 +202,6 @@ export default function Home() {
                 </span>
               )}
             </Button>
-
-            <div className="flex items-center gap-2">
-              {postsQuery.isFetching ? (
-                <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
-              ) : (
-                <div 
-                  className={`h-3 w-3 rounded-full ${
-                    apiStatus === "success" ? "bg-green-500 glow-cyan" : "bg-red-500"
-                  }`}
-                />
-              )}
-              <span className="text-sm font-mono">{formattedTimer}</span>
-            </div>
           </div>
         </div>
       </header>
