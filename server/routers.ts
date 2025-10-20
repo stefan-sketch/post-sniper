@@ -74,9 +74,9 @@ export const appRouter = router({
 
     update: protectedProcedure
       .input(z.object({
-        fanpageKarmaToken: z.string().optional(),
         autoRefreshEnabled: z.boolean().optional(),
         refreshInterval: z.number().optional(),
+        useMockData: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await db.upsertUserSettings({
@@ -92,19 +92,23 @@ export const appRouter = router({
       .input(z.object({
         profileId: z.string(),
         network: z.string().default("facebook"),
-        period: z.string().optional(), // format: YYYY-MM-DD_YYYY-MM-DD
+        period: z.string().optional(),
+        apiToken: z.string().optional(), // Optional API token passed from frontend
       }))
       .query(async ({ ctx, input }) => {
-        // Get user's API token
         const settings = await db.getUserSettings(ctx.user.id);
-        if (!settings?.fanpageKarmaToken) {
-          throw new Error("Fanpage Karma API token not configured");
+        const useMockData = settings?.useMockData ?? true;
+
+        // Use mock data if enabled or no API token provided
+        if (useMockData || !input.apiToken) {
+          const { generateMockResponse } = await import("./mockData");
+          return generateMockResponse(input.profileId, `Mock Page ${input.profileId}`);
         }
 
         // Build API URL
         const baseUrl = "https://app.fanpagekarma.com/api/v1";
-        const { profileId, network, period } = input;
-        let url = `${baseUrl}/${network}/${profileId}/posts?token=${settings.fanpageKarmaToken}`;
+        const { profileId, network, period, apiToken } = input;
+        let url = `${baseUrl}/${network}/${profileId}/posts?token=${apiToken}`;
         
         if (period) {
           url += `&period=${period}`;
@@ -120,64 +124,87 @@ export const appRouter = router({
         return data;
       }),
 
-    fetchAll: protectedProcedure.query(async ({ ctx }) => {
-      const pages = await db.getMonitoredPages(ctx.user.id);
-      const settings = await db.getUserSettings(ctx.user.id);
-      
-      if (!settings?.fanpageKarmaToken) {
-        throw new Error("Fanpage Karma API token not configured");
-      }
+    fetchAll: protectedProcedure
+      .input(z.object({
+        apiToken: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const pages = await db.getMonitoredPages(ctx.user.id);
+        const settings = await db.getUserSettings(ctx.user.id);
+        const useMockData = settings?.useMockData ?? true;
+        const apiToken = input?.apiToken;
 
-      const baseUrl = "https://app.fanpagekarma.com/api/v1";
-      const results = await Promise.allSettled(
-        pages.map(async (page) => {
-          const url = `${baseUrl}/${page.network}/${page.profileId}/posts?token=${settings.fanpageKarmaToken}`;
-          const response = await fetch(url);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch posts for ${page.profileName}`);
-          }
-          
-          const data = await response.json();
-          return {
+        // Use mock data if enabled or no API token provided
+        if (useMockData || !apiToken) {
+          const { generateMockResponse } = await import("./mockData");
+          return pages.map((page) => ({
             pageId: page.id,
             pageName: page.profileName,
             borderColor: page.borderColor,
             profilePicture: page.profilePicture,
             alertThreshold: page.alertThreshold,
             alertEnabled: page.alertEnabled,
-            ...data,
-          };
-        })
-      );
+            ...generateMockResponse(page.profileId, page.profileName),
+          }));
+        }
 
-      return results
-        .filter((result): result is PromiseFulfilledResult<any> => result.status === "fulfilled")
-        .map(result => result.value);
-    }),
-
-    checkApi: protectedProcedure.query(async ({ ctx }) => {
-      const settings = await db.getUserSettings(ctx.user.id);
-      
-      if (!settings?.fanpageKarmaToken) {
-        return { status: "error", message: "API token not configured" };
-      }
-
-      try {
-        // Test API with a simple request
-        const response = await fetch(
-          `https://app.fanpagekarma.com/api/v1/facebook/6815841748/kpi?token=${settings.fanpageKarmaToken}`,
-          { method: "HEAD" }
+        const baseUrl = "https://app.fanpagekarma.com/api/v1";
+        const results = await Promise.allSettled(
+          pages.map(async (page) => {
+            const url = `${baseUrl}/${page.network}/${page.profileId}/posts?token=${apiToken}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch posts for ${page.profileName}`);
+            }
+            
+            const data = await response.json();
+            return {
+              pageId: page.id,
+              pageName: page.profileName,
+              borderColor: page.borderColor,
+              profilePicture: page.profilePicture,
+              alertThreshold: page.alertThreshold,
+              alertEnabled: page.alertEnabled,
+              ...data,
+            };
+          })
         );
-        
-        return {
-          status: response.ok ? "success" : "error",
-          message: response.ok ? "API is working" : "API request failed"
-        };
-      } catch (error) {
-        return { status: "error", message: "Failed to connect to API" };
-      }
-    }),
+
+        return results
+          .filter((result): result is PromiseFulfilledResult<any> => result.status === "fulfilled")
+          .map(result => result.value);
+      }),
+
+    checkApi: protectedProcedure
+      .input(z.object({
+        apiToken: z.string().optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const settings = await db.getUserSettings(ctx.user.id);
+        const useMockData = settings?.useMockData ?? true;
+        const apiToken = input?.apiToken;
+
+        // Mock data mode always returns success
+        if (useMockData || !apiToken) {
+          return { status: "success", message: "Using mock data" };
+        }
+
+        try {
+          // Test API with a simple request
+          const response = await fetch(
+            `https://app.fanpagekarma.com/api/v1/facebook/6815841748/kpi?token=${apiToken}`,
+            { method: "HEAD" }
+          );
+          
+          return {
+            status: response.ok ? "success" : "error",
+            message: response.ok ? "API is working" : "API request failed"
+          };
+        } catch (error) {
+          return { status: "error", message: "Failed to connect to API" };
+        }
+      }),
   }),
 
   alerts: router({

@@ -37,13 +37,13 @@ export type MonitoredPage = typeof monitoredPages.$inferSelect;
 export type InsertMonitoredPage = typeof monitoredPages.$inferInsert;
 
 /**
- * User settings for Fanpage Karma API
+ * User settings
  */
 export const userSettings = mysqlTable("user_settings", {
   userId: varchar("userId", { length: 64 }).primaryKey(),
-  fanpageKarmaToken: text("fanpageKarmaToken"),
   autoRefreshEnabled: boolean("autoRefreshEnabled").default(true),
   refreshInterval: int("refreshInterval").default(600), // seconds (10 minutes)
+  useMockData: boolean("useMockData").default(true), // Use mock data for testing
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });

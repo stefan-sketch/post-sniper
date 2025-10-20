@@ -15,6 +15,13 @@
       "when": 1760983442187,
       "tag": "0001_chunky_synch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1760984313849,
+      "tag": "0002_rapid_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

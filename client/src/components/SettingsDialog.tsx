@@ -21,7 +21,6 @@ interface SettingsDialogProps {
 
 export default function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const utils = trpc.useUtils();
-  const [apiToken, setApiToken] = useState("");
   const [pages, setPages] = useState<any[]>([]);
   
   const settingsQuery = trpc.settings.get.useQuery();
@@ -52,20 +51,12 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
   });
 
   useEffect(() => {
-    if (settingsQuery.data) {
-      setApiToken(settingsQuery.data.fanpageKarmaToken || "");
-    }
-  }, [settingsQuery.data]);
-
-  useEffect(() => {
     if (pagesQuery.data) {
       setPages(pagesQuery.data);
     }
   }, [pagesQuery.data]);
 
-  const handleSaveSettings = () => {
-    updateSettings.mutate({ fanpageKarmaToken: apiToken });
-  };
+
 
   const handleAddPage = () => {
     const newPage = {
@@ -133,29 +124,11 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Configure your Fanpage Karma API token and monitored pages
+            Configure monitored pages with custom colors and alert thresholds
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* API Token Section */}
-          <div className="space-y-2">
-            <Label htmlFor="apiToken">Fanpage Karma API Token</Label>
-            <div className="flex gap-2">
-              <Input
-                id="apiToken"
-                type="password"
-                placeholder="Enter your API token"
-                value={apiToken}
-                onChange={(e) => setApiToken(e.target.value)}
-              />
-              <Button onClick={handleSaveSettings} disabled={updateSettings.isPending}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </Button>
-            </div>
-          </div>
-
           {/* Monitored Pages Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
