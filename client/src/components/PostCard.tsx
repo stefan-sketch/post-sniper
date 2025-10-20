@@ -35,6 +35,14 @@ export default function PostCard({ post }: PostCardProps) {
     }
   };
 
+  const handleCopyImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (post.image) {
+      navigator.clipboard.writeText(post.image);
+      toast.success("Image URL copied to clipboard!");
+    }
+  };
+
   const handleOpenPost = () => {
     if (post.link) {
       window.open(post.link, "_blank", "noopener,noreferrer");
@@ -76,12 +84,20 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* Post Image */}
       {post.image && (
-        <div className="relative w-full aspect-video overflow-hidden">
+        <div className="relative w-full aspect-video overflow-hidden group/image">
           <img 
             src={post.image} 
             alt="Post content"
             className="w-full h-full object-cover"
           />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute top-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+            onClick={handleCopyImage}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
         </div>
       )}
 

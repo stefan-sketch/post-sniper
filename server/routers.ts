@@ -272,6 +272,13 @@ export const appRouter = router({
     unreadCount: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUnreadAlertCount(ctx.user.id);
     }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        await db.deleteAlert(input.id);
+        return { success: true };
+      }),
   }),
 });
 

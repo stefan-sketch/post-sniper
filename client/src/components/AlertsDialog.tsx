@@ -19,16 +19,16 @@ interface AlertsDialogProps {
 export default function AlertsDialog({ open, onOpenChange }: AlertsDialogProps) {
   const utils = trpc.useUtils();
   const alertsQuery = trpc.alerts.list.useQuery();
-  const markRead = trpc.alerts.markRead.useMutation({
+  const deleteAlert = trpc.alerts.delete.useMutation({
     onSuccess: () => {
       utils.alerts.list.invalidate();
       utils.alerts.unreadCount.invalidate();
-      toast.success("Alert marked as read");
+      toast.success("Alert cleared");
     },
   });
 
-  const handleMarkRead = (alertId: string) => {
-    markRead.mutate({ id: alertId });
+  const handleDeleteAlert = (alertId: string) => {
+    deleteAlert.mutate({ id: alertId });
   };
 
   return (
@@ -57,9 +57,7 @@ export default function AlertsDialog({ open, onOpenChange }: AlertsDialogProps) 
           {alertsQuery.data?.map((alert) => (
             <div
               key={alert.id}
-              className={`glass-card p-4 rounded-lg space-y-3 ${
-                alert.isRead ? "opacity-60" : ""
-              }`}
+              className="glass-card p-4 rounded-lg space-y-3"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -102,16 +100,15 @@ export default function AlertsDialog({ open, onOpenChange }: AlertsDialogProps) 
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {!alert.isRead && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleMarkRead(alert.id)}
-                      disabled={markRead.isPending}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDeleteAlert(alert.id)}
+                    disabled={deleteAlert.isPending}
+                    title="Clear alert"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
                   {alert.postLink && (
                     <Button
                       size="sm"

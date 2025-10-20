@@ -180,3 +180,10 @@ export async function getUnreadAlertCount(userId: string): Promise<number> {
   return result.length;
 }
 
+export async function deleteAlert(id: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(alerts).where(eq(alerts.id, id));
+}
+
