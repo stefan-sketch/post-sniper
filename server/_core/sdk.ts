@@ -86,8 +86,9 @@ class SDKServer {
   private readonly client: AxiosInstance;
   private readonly oauthService: OAuthService;
 
-  constructor(client: AxiosInstance = createOAuthHttpClient()) {
-    this.client = client;
+  constructor(client?: AxiosInstance) {
+    // Only initialize OAuth client if URL is properly configured
+    this.client = client || (ENV.oAuthServerUrl && ENV.oAuthServerUrl !== "http://localhost:3000" ? createOAuthHttpClient() : axios.create());
     this.oauthService = new OAuthService(this.client);
   }
 
