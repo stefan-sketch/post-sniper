@@ -19,6 +19,8 @@ export const cachedPostsRouter = router({
       // Get all posts from last 24 hours, sorted by date desc
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       
+      console.log('[CachedPosts] Fetching posts from database...');
+      
       // Join cached posts with monitored pages to get current page settings
       const posts = await db
         .select({
@@ -42,8 +44,14 @@ export const cachedPostsRouter = router({
         .where(gte(cachedPosts.postDate, oneDayAgo))
         .orderBy(desc(cachedPosts.postDate));
 
+      console.log(`[CachedPosts] Found ${posts.length} posts in database`);
+      if (posts.length > 0) {
+        console.log('[CachedPosts] Sample post:', JSON.stringify(posts[0], null, 2));
+      }
+
       // Get last fetched time
       const settings = await getUserSettings(PUBLIC_USER_ID);
+      console.log('[CachedPosts] Last fetched at:', settings?.lastFetchedAt);
 
       return {
         posts: posts.map((post) => ({
