@@ -46,6 +46,7 @@ export const userSettings = mysqlTable("user_settings", {
   refreshInterval: int("refreshInterval").default(600), // seconds (10 minutes)
   useMockData: boolean("useMockData").default(false), // Use real API by default
   isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
+  lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });

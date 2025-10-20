@@ -1,10 +1,13 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { nanoid } from "nanoid";
+
+// Fixed user ID for public access
+const PUBLIC_USER_ID = "public";
 
 export const appRouter = router({
   system: systemRouter,
@@ -21,11 +24,11 @@ export const appRouter = router({
   }),
 
   pages: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getMonitoredPages(ctx.user.id);
+    list: publicProcedure.query(async () => {
+      return await db.getMonitoredPages(PUBLIC_USER_ID);
     }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         profileId: z.string(),
         profileName: z.string(),
@@ -35,16 +38,16 @@ export const appRouter = router({
         alertThreshold: z.number().default(100),
         alertEnabled: z.boolean().default(true),
       }))
-      .mutation(async ({ ctx, input }) => {
+      .mutation(async ({ input }) => {
         const page = await db.createMonitoredPage({
           id: nanoid(),
-          userId: ctx.user.id,
+          userId: PUBLIC_USER_ID,
           ...input,
         });
         return page;
       }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         id: z.string(),
         profileName: z.string().optional(),
@@ -54,12 +57,11 @@ export const appRouter = router({
         alertEnabled: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, ...updates } = input;
-        await db.updateMonitoredPage(id, updates);
+        await db.updateMonitoredPage(input.id, input);
         return { success: true };
       }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         await db.deleteMonitoredPage(input.id);
@@ -68,133 +70,115 @@ export const appRouter = router({
   }),
 
   settings: router({
-    get: protectedProcedure.query(async ({ ctx }) => {
-      const settings = await db.getUserSettings(ctx.user.id);
+    get: publicProcedure.query(async () => {
+      const settings = await db.getUserSettings(PUBLIC_USER_ID);
       // Return default settings if none exist
       if (!settings) {
         return {
-          userId: ctx.user.id,
-          fanpageKarmaToken: null,
+          userId: PUBLIC_USER_ID,
           autoRefreshEnabled: true,
           refreshInterval: 600,
           useMockData: false,
           isPlaying: false,
-          createdAt: null,
-          updatedAt: null,
+          lastFetchedAt: null,
         };
       }
       return settings;
     }),
 
-    update: protectedProcedure
+    update: publicProcedure
       .input(z.object({
         fanpageKarmaToken: z.string().optional(),
         autoRefreshEnabled: z.boolean().optional(),
         refreshInterval: z.number().optional(),
         useMockData: z.boolean().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        await db.upsertUserSettings({
-          userId: ctx.user.id,
-          ...input,
-        });
+      .mutation(async ({ input }) => {
+        await db.upsertUserSettings({ userId: PUBLIC_USER_ID, ...input });
         return { success: true };
       }),
 
-    setPlaying: protectedProcedure
+    setPlaying: publicProcedure
       .input(z.object({
         isPlaying: z.boolean(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        await db.upsertUserSettings({
-          userId: ctx.user.id,
-          isPlaying: input.isPlaying,
-        });
+      .mutation(async ({ input }) => {
+        await db.upsertUserSettings({ userId: PUBLIC_USER_ID, isPlaying: input.isPlaying });
+        return { success: true };
+      }),
+
+    updateLastFetched: publicProcedure
+      .mutation(async () => {
+        await db.upsertUserSettings({ userId: PUBLIC_USER_ID, lastFetchedAt: new Date() });
         return { success: true };
       }),
   }),
 
   posts: router({
-    fetch: protectedProcedure
+    fetch: publicProcedure
       .input(z.object({
         profileId: z.string(),
         network: z.string().default("facebook"),
-        period: z.string().optional(),
       }))
-      .query(async ({ ctx, input }) => {
-        const settings = await db.getUserSettings(ctx.user.id);
+      .query(async ({ input }) => {
+        const settings = await db.getUserSettings(PUBLIC_USER_ID);
         const useMockData = settings?.useMockData ?? false;
         const apiToken = settings?.fanpageKarmaToken;
 
-        // Use mock data if enabled or no API token
         if (useMockData || !apiToken) {
-          const { generateMockResponse } = await import("./mockData");
-          return generateMockResponse(input.profileId, `Mock Page ${input.profileId}`);
+          // Return mock data
+          const { generateMockPosts } = await import("./mockData");
+          return generateMockPosts(parseInt(input.profileId));
         }
 
-        // Build API URL
-        const baseUrl = "https://app.fanpagekarma.com/api/v1";
-        const { profileId, network, period } = input;
-        let url = `${baseUrl}/${network}/${profileId}/posts?token=${apiToken}`;
-        
-        if (period) {
-          url += `&period=${period}`;
-        }
+        // Fetch real data from Fanpage Karma API
+        const response = await fetch(
+          `https://app.fanpagekarma.com/api/v1/${input.network}/${input.profileId}/posts?token=${apiToken}&period=1d`,
+          { method: "GET" }
+        );
 
-        // Fetch posts from Fanpage Karma API
-        const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`Fanpage Karma API error: ${response.statusText}`);
+          throw new Error("Failed to fetch posts from Fanpage Karma API");
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
       }),
 
-    fetchAll: protectedProcedure.query(async ({ ctx }) => {
-        const pages = await db.getMonitoredPages(ctx.user.id);
-        const settings = await db.getUserSettings(ctx.user.id);
+    fetchAll: publicProcedure.query(async () => {
+        const pages = await db.getMonitoredPages(PUBLIC_USER_ID);
+        const settings = await db.getUserSettings(PUBLIC_USER_ID);
         const useMockData = settings?.useMockData ?? false;
         const apiToken = settings?.fanpageKarmaToken;
 
-        // Use mock data if enabled or no API token provided
         if (useMockData || !apiToken) {
-          const { generateMockResponse } = await import("./mockData");
-          return pages.map((page) => ({
-            pageId: page.id,
+          // Return mock data for all pages
+          const { generateMockPosts } = await import("./mockData");
+          return pages.map(page => ({
+            pageId: page.profileId,
             pageName: page.profileName,
             borderColor: page.borderColor,
             profilePicture: page.profilePicture,
             alertThreshold: page.alertThreshold,
             alertEnabled: page.alertEnabled,
-            ...generateMockResponse(page.profileId, page.profileName),
+            data: generateMockPosts(parseInt(page.profileId)),
           }));
         }
 
-        // Calculate date range for last 24 hours
-        const now = new Date();
-        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        const formatDate = (date: Date) => {
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        };
-        const period = `${formatDate(oneDayAgo)}_${formatDate(now)}`;
-
-        const baseUrl = "https://app.fanpagekarma.com/api/v1";
+        // Fetch real data from Fanpage Karma API for all pages
         const results = await Promise.allSettled(
           pages.map(async (page) => {
-            const url = `${baseUrl}/${page.network}/${page.profileId}/posts?token=${apiToken}&period=${period}`;
-            const response = await fetch(url);
-            
+            const response = await fetch(
+              `https://app.fanpagekarma.com/api/v1/${page.network}/${page.profileId}/posts?token=${apiToken}&period=1d`,
+              { method: "GET" }
+            );
+
             if (!response.ok) {
               throw new Error(`Failed to fetch posts for ${page.profileName}`);
             }
-            
+
             const data = await response.json();
             return {
-              pageId: page.id,
+              pageId: page.profileId,
               pageName: page.profileName,
               borderColor: page.borderColor,
               profilePicture: page.profilePicture,
@@ -210,8 +194,8 @@ export const appRouter = router({
           .map(result => result.value);
       }),
 
-    checkApi: protectedProcedure.query(async ({ ctx }) => {
-        const settings = await db.getUserSettings(ctx.user.id);
+    checkApi: publicProcedure.query(async () => {
+        const settings = await db.getUserSettings(PUBLIC_USER_ID);
         const useMockData = settings?.useMockData ?? false;
         const apiToken = settings?.fanpageKarmaToken;
 
@@ -238,11 +222,11 @@ export const appRouter = router({
   }),
 
   alerts: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getAlerts(ctx.user.id);
+    list: publicProcedure.query(async () => {
+      return await db.getAlerts(PUBLIC_USER_ID);
     }),
 
-    create: protectedProcedure
+    create: publicProcedure
       .input(z.object({
         pageId: z.string(),
         postId: z.string(),
@@ -253,27 +237,27 @@ export const appRouter = router({
         threshold: z.number(),
         postDate: z.date().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
+      .mutation(async ({ input }) => {
         await db.createAlert({
           id: nanoid(),
-          userId: ctx.user.id,
+          userId: PUBLIC_USER_ID,
           ...input,
         });
         return { success: true };
       }),
 
-    markRead: protectedProcedure
+    markRead: publicProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         await db.markAlertAsRead(input.id);
         return { success: true };
       }),
 
-    unreadCount: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getUnreadAlertCount(ctx.user.id);
+    unreadCount: publicProcedure.query(async () => {
+      return await db.getUnreadAlertCount(PUBLIC_USER_ID);
     }),
 
-    delete: protectedProcedure
+    delete: publicProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         await db.deleteAlert(input.id);

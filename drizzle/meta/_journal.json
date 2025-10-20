@@ -36,6 +36,13 @@
       "when": 1760986222458,
       "tag": "0004_groovy_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1760987674933,
+      "tag": "0005_tricky_nick_fury",
+      "breakpoints": true
     }
   ]
 }

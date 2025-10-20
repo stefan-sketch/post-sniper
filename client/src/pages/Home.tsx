@@ -9,14 +9,14 @@ import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
 
 export default function Home() {
-  const { user, loading, isAuthenticated } = useAuth();
+  // No authentication required - public access
   const utils = trpc.useUtils();
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   
-  const settingsQuery = trpc.settings.get.useQuery(undefined, { enabled: isAuthenticated });
+  const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
 
   // Sync isPlaying state from database on load
@@ -28,20 +28,28 @@ export default function Home() {
 
   // Update database when isPlaying changes
   useEffect(() => {
-    if (isAuthenticated && settingsQuery.data) {
+    if (settingsQuery.data) {
       setPlayingMutation.mutate({ isPlaying });
     }
-  }, [isPlaying, isAuthenticated]);
+  }, [isPlaying]);
   const postsQuery = trpc.posts.fetchAll.useQuery(undefined, {
-    enabled: isAuthenticated && isPlaying,
+    enabled: isPlaying,
     refetchInterval: (settingsQuery.data?.refreshInterval || 600) * 1000,
   });
   const unreadCountQuery = trpc.alerts.unreadCount.useQuery(undefined, {
-    enabled: isAuthenticated,
     refetchInterval: 30000, // Check every 30 seconds
   });
 
-  // Timer countdown
+  // Update lastFetchedAt when posts are successfully fetched
+  const updateLastFetchedMutation = trpc.settings.updateLastFetched.useMutation();
+  
+  useEffect(() => {
+    if (postsQuery.isSuccess && postsQuery.data && isPlaying) {
+      updateLastFetchedMutation.mutate();
+    }
+  }, [postsQuery.isSuccess, postsQuery.dataUpdatedAt]);
+
+  // Timer countdown based on lastFetchedAt
   useEffect(() => {
     if (!isPlaying) {
       setTimer(0);
@@ -49,19 +57,32 @@ export default function Home() {
     }
 
     const interval = settingsQuery.data?.refreshInterval || 600;
-    setTimer(interval);
+    const lastFetched = settingsQuery.data?.lastFetchedAt;
 
+    const calculateRemainingTime = () => {
+      if (!lastFetched) {
+        return interval; // No previous fetch, start from full interval
+      }
+      
+      const now = Date.now();
+      const lastFetchTime = new Date(lastFetched).getTime();
+      const elapsed = Math.floor((now - lastFetchTime) / 1000);
+      const remaining = Math.max(0, interval - elapsed);
+      
+      return remaining;
+    };
+
+    // Set initial timer value
+    setTimer(calculateRemainingTime());
+
+    // Update timer every second
     const countdown = setInterval(() => {
-      setTimer(prev => {
-        if (prev <= 1) {
-          return interval;
-        }
-        return prev - 1;
-      });
+      const remaining = calculateRemainingTime();
+      setTimer(remaining);
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [isPlaying, settingsQuery.data?.refreshInterval]);
+  }, [isPlaying, settingsQuery.data?.refreshInterval, settingsQuery.data?.lastFetchedAt]);
 
   // Format timer as MM:SS
   const formattedTimer = useMemo(() => {
@@ -70,7 +91,7 @@ export default function Home() {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, [timer]);
 
-  const alertsListQuery = trpc.alerts.list.useQuery(undefined, { enabled: isAuthenticated });
+  const alertsListQuery = trpc.alerts.list.useQuery();
   const createAlertMutation = trpc.alerts.create.useMutation({
     onSuccess: () => {
       utils.alerts.list.invalidate();
@@ -145,27 +166,7 @@ export default function Home() {
     return { livePosts: live, popularPosts: popular };
   }, [postsQuery.data]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Post Sniper 🎯</h1>
-          <p className="text-muted-foreground">Monitor your social media posts in real-time</p>
-          <Button onClick={() => window.location.href = getLoginUrl()}>
-            Sign In to Continue
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // No authentication required - removed loading and login screens
 
   // API status based on postsQuery success/error
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
