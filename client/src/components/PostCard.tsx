@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Copy, ExternalLink, Download } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, ExternalLink, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -129,18 +129,18 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
 
       {/* Engagement Stats */}
       <div className="px-4 pb-3 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <Heart className="h-4 w-4 text-accent" />
-            <span>{post.reactions.toLocaleString()}</span>
+        <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2">
+            <ThumbsUp className="h-4 w-4 text-gray-400" strokeWidth={2} />
+            <span className="text-gray-300 font-medium">{post.reactions.toLocaleString()}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <MessageCircle className="h-4 w-4 text-primary" />
-            <span>{comments.toLocaleString()}</span>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
+            <span className="text-gray-300 font-medium">{comments.toLocaleString()}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Share2 className="h-4 w-4 text-secondary" />
-            <span>{shares.toLocaleString()}</span>
+          <div className="flex items-center gap-2">
+            <Share2 className="h-4 w-4 text-gray-400" strokeWidth={2} />
+            <span className="text-gray-300 font-medium">{shares.toLocaleString()}</span>
           </div>
         </div>
         {post.link && (
