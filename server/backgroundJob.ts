@@ -173,23 +173,17 @@ export class BackgroundJobService {
     const endDate = formatDate(now);
     const period = `${startDate}_${endDate}`;
 
-    // Use the correct Fanpage Karma API endpoint
+    // Use the correct Fanpage Karma API endpoint (same as original working code)
     const url = `https://app.fanpagekarma.com/api/v1/facebook/${profileId}/posts?token=${apiToken}&period=${period}`;
     
-    console.log(`[BackgroundJob] Fetching from URL: ${url.replace(apiToken, 'TOKEN_HIDDEN')}`);
     const response = await axios.get(url);
     
-    console.log(`[BackgroundJob] API Response status: ${response.status}`);
-    console.log(`[BackgroundJob] API Response data keys:`, Object.keys(response.data || {}));
+    // The API response structure is: { data: { posts: [...] }, metadata: {...} }
+    // Based on the original working code: pageData.data.posts
+    const posts = response.data?.data?.posts || [];
     
-    // The API returns posts in response.data.data, not response.data.posts
-    const posts = response.data?.data || [];
-    console.log(`[BackgroundJob] Posts count:`, posts.length);
+    console.log(`[BackgroundJob] Fetched ${posts.length} posts for profile ${profileId}`);
     
-    if (posts.length > 0) {
-      console.log(`[BackgroundJob] First post sample:`, JSON.stringify(posts[0], null, 2));
-    }
-
     return posts;
   }
 }
