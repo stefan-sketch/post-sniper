@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2 } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -19,6 +19,13 @@ export default function Home() {
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
+  const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
+  
+  const handleManualFetch = async () => {
+    await manualFetchMutation.mutateAsync();
+    postsQuery.refetch();
+    settingsQuery.refetch();
+  };
 
   // Sync isPlaying state from database on load
   useEffect(() => {
@@ -169,6 +176,17 @@ export default function Home() {
               className="relative"
             >
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleManualFetch}
+              disabled={manualFetchMutation.isPending}
+              className="relative"
+              title="Fetch Now"
+            >
+              <RefreshCw className={`h-5 w-5 ${manualFetchMutation.isPending ? 'animate-spin' : ''}`} />
             </Button>
 
             <Button
