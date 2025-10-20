@@ -2,6 +2,7 @@ import { getDb, getUserSettings, getMonitoredPages, createAlert } from "./db";
 import { cachedPosts, InsertCachedPost } from "../drizzle/schema";
 import axios from "axios";
 import { eq } from "drizzle-orm";
+import { ENV } from "./_core/env";
 
 const PUBLIC_USER_ID = "public";
 
@@ -45,7 +46,9 @@ export class BackgroundJobService {
       console.log("[BackgroundJob] Fetching posts...");
       
       const settings = await getUserSettings(PUBLIC_USER_ID);
-      if (!settings?.fanpageKarmaToken) {
+      const apiToken = settings?.fanpageKarmaToken || ENV.fanpageKarmaToken;
+      
+      if (!apiToken) {
         console.log("[BackgroundJob] No API token configured");
         return;
       }
@@ -67,7 +70,7 @@ export class BackgroundJobService {
         try {
           const posts = await this.fetchPostsForPage(
             page.profileId,
-            settings.fanpageKarmaToken
+            apiToken
           );
 
           // Cache each post
