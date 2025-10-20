@@ -3,6 +3,7 @@ import { cachedPosts, InsertCachedPost } from "../drizzle/schema";
 import axios from "axios";
 import { eq } from "drizzle-orm";
 import { ENV } from "./_core/env";
+import * as cron from "node-cron";
 
 const PUBLIC_USER_ID = "public";
 
@@ -11,7 +12,7 @@ const PUBLIC_USER_ID = "public";
  * and stores them in the database for all users to access
  */
 export class BackgroundJobService {
-  private intervalId: NodeJS.Timeout | null = null;
+  private cronTask: cron.ScheduledTask | null = null;
   private isRunning = false;
 
   async start() {
@@ -21,30 +22,27 @@ export class BackgroundJobService {
     }
 
     this.isRunning = true;
-    console.log("[BackgroundJob] Starting background job service");
+    console.log("[BackgroundJob] Starting background job service with node-cron");
 
     // Run immediately on start
     await this.fetchAndCachePosts();
 
-    // Then run every 10 minutes
-    const intervalMs = 10 * 60 * 1000; // 10 minutes
-    console.log(`[BackgroundJob] Setting up interval to run every ${intervalMs / 1000 / 60} minutes`);
+    // Schedule to run every 10 minutes using cron expression
+    // Cron expression: "*/10 * * * *" = every 10 minutes
+    console.log("[BackgroundJob] Setting up cron job to run every 10 minutes");
     
-    this.intervalId = setInterval(async () => {
-      console.log(`[BackgroundJob] Interval triggered at ${new Date().toISOString()}`);
+    this.cronTask = cron.schedule("*/10 * * * *", async () => {
+      console.log(`[BackgroundJob] Cron job triggered at ${new Date().toISOString()}`);
       await this.fetchAndCachePosts();
-    }, intervalMs);
+    });
     
-    console.log(`[BackgroundJob] Interval ID: ${this.intervalId}`);
-    
-    // Keep the interval alive (prevent Node.js from exiting)
-    this.intervalId.ref();
+    console.log("[BackgroundJob] Cron job scheduled successfully");
   }
 
   stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.cronTask) {
+      this.cronTask.stop();
+      this.cronTask = null;
     }
     this.isRunning = false;
     console.log("[BackgroundJob] Stopped background job service");
