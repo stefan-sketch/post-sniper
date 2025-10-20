@@ -173,19 +173,10 @@ export class BackgroundJobService {
     const endDate = formatDate(now);
     const period = `${startDate}_${endDate}`;
 
-    const response = await axios.get(
-      "https://api.fanpagekarma.com/facebook/page/posts",
-      {
-        params: {
-          account_id: profileId,
-          period: period,
-          country: "all",
-        },
-        headers: {
-          "API-Key": apiToken,
-        },
-      }
-    );
+    // Use the correct Fanpage Karma API endpoint
+    const url = `https://app.fanpagekarma.com/api/v1/facebook/${profileId}/posts?token=${apiToken}&period=${period}`;
+    
+    const response = await axios.get(url);
 
     return response.data?.posts || [];
   }
