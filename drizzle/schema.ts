@@ -1,14 +1,16 @@
-import { mysqlEnum, mysqlTable, text, timestamp, varchar, int, boolean } from "drizzle-orm/mysql-core";
+import { pgTable, text, timestamp, varchar, integer, boolean, pgEnum } from "drizzle-orm/pg-core";
 
 /**
  * Core user table backing auth flow.
  */
-export const users = mysqlTable("users", {
+export const roleEnum = pgEnum("role", ["user", "admin"]);
+
+export const users = pgTable("users", {
   id: varchar("id", { length: 64 }).primaryKey(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow(),
 });
@@ -19,7 +21,7 @@ export type InsertUser = typeof users.$inferInsert;
 /**
  * Monitored Facebook pages configuration
  */
-export const monitoredPages = mysqlTable("monitored_pages", {
+export const monitoredPages = pgTable("monitored_pages", {
   id: varchar("id", { length: 64 }).primaryKey(),
   userId: varchar("userId", { length: 64 }).notNull(),
   profileId: varchar("profileId", { length: 128 }).notNull(),
@@ -27,7 +29,7 @@ export const monitoredPages = mysqlTable("monitored_pages", {
   profilePicture: text("profilePicture"),
   borderColor: varchar("borderColor", { length: 7 }).notNull(), // hex color
   network: varchar("network", { length: 32 }).default("facebook").notNull(),
-  alertThreshold: int("alertThreshold").default(100), // reactions threshold for alerts
+  alertThreshold: integer("alertThreshold").default(100), // reactions threshold for alerts
   alertEnabled: boolean("alertEnabled").default(true),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
@@ -39,11 +41,11 @@ export type InsertMonitoredPage = typeof monitoredPages.$inferInsert;
 /**
  * User settings
  */
-export const userSettings = mysqlTable("user_settings", {
+export const userSettings = pgTable("user_settings", {
   userId: varchar("userId", { length: 64 }).primaryKey(),
   fanpageKarmaToken: text("fanpageKarmaToken"),
   autoRefreshEnabled: boolean("autoRefreshEnabled").default(true),
-  refreshInterval: int("refreshInterval").default(600), // seconds (10 minutes)
+  refreshInterval: integer("refreshInterval").default(600), // seconds (10 minutes)
   useMockData: boolean("useMockData").default(false), // Use real API by default
   isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
   lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
@@ -58,7 +60,7 @@ export type InsertUserSettings = typeof userSettings.$inferInsert;
 /**
  * Triggered alerts history
  */
-export const alerts = mysqlTable("alerts", {
+export const alerts = pgTable("alerts", {
   id: varchar("id", { length: 64 }).primaryKey(),
   userId: varchar("userId", { length: 64 }).notNull(),
   pageId: varchar("pageId", { length: 64 }).notNull(),
@@ -66,8 +68,8 @@ export const alerts = mysqlTable("alerts", {
   postLink: text("postLink"),
   postMessage: text("postMessage"),
   postImage: text("postImage"),
-  reactionCount: int("reactionCount").notNull(),
-  threshold: int("threshold").notNull(),
+  reactionCount: integer("reactionCount").notNull(),
+  threshold: integer("threshold").notNull(),
   postDate: timestamp("postDate"),
   triggeredAt: timestamp("triggeredAt").defaultNow(),
   isRead: boolean("isRead").default(false),
@@ -75,4 +77,29 @@ export const alerts = mysqlTable("alerts", {
 
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
+
+/**
+ * Cached posts data - stores fetched posts server-side
+ */
+export const cachedPosts = pgTable("cached_posts", {
+  id: varchar("id", { length: 255 }).primaryKey(), // postId
+  pageId: varchar("pageId", { length: 64 }).notNull(),
+  pageName: varchar("pageName", { length: 255 }).notNull(),
+  borderColor: varchar("borderColor", { length: 7 }).notNull(),
+  profilePicture: text("profilePicture"),
+  message: text("message"),
+  image: text("image"),
+  link: text("link"),
+  postDate: timestamp("postDate").notNull(),
+  reactions: integer("reactions").default(0),
+  comments: integer("comments").default(0),
+  shares: integer("shares").default(0),
+  alertThreshold: integer("alertThreshold"),
+  alertEnabled: boolean("alertEnabled"),
+  fetchedAt: timestamp("fetchedAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
+});
+
+export type CachedPost = typeof cachedPosts.$inferSelect;
+export type InsertCachedPost = typeof cachedPosts.$inferInsert;
 

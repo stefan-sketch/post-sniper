@@ -33,22 +33,15 @@ export default function Home() {
       setPlayingMutation.mutate({ isPlaying });
     }
   }, [isPlaying]);
-  const postsQuery = trpc.posts.fetchAll.useQuery(undefined, {
-    enabled: isPlaying,
-    refetchInterval: (settingsQuery.data?.refreshInterval || 600) * 1000,
+  // Use cached posts from server (fetched by background job)
+  const postsQuery = trpc.cachedPosts.getAll.useQuery(undefined, {
+    refetchInterval: 5000, // Poll every 5 seconds to get latest cached data
   });
   const unreadCountQuery = trpc.alerts.unreadCount.useQuery(undefined, {
     refetchInterval: 30000, // Check every 30 seconds
   });
 
-  // Update lastFetchedAt when posts are successfully fetched
-  const updateLastFetchedMutation = trpc.settings.updateLastFetched.useMutation();
-  
-  useEffect(() => {
-    if (postsQuery.isSuccess && postsQuery.data && isPlaying) {
-      updateLastFetchedMutation.mutate();
-    }
-  }, [postsQuery.isSuccess, postsQuery.dataUpdatedAt]);
+  // No need to update lastFetchedAt - background job handles this
 
   // Timer countdown based on lastFetchedAt
   useEffect(() => {
@@ -105,66 +98,37 @@ export default function Home() {
     },
   });
 
-  // Process and organize posts
+  // Process and organize posts (now from cached server data)
   const { livePosts, popularPosts } = useMemo(() => {
-    if (!postsQuery.data) return { livePosts: [], popularPosts: [] };
+    if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [] };
 
-    const allPosts: any[] = [];
     const now = new Date();
     const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
-    postsQuery.data.forEach((pageData: any) => {
-      if (pageData.data?.posts) {
-        pageData.data.posts.forEach((post: any) => {
-          const postDate = new Date(post.date);
-          const reactions = post.kpi?.page_posts_reactions?.value || 0;
-          
-          allPosts.push({
-            ...post,
-            pageId: pageData.pageId,
-            pageName: pageData.pageName,
-            borderColor: pageData.borderColor,
-            profilePicture: pageData.profilePicture,
-            alertThreshold: pageData.alertThreshold,
-            alertEnabled: pageData.alertEnabled,
-            postDate,
-            reactions,
-          });
-
-          // Check if alert should be triggered
-          if (
-            pageData.alertEnabled &&
-            reactions >= pageData.alertThreshold &&
-            postDate >= tenMinutesAgo // Only check recent posts
-          ) {
-            // Check if alert already exists for this post
-            const existingAlert = alertsListQuery.data?.find(
-              (alert) => alert.postId === post.id && alert.pageId === pageData.pageId
-            );
-            
-            if (!existingAlert) {
-              // Create alert
-              createAlertMutation.mutate({
-                pageId: pageData.pageId,
-                postId: post.id,
-                postLink: post.link,
-                postMessage: post.message,
-                postImage: post.image,
-                reactionCount: reactions,
-                threshold: pageData.alertThreshold,
-                postDate: postDate,
-              });
-            }
-          }
-        });
-      }
-    });
+    // Convert cached posts to display format
+    const allPosts = postsQuery.data.posts.map((post: any) => ({
+      id: post.id,
+      pageId: post.pageId,
+      pageName: post.pageName,
+      borderColor: post.borderColor,
+      profilePicture: post.profilePicture,
+      message: post.message,
+      image: post.image,
+      link: post.link,
+      postDate: new Date(post.postDate),
+      reactions: post.reactions || 0,
+      kpi: {
+        page_posts_comments_count: { value: post.comments || 0 },
+        page_posts_shares_count: { value: post.shares || 0 },
+      },
+      alertThreshold: post.alertThreshold,
+      alertEnabled: post.alertEnabled,
+    }));
 
     // Sort all posts by date (newest first) for live posts
     const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
 
-    // Filte    // Get dismissed post IDs
+    // Get dismissed post IDs
     const dismissedIds = settingsQuery.data?.dismissedPosts 
       ? JSON.parse(settingsQuery.data.dismissedPosts) 
       : [];
@@ -175,7 +139,7 @@ export default function Home() {
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data]);
+  }, [postsQuery.data, settingsQuery.data?.dismissedPosts]);
 
   // No authentication required - removed loading and login screens
 
