@@ -50,7 +50,6 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
     },
   });
   const clearAllPostsMutation = trpc.settings.clearAllPosts.useMutation();
-  const resyncPostsMutation = trpc.settings.resyncPosts.useMutation();
 
   useEffect(() => {
     if (pagesQuery.data) {
@@ -150,17 +149,15 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
                 Clear All Posts
               </Button>
               <Button
-                onClick={async () => {
-                  await resyncPostsMutation.mutateAsync();
+                onClick={() => {
                   utils.cachedPosts.getAll.invalidate();
                   utils.settings.get.invalidate();
-                  toast.success("Posts resynced successfully");
+                  toast.success("UI refreshed from database");
                 }}
                 variant="outline"
                 size="sm"
-                disabled={resyncPostsMutation.isPending}
               >
-                {resyncPostsMutation.isPending ? "Resyncing..." : "Resync Posts"}
+                Refresh UI
               </Button>
             </div>
           </div>
