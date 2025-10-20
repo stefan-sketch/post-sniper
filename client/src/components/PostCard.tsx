@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Share2, Copy, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, Copy, ExternalLink, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -38,11 +38,24 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
     }
   };
 
-  const handleCopyImage = (e: React.MouseEvent) => {
+  const handleDownloadImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (post.image) {
-      navigator.clipboard.writeText(post.image);
-      toast.success("Image URL copied to clipboard!");
+      try {
+        const response = await fetch(post.image);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `post-${post.id}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast.success("Image downloaded!");
+      } catch (error) {
+        toast.error("Failed to download image");
+      }
     }
   };
 
@@ -111,9 +124,9 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
             size="sm"
             variant="ghost"
             className="absolute top-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            onClick={handleCopyImage}
+            onClick={handleDownloadImage}
           >
-            <Copy className="h-4 w-4" />
+            <Download className="h-4 w-4" />
           </Button>
         </div>
       )}
