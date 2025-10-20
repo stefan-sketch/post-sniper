@@ -78,6 +78,7 @@ export const appRouter = router({
           autoRefreshEnabled: true,
           refreshInterval: 600,
           useMockData: false,
+          isPlaying: false,
           createdAt: null,
           updatedAt: null,
         };
@@ -96,6 +97,18 @@ export const appRouter = router({
         await db.upsertUserSettings({
           userId: ctx.user.id,
           ...input,
+        });
+        return { success: true };
+      }),
+
+    setPlaying: protectedProcedure
+      .input(z.object({
+        isPlaying: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.upsertUserSettings({
+          userId: ctx.user.id,
+          isPlaying: input.isPlaying,
         });
         return { success: true };
       }),

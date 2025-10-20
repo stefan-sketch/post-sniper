@@ -17,6 +17,21 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   
   const settingsQuery = trpc.settings.get.useQuery(undefined, { enabled: isAuthenticated });
+  const setPlayingMutation = trpc.settings.setPlaying.useMutation();
+
+  // Sync isPlaying state from database on load
+  useEffect(() => {
+    if (settingsQuery.data?.isPlaying !== undefined && settingsQuery.data.isPlaying !== null) {
+      setIsPlaying(settingsQuery.data.isPlaying);
+    }
+  }, [settingsQuery.data?.isPlaying]);
+
+  // Update database when isPlaying changes
+  useEffect(() => {
+    if (isAuthenticated && settingsQuery.data) {
+      setPlayingMutation.mutate({ isPlaying });
+    }
+  }, [isPlaying, isAuthenticated]);
   const apiCheckQuery = trpc.posts.checkApi.useQuery(undefined, { 
     enabled: isAuthenticated && isPlaying,
     refetchInterval: 60000 // Check API status every minute

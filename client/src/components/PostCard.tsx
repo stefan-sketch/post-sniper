@@ -1,5 +1,7 @@
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Copy, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface PostCardProps {
   post: {
@@ -25,10 +27,25 @@ export default function PostCard({ post }: PostCardProps) {
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
 
+  const handleCopyCaption = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (post.message) {
+      navigator.clipboard.writeText(post.message);
+      toast.success("Caption copied to clipboard!");
+    }
+  };
+
+  const handleOpenPost = () => {
+    if (post.link) {
+      window.open(post.link, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <div 
-      className="glass-card rounded-xl overflow-hidden transition-all hover:scale-[1.02]"
+      className="glass-card rounded-xl overflow-hidden transition-all hover:scale-[1.02] cursor-pointer"
       style={{ borderLeft: `4px solid ${post.borderColor}` }}
+      onClick={handleOpenPost}
     >
       {/* Profile Header */}
       <div className="p-4 flex items-center gap-3">
@@ -70,25 +87,38 @@ export default function PostCard({ post }: PostCardProps) {
 
       {/* Post Message */}
       {post.message && (
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 relative group">
           <p className="text-sm line-clamp-3">{post.message}</p>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleCopyCaption}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
       {/* Engagement Stats */}
-      <div className="px-4 pb-4 flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1.5">
-          <Heart className="h-4 w-4 text-accent" />
-          <span>{post.reactions.toLocaleString()}</span>
+      <div className="px-4 pb-4 flex items-center justify-between text-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <Heart className="h-4 w-4 text-accent" />
+            <span>{post.reactions.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MessageCircle className="h-4 w-4 text-primary" />
+            <span>{comments.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Share2 className="h-4 w-4 text-secondary" />
+            <span>{shares.toLocaleString()}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span>{comments.toLocaleString()}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Share2 className="h-4 w-4 text-secondary" />
-          <span>{shares.toLocaleString()}</span>
-        </div>
+        {post.link && (
+          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+        )}
       </div>
     </div>
   );

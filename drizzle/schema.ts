@@ -45,6 +45,7 @@ export const userSettings = mysqlTable("user_settings", {
   autoRefreshEnabled: boolean("autoRefreshEnabled").default(true),
   refreshInterval: int("refreshInterval").default(600), // seconds (10 minutes)
   useMockData: boolean("useMockData").default(false), // Use real API by default
+  isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });
