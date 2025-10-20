@@ -69,11 +69,25 @@ export const appRouter = router({
 
   settings: router({
     get: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getUserSettings(ctx.user.id);
+      const settings = await db.getUserSettings(ctx.user.id);
+      // Return default settings if none exist
+      if (!settings) {
+        return {
+          userId: ctx.user.id,
+          fanpageKarmaToken: null,
+          autoRefreshEnabled: true,
+          refreshInterval: 600,
+          useMockData: false,
+          createdAt: null,
+          updatedAt: null,
+        };
+      }
+      return settings;
     }),
 
     update: protectedProcedure
       .input(z.object({
+        fanpageKarmaToken: z.string().optional(),
         autoRefreshEnabled: z.boolean().optional(),
         refreshInterval: z.number().optional(),
         useMockData: z.boolean().optional(),
@@ -93,21 +107,21 @@ export const appRouter = router({
         profileId: z.string(),
         network: z.string().default("facebook"),
         period: z.string().optional(),
-        apiToken: z.string().optional(), // Optional API token passed from frontend
       }))
       .query(async ({ ctx, input }) => {
         const settings = await db.getUserSettings(ctx.user.id);
-        const useMockData = settings?.useMockData ?? true;
+        const useMockData = settings?.useMockData ?? false;
+        const apiToken = settings?.fanpageKarmaToken;
 
-        // Use mock data if enabled or no API token provided
-        if (useMockData || !input.apiToken) {
+        // Use mock data if enabled or no API token
+        if (useMockData || !apiToken) {
           const { generateMockResponse } = await import("./mockData");
           return generateMockResponse(input.profileId, `Mock Page ${input.profileId}`);
         }
 
         // Build API URL
         const baseUrl = "https://app.fanpagekarma.com/api/v1";
-        const { profileId, network, period, apiToken } = input;
+        const { profileId, network, period } = input;
         let url = `${baseUrl}/${network}/${profileId}/posts?token=${apiToken}`;
         
         if (period) {
@@ -124,15 +138,11 @@ export const appRouter = router({
         return data;
       }),
 
-    fetchAll: protectedProcedure
-      .input(z.object({
-        apiToken: z.string().optional(),
-      }).optional())
-      .query(async ({ ctx, input }) => {
+    fetchAll: protectedProcedure.query(async ({ ctx }) => {
         const pages = await db.getMonitoredPages(ctx.user.id);
         const settings = await db.getUserSettings(ctx.user.id);
-        const useMockData = settings?.useMockData ?? true;
-        const apiToken = input?.apiToken;
+        const useMockData = settings?.useMockData ?? false;
+        const apiToken = settings?.fanpageKarmaToken;
 
         // Use mock data if enabled or no API token provided
         if (useMockData || !apiToken) {
@@ -176,14 +186,10 @@ export const appRouter = router({
           .map(result => result.value);
       }),
 
-    checkApi: protectedProcedure
-      .input(z.object({
-        apiToken: z.string().optional(),
-      }).optional())
-      .query(async ({ ctx, input }) => {
+    checkApi: protectedProcedure.query(async ({ ctx }) => {
         const settings = await db.getUserSettings(ctx.user.id);
-        const useMockData = settings?.useMockData ?? true;
-        const apiToken = input?.apiToken;
+        const useMockData = settings?.useMockData ?? false;
+        const apiToken = settings?.fanpageKarmaToken;
 
         // Mock data mode always returns success
         if (useMockData || !apiToken) {

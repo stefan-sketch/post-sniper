@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO user_settings (userId, fanpageKarmaToken, autoRefreshEnabled, refreshInterval, useMockData) \nVALUES ('8zocpvayrrSow64UeKNBpj', '2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB', 1, 600, 0)\nON DUPLICATE KEY UPDATE fanpageKarmaToken = '2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB', useMockData = 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute INSERT INTO user_settings (userId, fanpageKarmaToken, autoRefreshEnabled, refreshInterval, useMockData) \nVALUES ('8zocpvayrrSow64UeKNBpj', '2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB', 1, 600, 0)\nON DUPLICATE KEY UPDATE fanpageKarmaToken = '2a10FtrIfe10OnZN0C5l1s1qee600GpER2RylNPNuD47RXs8frGfuB', useMockData = 0;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 49
+}

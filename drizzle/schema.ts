@@ -41,9 +41,10 @@ export type InsertMonitoredPage = typeof monitoredPages.$inferInsert;
  */
 export const userSettings = mysqlTable("user_settings", {
   userId: varchar("userId", { length: 64 }).primaryKey(),
+  fanpageKarmaToken: text("fanpageKarmaToken"),
   autoRefreshEnabled: boolean("autoRefreshEnabled").default(true),
   refreshInterval: int("refreshInterval").default(600), // seconds (10 minutes)
-  useMockData: boolean("useMockData").default(true), // Use mock data for testing
+  useMockData: boolean("useMockData").default(false), // Use real API by default
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });
