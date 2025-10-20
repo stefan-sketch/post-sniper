@@ -1,11 +1,22 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users, 
+  monitoredPages, 
+  InsertMonitoredPage,
+  MonitoredPage,
+  userSettings,
+  InsertUserSettings,
+  UserSettings,
+  alerts,
+  InsertAlert,
+  Alert
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -85,4 +96,87 @@ export async function getUser(id: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Monitored Pages
+export async function getMonitoredPages(userId: string): Promise<MonitoredPage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(monitoredPages).where(eq(monitoredPages.userId, userId));
+}
+
+export async function createMonitoredPage(page: InsertMonitoredPage): Promise<MonitoredPage> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(monitoredPages).values(page);
+  const result = await db.select().from(monitoredPages).where(eq(monitoredPages.id, page.id!)).limit(1);
+  return result[0];
+}
+
+export async function updateMonitoredPage(id: string, updates: Partial<InsertMonitoredPage>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(monitoredPages).set({ ...updates, updatedAt: new Date() }).where(eq(monitoredPages.id, id));
+}
+
+export async function deleteMonitoredPage(id: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(monitoredPages).where(eq(monitoredPages.id, id));
+}
+
+// User Settings
+export async function getUserSettings(userId: string): Promise<UserSettings | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(userSettings).where(eq(userSettings.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function upsertUserSettings(settings: InsertUserSettings): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(userSettings).values(settings).onDuplicateKeyUpdate({
+    set: { ...settings, updatedAt: new Date() }
+  });
+}
+
+// Alerts
+export async function getAlerts(userId: string, limit: number = 50): Promise<Alert[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(alerts)
+    .where(eq(alerts.userId, userId))
+    .orderBy(desc(alerts.triggeredAt))
+    .limit(limit);
+}
+
+export async function createAlert(alert: InsertAlert): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(alerts).values(alert);
+}
+
+export async function markAlertAsRead(id: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(alerts).set({ isRead: true }).where(eq(alerts.id, id));
+}
+
+export async function getUnreadAlertCount(userId: string): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const result = await db.select().from(alerts)
+    .where(and(eq(alerts.userId, userId), eq(alerts.isRead, false)));
+  
+  return result.length;
+}
+

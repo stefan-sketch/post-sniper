@@ -1,0 +1,284 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { trpc } from "@/lib/trpc";
+import { Plus, Trash2, Save } from "lucide-react";
+import { toast } from "sonner";
+import { nanoid } from "nanoid";
+
+interface SettingsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+  const utils = trpc.useUtils();
+  const [apiToken, setApiToken] = useState("");
+  const [pages, setPages] = useState<any[]>([]);
+  
+  const settingsQuery = trpc.settings.get.useQuery();
+  const pagesQuery = trpc.pages.list.useQuery();
+  const updateSettings = trpc.settings.update.useMutation({
+    onSuccess: () => {
+      utils.settings.get.invalidate();
+      toast.success("Settings saved successfully");
+    },
+  });
+  const createPage = trpc.pages.create.useMutation({
+    onSuccess: () => {
+      utils.pages.list.invalidate();
+      toast.success("Page added successfully");
+    },
+  });
+  const updatePage = trpc.pages.update.useMutation({
+    onSuccess: () => {
+      utils.pages.list.invalidate();
+      toast.success("Page updated successfully");
+    },
+  });
+  const deletePage = trpc.pages.delete.useMutation({
+    onSuccess: () => {
+      utils.pages.list.invalidate();
+      toast.success("Page removed successfully");
+    },
+  });
+
+  useEffect(() => {
+    if (settingsQuery.data) {
+      setApiToken(settingsQuery.data.fanpageKarmaToken || "");
+    }
+  }, [settingsQuery.data]);
+
+  useEffect(() => {
+    if (pagesQuery.data) {
+      setPages(pagesQuery.data);
+    }
+  }, [pagesQuery.data]);
+
+  const handleSaveSettings = () => {
+    updateSettings.mutate({ fanpageKarmaToken: apiToken });
+  };
+
+  const handleAddPage = () => {
+    const newPage = {
+      id: nanoid(),
+      profileId: "",
+      profileName: "",
+      profilePicture: "",
+      borderColor: "#22d3ee",
+      alertThreshold: 100,
+      alertEnabled: true,
+      isNew: true,
+    };
+    setPages([...pages, newPage]);
+  };
+
+  const handleSavePage = (page: any) => {
+    if (!page.profileId || !page.profileName) {
+      toast.error("Profile ID and Name are required");
+      return;
+    }
+
+    if (page.isNew) {
+      const { isNew, ...pageData } = page;
+      createPage.mutate(pageData);
+      setPages(pages.filter(p => p.id !== page.id));
+    } else {
+      updatePage.mutate({
+        id: page.id,
+        profileName: page.profileName,
+        profilePicture: page.profilePicture,
+        borderColor: page.borderColor,
+        alertThreshold: page.alertThreshold,
+        alertEnabled: page.alertEnabled,
+      });
+    }
+  };
+
+  const handleDeletePage = (pageId: string) => {
+    const page = pages.find(p => p.id === pageId);
+    if (page?.isNew) {
+      setPages(pages.filter(p => p.id !== pageId));
+    } else {
+      deletePage.mutate({ id: pageId });
+    }
+  };
+
+  const handleUpdatePage = (pageId: string, field: string, value: any) => {
+    setPages(pages.map(p => p.id === pageId ? { ...p, [field]: value } : p));
+  };
+
+  const colorOptions = [
+    "#22d3ee", // cyan
+    "#a855f7", // purple
+    "#ec4899", // pink
+    "#f59e0b", // amber
+    "#10b981", // green
+    "#ef4444", // red
+    "#3b82f6", // blue
+    "#f97316", // orange
+  ];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogDescription>
+            Configure your Fanpage Karma API token and monitored pages
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* API Token Section */}
+          <div className="space-y-2">
+            <Label htmlFor="apiToken">Fanpage Karma API Token</Label>
+            <div className="flex gap-2">
+              <Input
+                id="apiToken"
+                type="password"
+                placeholder="Enter your API token"
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+              />
+              <Button onClick={handleSaveSettings} disabled={updateSettings.isPending}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </div>
+
+          {/* Monitored Pages Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Monitored Pages</Label>
+              <Button onClick={handleAddPage} size="sm" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Page
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {pages.map((page) => (
+                <div key={page.id} className="glass-card p-4 rounded-lg space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Profile ID</Label>
+                      <Input
+                        placeholder="e.g., 6815841748"
+                        value={page.profileId}
+                        onChange={(e) => handleUpdatePage(page.id, "profileId", e.target.value)}
+                        disabled={!page.isNew}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Profile Name</Label>
+                      <Input
+                        placeholder="e.g., Barack Obama"
+                        value={page.profileName}
+                        onChange={(e) => handleUpdatePage(page.id, "profileName", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Profile Picture URL (optional)</Label>
+                    <Input
+                      placeholder="https://..."
+                      value={page.profilePicture || ""}
+                      onChange={(e) => handleUpdatePage(page.id, "profilePicture", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Border Color</Label>
+                      <div className="flex gap-2 flex-wrap mt-1">
+                        {colorOptions.map((color) => (
+                          <button
+                            key={color}
+                            className={`h-8 w-8 rounded-full border-2 ${
+                              page.borderColor === color ? "border-white" : "border-transparent"
+                            }`}
+                            style={{ backgroundColor: color }}
+                            onClick={() => handleUpdatePage(page.id, "borderColor", color)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Alert Threshold (reactions)</Label>
+                      <Input
+                        type="number"
+                        value={page.alertThreshold}
+                        onChange={(e) => handleUpdatePage(page.id, "alertThreshold", parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={page.alertEnabled}
+                        onChange={(e) => handleUpdatePage(page.id, "alertEnabled", e.target.checked)}
+                        className="rounded"
+                      />
+                      Enable alerts
+                    </label>
+                    <div className="flex gap-2">
+                      {page.isNew && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleSavePage(page)}
+                          disabled={createPage.isPending}
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Save
+                        </Button>
+                      )}
+                      {!page.isNew && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSavePage(page)}
+                          disabled={updatePage.isPending}
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Update
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeletePage(page.id)}
+                        disabled={deletePage.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {pages.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No pages configured. Click "Add Page" to get started.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
