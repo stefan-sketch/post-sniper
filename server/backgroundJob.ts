@@ -176,7 +176,16 @@ export class BackgroundJobService {
     // Use the correct Fanpage Karma API endpoint
     const url = `https://app.fanpagekarma.com/api/v1/facebook/${profileId}/posts?token=${apiToken}&period=${period}`;
     
+    console.log(`[BackgroundJob] Fetching from URL: ${url.replace(apiToken, 'TOKEN_HIDDEN')}`);
     const response = await axios.get(url);
+    
+    console.log(`[BackgroundJob] API Response status: ${response.status}`);
+    console.log(`[BackgroundJob] API Response data keys:`, Object.keys(response.data || {}));
+    console.log(`[BackgroundJob] Posts count:`, response.data?.posts?.length || 0);
+    
+    if (response.data?.posts?.length > 0) {
+      console.log(`[BackgroundJob] First post sample:`, JSON.stringify(response.data.posts[0], null, 2));
+    }
 
     return response.data?.posts || [];
   }
