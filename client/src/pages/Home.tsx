@@ -32,10 +32,6 @@ export default function Home() {
       setPlayingMutation.mutate({ isPlaying });
     }
   }, [isPlaying, isAuthenticated]);
-  const apiCheckQuery = trpc.posts.checkApi.useQuery(undefined, { 
-    enabled: isAuthenticated && isPlaying,
-    refetchInterval: 60000 // Check API status every minute
-  });
   const postsQuery = trpc.posts.fetchAll.useQuery(undefined, {
     enabled: isAuthenticated && isPlaying,
     refetchInterval: (settingsQuery.data?.refreshInterval || 600) * 1000,
@@ -171,14 +167,15 @@ export default function Home() {
     );
   }
 
-  const apiStatus = apiCheckQuery.data?.status || "unknown";
+  // API status based on postsQuery success/error
+  const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
     <div className="min-h-screen w-full" style={{ width: '770px', margin: '0 auto' }}>
       {/* Header */}
-      <header className="glass-card p-4 mb-6 rounded-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Post Sniper 🎯</h1>
+      <header className="glass-card p-3 mb-4 rounded-xl">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold">Post Sniper 🎯</h1>
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -225,11 +222,11 @@ export default function Home() {
       </header>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Live Posts Column */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-primary">Live Posts</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-semibold mb-3 text-primary">Live Posts</h2>
+          <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -248,8 +245,8 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <h2 className="text-xl font-semibold mb-4 text-secondary">Popular Posts</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-semibold mb-3 text-secondary">Popular Posts</h2>
+          <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
