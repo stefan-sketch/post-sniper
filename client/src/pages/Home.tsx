@@ -15,6 +15,7 @@ export default function Home() {
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -236,8 +237,20 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Mobile View Selector - Only visible on mobile */}
+      <div className="md:hidden mb-4">
+        <select 
+          value={mobileView} 
+          onChange={(e) => setMobileView(e.target.value as 'live' | 'popular')}
+          className="w-full glass-card p-3 rounded-xl text-sm font-semibold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="live" className="bg-[#0a0e27] text-white">🔴 Live Posts</option>
+          <option value="popular" className="bg-[#0a0e27] text-white">📈 Popular Posts</option>
+        </select>
+      </div>
+
+      {/* Desktop: Two Column Layout */}
+      <div className="hidden md:grid grid-cols-2 gap-3">
         {/* Live Posts Column */}
         <div>
           <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">
@@ -291,6 +304,63 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Mobile: Single Column with Switchable View */}
+      <div className="md:hidden">
+        {mobileView === 'live' ? (
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              Live Posts
+            </h2>
+            <div className="space-y-3">
+              {postsQuery.isLoading && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">Loading posts...</p>
+                </div>
+              )}
+              {!postsQuery.isLoading && livePosts.length === 0 && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
+                </div>
+              )}
+              {livePosts.map((post, index) => (
+                <PostCard key={`${post.pageId}-${post.id}-${index}`} post={post} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-secondary text-center flex items-center justify-center gap-2">
+              <TrendingUp className="h-5 w-5 text-secondary" />
+              Popular Posts
+            </h2>
+            <div className="space-y-3">
+              {postsQuery.isLoading && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">Loading posts...</p>
+                </div>
+              )}
+              {!postsQuery.isLoading && popularPosts.length === 0 && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
+                </div>
+              )}
+              {popularPosts.map((post, index) => (
+                <PostCard 
+                  key={`${post.pageId}-${post.id}-popular-${index}`} 
+                  post={post} 
+                  showDismiss={true}
+                  onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Dialogs */}
