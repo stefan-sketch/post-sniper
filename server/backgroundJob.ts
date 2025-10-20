@@ -181,13 +181,16 @@ export class BackgroundJobService {
     
     console.log(`[BackgroundJob] API Response status: ${response.status}`);
     console.log(`[BackgroundJob] API Response data keys:`, Object.keys(response.data || {}));
-    console.log(`[BackgroundJob] Posts count:`, response.data?.posts?.length || 0);
     
-    if (response.data?.posts?.length > 0) {
-      console.log(`[BackgroundJob] First post sample:`, JSON.stringify(response.data.posts[0], null, 2));
+    // The API returns posts in response.data.data, not response.data.posts
+    const posts = response.data?.data || [];
+    console.log(`[BackgroundJob] Posts count:`, posts.length);
+    
+    if (posts.length > 0) {
+      console.log(`[BackgroundJob] First post sample:`, JSON.stringify(posts[0], null, 2));
     }
 
-    return response.data?.posts || [];
+    return posts;
   }
 }
 
