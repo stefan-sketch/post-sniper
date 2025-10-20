@@ -112,33 +112,14 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
         )}
       </div>
 
-      {/* Post Image */}
-      {post.image && (
-        <div className="relative w-full aspect-[4/5] overflow-hidden group/image">
-          <img 
-            src={post.image} 
-            alt="Post content"
-            className="w-full h-full object-cover"
-          />
-          <Button
-            size="sm"
-            variant="ghost"
-            className="absolute top-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            onClick={handleDownloadImage}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       {/* Post Message */}
       {post.message && (
-        <div className="px-4 py-3 relative group">
+        <div className="px-4 pb-3 relative group">
           <p className="text-sm line-clamp-3">{post.message}</p>
           <Button
             size="sm"
             variant="ghost"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-0 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handleCopyCaption}
           >
             <Copy className="h-4 w-4" />
@@ -147,7 +128,7 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
       )}
 
       {/* Engagement Stats */}
-      <div className="px-4 pb-4 flex items-center justify-between text-sm">
+      <div className="px-4 pb-3 flex items-center justify-between text-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <Heart className="h-4 w-4 text-accent" />
@@ -166,6 +147,25 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
           <ExternalLink className="h-4 w-4 text-muted-foreground" />
         )}
       </div>
+
+      {/* Post Image */}
+      {post.image && (
+        <div className="relative w-full aspect-[4/5] overflow-hidden group/image">
+          <img 
+            src={post.image} 
+            alt="Post content"
+            className="w-full h-full object-cover"
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute top-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+            onClick={handleDownloadImage}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
