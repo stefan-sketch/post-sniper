@@ -1,5 +1,5 @@
 import { ThumbsUp, MessageCircle, Share2, Copy, Download } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+// Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -31,7 +31,32 @@ interface PostCardProps {
 export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
-  const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
+  
+  // Custom time formatting that switches at halfway points
+  const getTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    
+    const diffHours = diffMins / 60;
+    
+    // Round to nearest hour (switches at 30-minute mark)
+    // 60-89 mins = "1 hour ago"
+    // 90-149 mins = "2 hours ago"
+    const roundedHours = Math.round(diffHours);
+    
+    if (roundedHours < 24) {
+      return `${roundedHours} hour${roundedHours === 1 ? '' : 's'} ago`;
+    }
+    
+    const diffDays = Math.round(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  };
+  
+  const timeAgo = getTimeAgo(post.postDate);
 
   const handleCopyCaption = (e: React.MouseEvent) => {
     e.stopPropagation();
