@@ -10,10 +10,10 @@ import "react-image-crop/dist/ReactCrop.css";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
-const PAGES: { id: PageId; name: string }[] = [
-  { id: "footy-feed", name: "The Footy Feed" },
-  { id: "football-funnys", name: "Football Funnys" },
-  { id: "football-away-days", name: "Football Away Days" },
+const PAGES: { id: PageId; name: string; watermark: string }[] = [
+  { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png" },
+  { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png" },
+  { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png" },
 ];
 
 interface CreatePostDialogProps {
@@ -27,6 +27,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [caption, setCaption] = useState("");
   const [selectedPages, setSelectedPages] = useState<PageId[]>([]);
+  const [useWatermark, setUseWatermark] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -39,7 +40,6 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        // Reset crop when new image is loaded
         setCrop(undefined);
         setCompletedCrop(undefined);
       };
@@ -60,6 +60,46 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       reader.readAsDataURL(file);
     }
   };
+
+  const applyWatermark = useCallback(
+    async (imageData: string, watermarkPath: string): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          // Load and apply watermark
+          const watermark = new Image();
+          watermark.onload = () => {
+            // Calculate watermark size (20% of image width, maintain aspect ratio)
+            const watermarkWidth = img.width * 0.2;
+            const watermarkHeight = (watermark.height / watermark.width) * watermarkWidth;
+
+            // Position in top-right corner with 2% padding
+            const x = img.width - watermarkWidth - img.width * 0.02;
+            const y = img.height * 0.02;
+
+            ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
+            resolve(canvas.toDataURL("image/jpeg", 0.9));
+          };
+          watermark.onerror = () => reject(new Error("Failed to load watermark"));
+          watermark.src = watermarkPath;
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = imageData;
+      });
+    },
+    []
+  );
 
   const getCroppedImage = useCallback(async (): Promise<string | null> => {
     if (!completedCrop || !imgRef.current) {
@@ -111,14 +151,22 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
     try {
       // Get cropped image
-      const croppedImage = await getCroppedImage();
-      if (!croppedImage) {
+      let processedImage = await getCroppedImage();
+      if (!processedImage) {
         throw new Error("Failed to process image");
+      }
+
+      // Apply watermark if enabled and only one page selected
+      if (useWatermark && selectedPages.length === 1) {
+        const selectedPage = PAGES.find((p) => p.id === selectedPages[0]);
+        if (selectedPage) {
+          processedImage = await applyWatermark(processedImage, selectedPage.watermark);
+        }
       }
 
       // Upload media to Publer
       const uploadResult = await uploadMediaMutation.mutateAsync({
-        imageData: croppedImage,
+        imageData: processedImage,
         fileName: `post-${Date.now()}.jpg`,
       });
 
@@ -145,6 +193,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       setCompletedCrop(undefined);
       setCaption("");
       setSelectedPages([]);
+      setUseWatermark(true);
       onOpenChange(false);
     } catch (error: any) {
       alert(`Error: ${error.message || "Failed to create post"}`);
@@ -157,6 +206,13 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
     setSelectedPages((prev) =>
       prev.includes(pageId) ? prev.filter((id) => id !== pageId) : [...prev, pageId]
     );
+  };
+
+  // Get watermark preview for selected page
+  const getWatermarkPreview = () => {
+    if (!useWatermark || selectedPages.length !== 1) return null;
+    const selectedPage = PAGES.find((p) => p.id === selectedPages[0]);
+    return selectedPage?.watermark;
   };
 
   return (
@@ -199,19 +255,24 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
               </div>
             ) : (
               <div className="space-y-2">
-                <ReactCrop
-                  crop={crop}
-                  onChange={(c) => setCrop(c)}
-                  onComplete={(c) => setCompletedCrop(c)}
-                  className="max-h-96"
-                >
-                  <img
-                    ref={imgRef}
-                    src={image}
-                    alt="Upload"
-                    className="max-w-full"
-                  />
-                </ReactCrop>
+                <div className="relative">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(c) => setCrop(c)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    className="max-h-96"
+                  >
+                    <img ref={imgRef} src={image} alt="Upload" className="max-w-full" />
+                  </ReactCrop>
+                  {/* Watermark Preview */}
+                  {getWatermarkPreview() && (
+                    <img
+                      src={getWatermarkPreview()!}
+                      alt="Watermark"
+                      className="absolute top-2 right-2 w-16 opacity-90 pointer-events-none"
+                    />
+                  )}
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
@@ -227,6 +288,20 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
               </div>
             )}
           </div>
+
+          {/* Watermark Toggle */}
+          {image && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="watermark"
+                checked={useWatermark}
+                onCheckedChange={(checked) => setUseWatermark(checked as boolean)}
+              />
+              <label htmlFor="watermark" className="text-sm text-gray-300 cursor-pointer">
+                Add watermark (only when posting to one page)
+              </label>
+            </div>
+          )}
 
           {/* Caption */}
           <div className="space-y-2">
@@ -252,15 +327,17 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                     checked={selectedPages.includes(page.id)}
                     onCheckedChange={() => togglePage(page.id)}
                   />
-                  <label
-                    htmlFor={page.id}
-                    className="text-sm text-gray-300 cursor-pointer"
-                  >
+                  <label htmlFor={page.id} className="text-sm text-gray-300 cursor-pointer">
                     {page.name}
                   </label>
                 </div>
               ))}
             </div>
+            {useWatermark && selectedPages.length > 1 && (
+              <p className="text-xs text-yellow-500">
+                ⚠️ Watermark disabled when posting to multiple pages
+              </p>
+            )}
           </div>
 
           {/* Post Button */}
