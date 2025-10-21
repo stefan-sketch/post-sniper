@@ -1,14 +1,9 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, Download, Upload } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 import { X } from "lucide-react";
 
 interface PostCardProps {
@@ -66,37 +61,7 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
     }
   };
 
-  const MANUS_CHATS = [
-    { name: "FootballFunnys", sessionId: "EUlhxwbdboxq5GamuZOfw4" },
-    { name: "FootyFeed", sessionId: "kcSypE0vgCTPKqXqLQWr7j" },
-    { name: "FAD", sessionId: "gwbHdSMCBnio6ozpKdD5tJ" },
-  ];
 
-  const uploadMutation = trpc.manus.uploadImage.useMutation();
-
-  const handleUploadToManus = async (e: React.MouseEvent, chatName: string, sessionId: string) => {
-    e.stopPropagation();
-    if (!post.image) {
-      toast.error("No image to upload");
-      return;
-    }
-
-    try {
-      const toastId = toast.loading(`Uploading to ${chatName}...`);
-      
-      const result = await uploadMutation.mutateAsync({
-        imageUrl: post.image,
-        sessionId,
-        chatName,
-      });
-      
-      toast.dismiss(toastId);
-      toast.success(`Uploaded to ${chatName}!`);
-    } catch (error) {
-      toast.error(`Failed to upload to ${chatName}`);
-      console.error('Manus upload error:', error);
-    }
-  };
 
   const handleOpenPost = () => {
     if (post.link) {
@@ -174,31 +139,7 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {post.image && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                  onClick={(e) => e.stopPropagation()}
-                  title="Upload to Manus"
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                {MANUS_CHATS.map((chat) => (
-                  <DropdownMenuItem
-                    key={chat.sessionId}
-                    onClick={(e) => handleUploadToManus(e, chat.name, chat.sessionId)}
-                  >
-                    {chat.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+
           {post.message && (
             <Button
               size="sm"
