@@ -304,23 +304,27 @@ export default function Home() {
       {/* Header */}
       <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
         <div className="flex items-center justify-between gap-2 md:gap-4">
-          {/* API Status Indicator - Before SDL */}
-          <div className="relative flex h-3 w-3 flex-shrink-0" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
-            {settingsQuery.data?.lastAPIStatus === "success" ? (
-              <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-              </>
-            ) : (
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            )}
-          </div>
+          {/* Spacer for balance */}
+          <div className="w-8 md:w-10 flex-shrink-0"></div>
 
-          {/* SDL MEDIA Text with Bell Icon */}
+          {/* Centered group: API indicator + SDL MEDIA + Bell */}
           <div className="flex-1 flex items-center justify-center gap-2 md:gap-3">
+            {/* API Status Indicator - Before SDL */}
+            <div className="relative flex h-3 w-3 flex-shrink-0" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
+              {settingsQuery.data?.lastAPIStatus === "success" ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </>
+              ) : (
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              )}
+            </div>
+
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
+
             {/* Alerts Icon - After MEDIA */}
             <Button
               variant="ghost"
