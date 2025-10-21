@@ -112,7 +112,8 @@ export class BackgroundJobService {
       console.log("[BackgroundJob] Fetching posts...");
       
       // Set isFetchingFromAPI to true at the start
-      await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: true });
+      // TEMPORARILY DISABLED until migration runs
+      // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: true });
       
       const settings = await getUserSettings(PUBLIC_USER_ID);
       const previousHash = settings?.lastDataHash;
@@ -259,11 +260,13 @@ export class BackgroundJobService {
       console.log("[BackgroundJob] Successfully fetched and cached all posts");
       
       // Set isFetchingFromAPI to false when done
-      await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
+      // TEMPORARILY DISABLED until migration runs
+      // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
     } catch (error) {
       console.error("[BackgroundJob] Error in fetchAndCachePosts:", error);
       // Set isFetchingFromAPI to false even on error
-      await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
+      // TEMPORARILY DISABLED until migration runs
+      // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
     }
   }
 

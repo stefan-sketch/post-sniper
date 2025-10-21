@@ -48,7 +48,8 @@ export const userSettings = pgTable("user_settings", {
   refreshInterval: integer("refreshInterval").default(600), // seconds (10 minutes)
   useMockData: boolean("useMockData").default(false), // Use real API by default
   isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
-  isFetchingFromAPI: boolean("isFetchingFromAPI").default(false), // Track if currently fetching from Fanpage Karma API
+  // TEMPORARILY REMOVED - will add back after proper migration
+  // isFetchingFromAPI: boolean("isFetchingFromAPI").default(false), // Track if currently fetching from Fanpage Karma API
   lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
   lastDataHash: text("lastDataHash"), // Hash of last API response to detect changes
   apiSyncOffset: integer("apiSyncOffset").default(0), // Learned offset in seconds to sync with API updates

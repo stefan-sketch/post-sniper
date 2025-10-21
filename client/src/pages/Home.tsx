@@ -354,7 +354,7 @@ export default function Home() {
               </span>
               Live Posts
             </h2>
-            {settingsQuery.data?.isFetchingFromAPI ? (
+            {false ? ( // TEMPORARILY DISABLED: settingsQuery.data?.isFetchingFromAPI
               <span className="text-xs text-green-400 font-semibold animate-pulse">
                 Fetching Data...
               </span>
