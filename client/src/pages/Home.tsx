@@ -386,7 +386,7 @@ export default function Home() {
       {/* Desktop: Two Column Layout */}
       <div className="hidden md:grid grid-cols-2 gap-6 flex-1 overflow-hidden">
         {/* Live Posts Column */}
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
             <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
               <span className="relative flex h-3 w-3">
@@ -470,7 +470,7 @@ export default function Home() {
         </div>
 
         {/* Popular Posts Column */}
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
             <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
             <h2 className="text-lg font-semibold text-green-400">
