@@ -68,7 +68,6 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
   return (
     <div 
       className="glass-card rounded-xl overflow-hidden transition-all hover:scale-[1.02] cursor-pointer"
-      style={{ border: `2px solid ${post.borderColor}` }}
       onClick={handleOpenPost}
     >
       {/* Profile Header */}
@@ -150,11 +149,11 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
 
       {/* Post Image */}
       {post.image && (
-        <div className="relative w-full aspect-[4/5] overflow-hidden group/image">
+        <div className="relative w-full overflow-hidden group/image">
           <img 
             src={post.image} 
             alt="Post content"
-            className="w-full h-full object-cover"
+            className="w-full h-auto object-contain"
           />
           <Button
             size="sm"
