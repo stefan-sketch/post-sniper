@@ -543,9 +543,9 @@ export default function Home() {
       </div>
 
       {/* Mobile: Single Column with Switchable View */}
-      <div className="md:hidden">
+      <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
-          <div>
+          <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-3 mb-3">
               <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
@@ -595,7 +595,7 @@ export default function Home() {
             <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
             </div>
-            <div className="space-y-3 relative">
+            <div className="space-y-3 relative overflow-y-auto flex-1 hide-scrollbar">
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading posts...</p>
@@ -627,7 +627,7 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div>
+          <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
@@ -667,7 +667,7 @@ export default function Home() {
               {/* Green pulsing underline */}
               <div className="w-full h-0.5 bg-green-500 animate-pulse"></div>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar">
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading posts...</p>
