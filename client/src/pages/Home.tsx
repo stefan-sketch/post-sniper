@@ -17,6 +17,7 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
+  const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('6hr');
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -125,7 +126,15 @@ export default function Home() {
     if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [] };
 
     const now = new Date();
-    const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    
+    // Calculate time threshold based on selected filter
+    const timeThresholds = {
+      '30min': 30 * 60 * 1000,
+      '2hr': 2 * 60 * 60 * 1000,
+      '3hr': 3 * 60 * 60 * 1000,
+      '6hr': 6 * 60 * 60 * 1000,
+    };
+    const timeAgo = new Date(now.getTime() - timeThresholds[popularTimeFilter]);
 
     // Convert cached posts to display format
     const allPosts = postsQuery.data.posts.map((post: any) => ({
@@ -155,13 +164,13 @@ export default function Home() {
       ? JSON.parse(settingsQuery.data.dismissedPosts) 
       : [];
 
-    // Popular posts: posts from last 6 hours sorted by reactions (highest first), excluding dismissed
+    // Popular posts: posts from selected time period sorted by reactions (highest first), excluding dismissed
     const popular = allPosts
-      .filter(post => post.postDate >= sixHoursAgo && !dismissedIds.includes(post.id))
+      .filter(post => post.postDate >= timeAgo && !dismissedIds.includes(post.id))
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data, settingsQuery.data?.dismissedPosts]);
+  }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter]);
 
   // No authentication required - removed loading and login screens
 
@@ -274,6 +283,24 @@ export default function Home() {
             <TrendingUp className="h-5 w-5 text-secondary" />
             Popular Posts
           </h2>
+          
+          {/* Time Filter Tabs */}
+          <div className="flex gap-2 mb-3 justify-center">
+            {(['30min', '2hr', '3hr', '6hr'] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setPopularTimeFilter(filter)}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                  popularTimeFilter === filter
+                    ? 'bg-secondary text-secondary-foreground'
+                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+          
           <div className="space-y-3">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
@@ -282,7 +309,7 @@ export default function Home() {
             )}
             {!postsQuery.isLoading && popularPosts.length === 0 && (
               <div className="glass-card p-6 rounded-xl text-center">
-                <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
+                <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
               </div>
             )}
             {popularPosts.map((post, index) => (
