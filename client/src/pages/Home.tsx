@@ -178,35 +178,35 @@ export default function Home() {
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
-    <div className="min-h-screen w-full" style={{ width: '770px', margin: '0 auto' }}>
+    <div className="min-h-screen w-full md:w-[770px] md:mx-auto px-2 md:px-0">
       {/* Header */}
-      <header className="glass-card p-3 mb-4 rounded-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">Post Sniper 🎯</h1>
+      <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 md:gap-4">
+            <h1 className="text-lg md:text-xl font-bold">Post Sniper 🎯</h1>
             {postsQuery.data?.lastFetchedAt && (
-              <span className="text-sm text-white/60">
+              <span className="text-xs md:text-sm text-white/60 hidden sm:inline">
                 Last updated: {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowSettings(true)}
-              className="relative"
+              className="relative h-8 w-8 md:h-10 md:w-10"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsPlaying(!isPlaying)}
-              className="relative"
+              className="relative h-8 w-8 md:h-10 md:w-10"
             >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+              {isPlaying ? <Pause className="h-4 w-4 md:h-5 md:w-5" /> : <Play className="h-4 w-4 md:h-5 md:w-5" />}
             </Button>
             
             <Button
@@ -214,19 +214,19 @@ export default function Home() {
               size="icon"
               onClick={handleManualFetch}
               disabled={manualFetchMutation.isPending}
-              className="relative"
+              className="relative h-8 w-8 md:h-10 md:w-10"
               title="Fetch Now"
             >
-              <RefreshCw className={`h-5 w-5 ${manualFetchMutation.isPending ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 md:h-5 md:w-5 ${manualFetchMutation.isPending ? 'animate-spin' : ''}`} />
             </Button>
 
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowAlerts(true)}
-              className="relative"
+              className="relative h-8 w-8 md:h-10 md:w-10"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4 md:h-5 md:w-5" />
               {(unreadCountQuery.data || 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {unreadCountQuery.data}
@@ -238,15 +238,27 @@ export default function Home() {
       </header>
 
       {/* Mobile View Selector - Only visible on mobile */}
-      <div className="md:hidden mb-4">
-        <select 
-          value={mobileView} 
-          onChange={(e) => setMobileView(e.target.value as 'live' | 'popular')}
-          className="w-full glass-card p-3 rounded-xl text-sm font-semibold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-primary"
+      <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1">
+        <button
+          onClick={() => setMobileView('live')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+            mobileView === 'live' 
+              ? 'bg-primary text-primary-foreground' 
+              : 'text-white/60 hover:text-white/80'
+          }`}
         >
-          <option value="live" className="bg-[#0a0e27] text-white">🔴 Live Posts</option>
-          <option value="popular" className="bg-[#0a0e27] text-white">📈 Popular Posts</option>
-        </select>
+          🔴 Live Posts
+        </button>
+        <button
+          onClick={() => setMobileView('popular')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+            mobileView === 'popular' 
+              ? 'bg-secondary text-secondary-foreground' 
+              : 'text-white/60 hover:text-white/80'
+          }`}
+        >
+          📈 Popular
+        </button>
       </div>
 
       {/* Desktop: Two Column Layout */}
