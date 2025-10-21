@@ -289,8 +289,8 @@ export default function Home() {
                 <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
               </div>
             )}
-            {livePosts.map((post, index) => (
-              <PostCard key={`${post.pageId}-${post.id}-${index}`} post={post} />
+            {livePosts.map((post) => (
+              <PostCard key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}`} post={post} />
             ))}
           </div>
         </div>
@@ -325,9 +325,9 @@ export default function Home() {
                 <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
               </div>
             )}
-            {popularPosts.map((post, index) => (
+            {popularPosts.map((post) => (
               <PostCard 
-                key={`${post.pageId}-${post.id}-popular-${index}`} 
+                key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
                 post={post} 
                 showDismiss={true}
                 onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
@@ -359,8 +359,8 @@ export default function Home() {
                   <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
                 </div>
               )}
-              {livePosts.map((post, index) => (
-                <PostCard key={`${post.pageId}-${post.id}-${index}`} post={post} />
+              {livePosts.map((post) => (
+                <PostCard key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile`} post={post} />
               ))}
             </div>
           </div>
@@ -381,9 +381,9 @@ export default function Home() {
                   <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
                 </div>
               )}
-              {popularPosts.map((post, index) => (
+              {popularPosts.map((post) => (
                 <PostCard 
-                  key={`${post.pageId}-${post.id}-popular-${index}`} 
+                  key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`} 
                   post={post} 
                   showDismiss={true}
                   onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
