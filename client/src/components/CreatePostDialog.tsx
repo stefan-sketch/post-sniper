@@ -103,7 +103,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
             const y = img.height * 0.02;
 
             ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
-            resolve(canvas.toDataURL("image/jpeg", 0.9));
+            resolve(canvas.toDataURL("image/png"));
           };
           watermark.onerror = () => reject(new Error("Failed to load watermark"));
           watermark.src = watermarkPath;
@@ -142,7 +142,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       completedCrop.height
     );
 
-    return canvas.toDataURL("image/jpeg", 0.9);
+    return canvas.toDataURL("image/png");
   }, [completedCrop, image]);
 
   const handlePost = async () => {
@@ -306,14 +306,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                       }}
                     />
                   </ReactCrop>
-                  {/* Watermark Preview */}
-                  {getWatermarkPreview() && (
-                    <img
-                      src={getWatermarkPreview()!}
-                      alt="Watermark"
-                      className="absolute top-2 right-2 w-16 opacity-90 pointer-events-none"
-                    />
-                  )}
+
                 </div>
                 <Button
                   variant="outline"
