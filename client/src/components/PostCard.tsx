@@ -228,20 +228,12 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
 
       {/* Post Image */}
       {post.image && (
-        <div className="relative w-full overflow-hidden group/image">
+        <div className="relative w-full overflow-hidden">
           <img 
             src={post.image} 
             alt="Post content"
             className="w-full h-auto object-contain"
           />
-          <Button
-            size="sm"
-            variant="ghost"
-            className="absolute top-2 right-2 opacity-0 group-hover/image:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-            onClick={handleDownloadImage}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
         </div>
       )}
     </div>
