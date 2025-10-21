@@ -369,8 +369,10 @@ export default function Home() {
           {/* Center: Drag-drop icon + SDL MEDIA + Create Post button */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
             <div
-              onDrop={(e) => {
+              onDrop={async (e) => {
                 e.preventDefault();
+                
+                // Try to get file first (from desktop)
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
                   const reader = new FileReader();
@@ -379,6 +381,25 @@ export default function Home() {
                     setShowCreatePost(true);
                   };
                   reader.readAsDataURL(file);
+                  return;
+                }
+                
+                // Try to get URL (from within app)
+                const url = e.dataTransfer.getData('text/uri-list');
+                if (url) {
+                  try {
+                    // Fetch the image and convert to base64
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setDroppedImage(reader.result as string);
+                      setShowCreatePost(true);
+                    };
+                    reader.readAsDataURL(blob);
+                  } catch (error) {
+                    console.error('Failed to load image:', error);
+                  }
                 }
               }}
               onDragOver={(e) => e.preventDefault()}

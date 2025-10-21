@@ -47,6 +47,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [useWatermark, setUseWatermark] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [overlayText, setOverlayText] = useState("");
+  const [fontSize, setFontSize] = useState(48);
+  const [useGradient, setUseGradient] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
@@ -149,6 +152,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     canvas.width = completedCrop.width;
     canvas.height = completedCrop.height;
 
+    // Draw cropped image
     ctx.drawImage(
       imgRef.current,
       completedCrop.x * scaleX,
@@ -161,8 +165,33 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       completedCrop.height
     );
 
+    // Add gradient overlay if enabled
+    if (useGradient) {
+      const gradient = ctx.createLinearGradient(0, canvas.height * 0.67, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Add text overlay if provided
+    if (overlayText.trim()) {
+      ctx.font = `bold ${fontSize}px Impact, 'Arial Black', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      
+      // Add black stroke for outline effect
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = fontSize * 0.1;
+      ctx.strokeText(overlayText, canvas.width / 2, canvas.height - 40);
+      
+      // Add white fill
+      ctx.fillStyle = 'white';
+      ctx.fillText(overlayText, canvas.width / 2, canvas.height - 40);
+    }
+
     return canvas.toDataURL("image/png");
-  }, [completedCrop, image]);
+  }, [completedCrop, image, useGradient, overlayText, fontSize]);
 
   const handlePost = async () => {
     if (!image) {
@@ -354,6 +383,48 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               <label htmlFor="watermark" className="text-sm text-gray-300 cursor-pointer">
                 Add watermark {selectedPages.length > 1 && "(only works with one page)"}
               </label>
+            </div>
+          )}
+
+          {/* Gradient Overlay Toggle */}
+          {image && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="gradient"
+                checked={useGradient}
+                onCheckedChange={(checked) => setUseGradient(checked as boolean)}
+              />
+              <label htmlFor="gradient" className="text-sm text-gray-300 cursor-pointer">
+                Add dark gradient (bottom 1/3)
+              </label>
+            </div>
+          )}
+
+          {/* Text Overlay */}
+          {image && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Text Overlay</label>
+              <input
+                type="text"
+                value={overlayText}
+                onChange={(e) => setOverlayText(e.target.value)}
+                placeholder="Add text to image..."
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                maxLength={100}
+              />
+              {overlayText && (
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-400">Font Size: {fontSize}px</label>
+                  <input
+                    type="range"
+                    min="24"
+                    max="120"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  />
+                </div>
+              )}
             </div>
           )}
 

@@ -206,6 +206,11 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
             src={post.image} 
             alt="Post content"
             className="w-full h-auto object-contain"
+            draggable="true"
+            onDragStart={(e) => {
+              e.dataTransfer.setData('text/uri-list', post.image!);
+              e.dataTransfer.effectAllowed = 'copy';
+            }}
           />
         </div>
       )}
