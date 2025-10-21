@@ -365,10 +365,20 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: SDL MEDIA */}
-          <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider absolute left-1/2 transform -translate-x-1/2" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
-            SDL MEDIA
-          </h1>
+          {/* Center: SDL MEDIA with Create Post button */}
+          <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+              SDL MEDIA
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowCreatePost(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          </div>
 
           {/* Right: Notifications + Settings */}
           <div className="flex items-center gap-1">
@@ -384,14 +394,6 @@ export default function Home() {
                   {unreadCountQuery.data}
                 </span>
               )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowCreatePost(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-            >
-              <Plus className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             <Button
               variant="ghost"

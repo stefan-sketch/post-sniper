@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { X, Upload } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import { toast } from "sonner";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
@@ -147,17 +148,17 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
   const handlePost = async () => {
     if (!image) {
-      alert("Please upload an image");
+      toast.error("Please upload an image");
       return;
     }
 
     if (!caption.trim()) {
-      alert("Please enter a caption");
+      toast.error("Please enter a caption");
       return;
     }
 
     if (selectedPages.length === 0) {
-      alert("Please select at least one page");
+      toast.error("Please select at least one page");
       return;
     }
 
@@ -199,7 +200,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
         throw new Error(postResult.error || "Failed to create post");
       }
 
-      alert(`Success! Posted to ${selectedPages.length} page${selectedPages.length > 1 ? "s" : ""}`);
+      toast.success(`Success! Posted to ${selectedPages.length} page${selectedPages.length > 1 ? "s" : ""}`);
 
       // Reset form
       setImage(null);
@@ -210,7 +211,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       setUseWatermark(true);
       onOpenChange(false);
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to create post"}`);
+      toast.error(error.message || "Failed to create post");
     } finally {
       setIsUploading(false);
     }
@@ -270,12 +271,12 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-gray-600 transition-colors"
+                className="border-2 border-dashed border-cyan-500 rounded-lg p-8 text-center cursor-pointer"
                 onClick={() => document.getElementById("image-upload")?.click()}
               >
-                <Upload className="h-12 w-12 mx-auto mb-3 text-gray-500" />
-                <p className="text-gray-400 mb-1">Drag & drop an image here</p>
-                <p className="text-sm text-gray-500">or click to browse</p>
+                <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p className="text-gray-300 mb-1">Drag & drop an image here</p>
+                <p className="text-sm text-gray-400">or click to browse</p>
                 <input
                   id="image-upload"
                   type="file"
@@ -286,7 +287,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="relative">
+                <div className="relative flex justify-center">
                   <ReactCrop
                     crop={crop}
                     onChange={(c) => setCrop(c)}
