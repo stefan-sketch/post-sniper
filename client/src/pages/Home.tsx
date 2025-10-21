@@ -436,7 +436,7 @@ export default function Home() {
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div className="space-y-3 relative overflow-y-auto flex-1 pr-2">
+          <div className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -510,7 +510,7 @@ export default function Home() {
           {/* Green separator line */}
           <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
           
-          <div className="space-y-3 overflow-y-auto flex-1 pr-2">
+          <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
