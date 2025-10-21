@@ -303,9 +303,9 @@ export default function Home() {
     <div className="min-h-screen w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4">
       {/* Header */}
       <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
-        <div className="flex items-center justify-between gap-4">
-          {/* API Status Indicator - Left */}
-          <div className="relative flex h-3 w-3" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          {/* API Status Indicator - Before SDL */}
+          <div className="relative flex h-3 w-3 flex-shrink-0" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
             {settingsQuery.data?.lastAPIStatus === "success" ? (
               <>
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -316,28 +316,35 @@ export default function Home() {
             )}
           </div>
 
-          {/* Centered Logo */}
-          <div className="flex-1 flex justify-center">
-            <img
-              src="/header-logo.png"
-              alt="SDL Media"
-              className="h-7 md:h-8 object-contain"
-            />
+          {/* SDL MEDIA Text with Bell Icon */}
+          <div className="flex-1 flex items-center justify-center gap-2 md:gap-3">
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+              SDL MEDIA
+            </h1>
+            {/* Alerts Icon - After MEDIA */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowAlerts(true)}
+              className="relative h-8 w-8 md:h-9 md:w-9 flex-shrink-0"
+            >
+              <Bell className="h-4 w-4 md:h-5 md:w-5" />
+              {(unreadCountQuery.data || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCountQuery.data}
+                </span>
+              )}
+            </Button>
           </div>
 
-          {/* Alerts Icon - Right */}
+          {/* Settings Icon - Right Corner */}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setShowAlerts(true)}
-            className="relative h-8 w-8 md:h-10 md:w-10"
+            onClick={() => setShowSettings(true)}
+            className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
           >
-            <Bell className="h-4 w-4 md:h-5 md:w-5" />
-            {(unreadCountQuery.data || 0) > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {unreadCountQuery.data}
-              </span>
-            )}
+            <Settings className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </div>
       </header>
