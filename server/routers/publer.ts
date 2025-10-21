@@ -148,10 +148,21 @@ export const publerRouter = router({
         const status = statusData.data?.status || statusData.status;
         const result = statusData.data?.result || statusData;
         
-        // Check for failures in the result
-        if (result?.payload?.failures) {
-          console.error("Publer job failures:", result.payload.failures);
-          throw new Error(`Post failed: ${JSON.stringify(result.payload.failures)}`);
+        // Check for failures in the payload
+        if (result?.payload && Array.isArray(result.payload)) {
+          const failures = result.payload.filter((item: any) => item.status === "failed" || item.type === "error");
+          
+          if (failures.length > 0) {
+            console.error("Publer job failures:", failures);
+            
+            // Extract error messages
+            const errorMessages = failures.map((f: any) => {
+              const failure = f.failure || {};
+              return `${failure.account_name || 'Account'}: ${failure.message || 'Unknown error'}`;
+            }).join('; ');
+            
+            throw new Error(`Post failed: ${errorMessages}`);
+          }
         }
         
         // If still working, let user know
@@ -164,10 +175,14 @@ export const publerRouter = router({
           };
         }
         
+        // Check if all posts succeeded
+        const successCount = result?.payload?.filter((item: any) => item.status === "success").length || 0;
+        
         return {
           success: true,
           jobId,
           status,
+          successCount,
           result,
         };
       } catch (error: any) {
