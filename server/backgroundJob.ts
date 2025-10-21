@@ -13,7 +13,7 @@ const PUBLIC_USER_ID = "public";
  * and stores them in the database for all users to access
  */
 export class BackgroundJobService {
-  private cronTask: cron.ScheduledTask | null = null;
+  private intervalTask: NodeJS.Timeout | null = null;
   private dailyResetTask: cron.ScheduledTask | null = null;
   private isRunning = false;
   private isPaused = false;
@@ -25,7 +25,7 @@ export class BackgroundJobService {
     }
 
     this.isRunning = true;
-    console.log("[BackgroundJob] Starting background job service with node-cron");
+    console.log("[BackgroundJob] Starting background job service with setInterval");
 
     // Check if monitoring is enabled
     const settings = await getUserSettings(PUBLIC_USER_ID);
@@ -36,11 +36,11 @@ export class BackgroundJobService {
       await this.fetchAndCachePosts();
     }
 
-    // Schedule to run every 3 minutes using cron expression
-    // Cron expression: "*/3 * * * *" = every 3 minutes
-    console.log("[BackgroundJob] Setting up cron job to run every 3 minutes");
+    // Schedule to run every 3 minutes using setInterval
+    const THREE_MINUTES = 3 * 60 * 1000; // 3 minutes in milliseconds
+    console.log("[BackgroundJob] Setting up interval to run every 3 minutes");
     
-    this.cronTask = cron.schedule("*/3 * * * *", async () => {
+    this.intervalTask = setInterval(async () => {
       try {
         // Check if monitoring is enabled before running
         const currentSettings = await getUserSettings(PUBLIC_USER_ID);
@@ -54,17 +54,15 @@ export class BackgroundJobService {
             await new Promise(resolve => setTimeout(resolve, syncOffset * 1000));
           }
           
-          console.log(`[BackgroundJob] Cron job triggered at ${new Date().toISOString()}`);
+          console.log(`[BackgroundJob] Interval triggered at ${new Date().toISOString()}`);
           await this.fetchAndCachePosts();
         } else {
-          console.log(`[BackgroundJob] Cron job skipped (monitoring paused) at ${new Date().toISOString()}`);
+          console.log(`[BackgroundJob] Interval skipped (monitoring paused) at ${new Date().toISOString()}`);
         }
       } catch (error) {
-        console.error(`[BackgroundJob] Cron job error:`, error);
+        console.error(`[BackgroundJob] Interval error:`, error);
       }
-    }, {
-      timezone: "Europe/London"
-    });
+    }, THREE_MINUTES);
     
     // Schedule daily reset at 6am
     // Cron expression: "0 6 * * *" = every day at 6:00 AM
@@ -84,9 +82,9 @@ export class BackgroundJobService {
   }
 
   stop() {
-    if (this.cronTask) {
-      this.cronTask.stop();
-      this.cronTask = null;
+    if (this.intervalTask) {
+      clearInterval(this.intervalTask);
+      this.intervalTask = null;
     }
     if (this.dailyResetTask) {
       this.dailyResetTask.stop();
