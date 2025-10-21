@@ -245,9 +245,12 @@
 }
 
 .ReactCrop__crop-selection {
-  border: 2px solid rgba(6, 182, 212, 0.8) !important;
+  border: 2px solid #06b6d4 !important;
+  border-style: solid !important;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: none !important;
+  animation: none !important;
 }
 
 .ReactCrop__drag-handle {
@@ -274,19 +277,5 @@
   opacity: 0.8;
 }
 
-/* Smooth fade-in for crop area */
-@keyframes cropFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 
-.ReactCrop__crop-selection {
-  animation: cropFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
