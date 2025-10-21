@@ -335,7 +335,7 @@ export default function Home() {
               onClick={() => setShowAlerts(true)}
               className="relative cursor-pointer flex-shrink-0"
             >
-              <Bell className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <Bell className="h-4 w-4 md:h-5 md:w-5 text-white" />
               {(unreadCountQuery.data || 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {unreadCountQuery.data}
