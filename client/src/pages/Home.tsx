@@ -183,7 +183,10 @@ export default function Home() {
       <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 md:gap-4">
-            <h1 className="text-lg md:text-xl font-bold">Post Sniper 🎯</h1>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="SDL MEDIA" className="w-8 h-8 md:w-10 md:h-10" />
+              <h1 className="text-lg md:text-xl font-bold">SDL MEDIA</h1>
+            </div>
             {postsQuery.data?.lastFetchedAt && (
               <span className="text-xs md:text-sm text-white/60 hidden sm:inline">
                 Last updated: {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
