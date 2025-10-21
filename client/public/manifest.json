@@ -1,6 +1,6 @@
 {
-  "name": "Post Sniper - SDL Media",
-  "short_name": "Post Sniper",
+  "name": "SDL Media",
+  "short_name": "SDL Media",
   "description": "Real-time social media post monitoring and analytics",
   "start_url": "/",
   "display": "standalone",
