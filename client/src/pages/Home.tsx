@@ -403,8 +403,8 @@ export default function Home() {
         {/* Popular Posts Column */}
         <div>
           <div className="flex items-center justify-center gap-3 mb-3">
-            <TrendingUp className="h-5 w-5 text-secondary" />
-            <h2 className="text-lg font-semibold text-secondary">
+            <TrendingUp className="h-5 w-5 text-green-400" />
+            <h2 className="text-lg font-semibold text-green-400">
               Popular Posts
             </h2>
             <div className="relative">
@@ -437,6 +437,9 @@ export default function Home() {
               )}
             </div>
           </div>
+          
+          {/* Green separator line */}
+          <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3"></div>
           
           <div className="space-y-3">
             {postsQuery.isLoading && (
