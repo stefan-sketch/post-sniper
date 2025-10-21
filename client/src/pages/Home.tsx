@@ -366,13 +366,16 @@ export default function Home() {
         </button>
         <button
           onClick={() => setMobileView('popular')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all relative ${
             mobileView === 'popular' 
-              ? 'bg-secondary text-secondary-foreground' 
+              ? 'bg-green-500 text-white' 
               : 'text-white/60 hover:text-white/80'
           }`}
         >
           📈 Popular
+          {mobileView === 'popular' && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></span>
+          )}
         </button>
       </div>
 
