@@ -88,7 +88,7 @@ export const publerRouter = router({
             posts: [
               {
                 networks: {
-                  default: {
+                  facebook: {
                     type: "photo",
                     text: input.caption,
                     media: [
