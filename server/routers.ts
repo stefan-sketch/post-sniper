@@ -84,6 +84,7 @@ export const appRouter = router({
           refreshInterval: 600,
           useMockData: false,
           isPlaying: false,
+          isFetchingFromAPI: false,
           lastFetchedAt: null,
           dismissedPosts: null,
         };

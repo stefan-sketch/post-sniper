@@ -27,9 +27,10 @@ interface PostCardProps {
   onDismiss?: () => void;
   rankingChange?: number; // Positive = moved up, negative = moved down, 0 or undefined = no change
   reactionIncrease?: number; // Number of reactions gained since last update
+  indicatorAge?: number; // Milliseconds since indicator was first shown
 }
 
-export default function PostCard({ post, showDismiss, onDismiss, rankingChange, reactionIncrease }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss, rankingChange, reactionIncrease, indicatorAge = 0 }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
@@ -101,8 +102,10 @@ export default function PostCard({ post, showDismiss, onDismiss, rankingChange, 
           <div className="flex items-center gap-2">
             <p className="font-semibold truncate">{post.pageName}</p>
             {rankingChange !== undefined && rankingChange !== 0 && (
-              <span className={`text-sm font-bold flex items-center gap-0.5 ${
-                rankingChange > 0 ? 'text-green-400' : 'text-red-400'
+              <span className={`text-sm font-bold flex items-center gap-0.5 transition-colors duration-1000 ${
+                indicatorAge < 60000 
+                  ? (rankingChange > 0 ? 'text-green-400 animate-pulse' : 'text-red-400 animate-pulse')
+                  : 'text-gray-400'
               }`}>
                 {rankingChange > 0 ? '↑' : '↓'}
                 {Math.abs(rankingChange)}
@@ -141,7 +144,13 @@ export default function PostCard({ post, showDismiss, onDismiss, rankingChange, 
             <ThumbsUp className="h-4 w-4 text-gray-400" strokeWidth={2} />
             <span className="text-gray-300 font-medium">{post.reactions.toLocaleString()}</span>
             {reactionIncrease !== undefined && reactionIncrease > 0 && (
-              <span className="text-green-400 text-xs font-semibold">+{reactionIncrease.toLocaleString()}</span>
+              <span 
+                className={`text-xs font-semibold transition-colors duration-1000 ${
+                  indicatorAge < 60000 ? 'text-green-400 animate-pulse' : 'text-gray-400'
+                }`}
+              >
+                +{reactionIncrease.toLocaleString()}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-2">

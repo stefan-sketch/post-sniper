@@ -22,8 +22,9 @@ export default function Home() {
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
-  const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
   const [previousReactionCounts, setPreviousReactionCounts] = useState<Map<string, number>>(new Map());
+  const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
+  const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -229,13 +230,10 @@ export default function Home() {
             hasChanges = true;
           }
         });
-        // Only update if there were actual changes
-        if (hasChanges) {
-          // Wait before updating to show the changes
-          setTimeout(() => {
-            setPreviousPopularRankings(currentRankings);
-          }, 10000); // Keep showing changes for 10 seconds
-        }
+        // Don't update previous rankings - keep showing changes permanently
+        // if (hasChanges) {
+        //   setPreviousPopularRankings(currentRankings);
+        // }
       } else {
         // First load, just store rankings without showing changes
         setPreviousPopularRankings(currentRankings);
@@ -260,12 +258,15 @@ export default function Home() {
             hasChanges = true;
           }
         });
-        // Only update if there were actual changes
+        // Store timestamps for new changes
         if (hasChanges) {
-          // Wait a bit before updating to allow UI to show the changes
-          setTimeout(() => {
-            setPreviousReactionCounts(currentReactions);
-          }, 10000); // Keep showing changes for 10 seconds
+          const newTimestamps = new Map(indicatorTimestamps);
+          currentReactions.forEach((count, id) => {
+            if (previousReactionCounts.get(id) !== count && !indicatorTimestamps.has(id)) {
+              newTimestamps.set(id, Date.now());
+            }
+          });
+          setIndicatorTimestamps(newTimestamps);
         }
       } else {
         // First load, just store counts without showing changes
@@ -353,7 +354,7 @@ export default function Home() {
               </span>
               Live Posts
             </h2>
-            {postsQuery.isFetching ? (
+            {settingsQuery.data?.isFetchingFromAPI ? (
               <span className="text-xs text-green-400 font-semibold animate-pulse">
                 Fetching Data...
               </span>
@@ -382,6 +383,7 @@ export default function Home() {
               const isNew = newPostIds.has(post.id);
               const previousReactions = previousReactionCounts.get(post.id);
               const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+              const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
               
               return (
                 <div
@@ -391,7 +393,7 @@ export default function Home() {
                     animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                   }}
                 >
-                  <PostCard post={post} reactionIncrease={reactionIncrease} />
+                  <PostCard post={post} reactionIncrease={reactionIncrease} indicatorAge={indicatorAge} />
                 </div>
               );
             })}
@@ -453,6 +455,7 @@ export default function Home() {
               const rankingChange = previousRank ? previousRank - currentRank : undefined;
               const previousReactions = previousReactionCounts.get(post.id);
               const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+              const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
               
               return (
                 <PostCard 
@@ -462,6 +465,7 @@ export default function Home() {
                   onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
                   rankingChange={rankingChange}
                   reactionIncrease={reactionIncrease}
+                  indicatorAge={indicatorAge}
                 />
               );
             })}
