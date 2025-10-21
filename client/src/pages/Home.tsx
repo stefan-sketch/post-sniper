@@ -29,6 +29,7 @@ export default function Home() {
   const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
   
   const settingsQuery = trpc.settings.get.useQuery();
+  const pagesQuery = trpc.pages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
   
@@ -140,8 +141,8 @@ export default function Home() {
   });
 
   // Process and organize posts (now from cached server data)
-  const { livePosts, popularPosts, availablePages } = useMemo(() => {
-    if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [], availablePages: [] };
+  const { livePosts, popularPosts } = useMemo(() => {
+    if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [] };
 
     const now = new Date();
     
@@ -199,13 +200,17 @@ export default function Home() {
       .filter(post => post.postDate >= timeAgo && !dismissedIds.includes(post.id))
       .sort((a, b) => b.reactions - a.reactions);
 
-    // Extract unique pages for the filter dropdown
-    const uniquePages = Array.from(
-      new Map(allPosts.map(post => [post.pageId, { id: post.pageId, name: post.pageName }])).values()
-    );
-    
-    return { livePosts: live, popularPosts: popular, availablePages: uniquePages };
+    return { livePosts: live, popularPosts: popular };
   }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter, livePageFilter]);
+
+  // Get available pages from monitored pages instead of posts
+  const availablePages = useMemo(() => {
+    if (!pagesQuery.data) return [];
+    return pagesQuery.data.map(page => ({
+      id: page.id,
+      name: page.profileName
+    }));
+  }, [pagesQuery.data]);
 
   // Detect new posts for animation
   useEffect(() => {
