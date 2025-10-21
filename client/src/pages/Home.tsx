@@ -305,9 +305,9 @@ export default function Home() {
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
-    <div className="min-h-screen w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4">
+    <div className="h-screen w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
+      <header className="glass-card p-2 md:p-3 mb-4 rounded-xl flex-shrink-0">
         <div className="flex items-center justify-between gap-2 md:gap-4">
           {/* Spacer for balance */}
           <div className="w-8 md:w-10 flex-shrink-0"></div>
@@ -357,7 +357,7 @@ export default function Home() {
       </header>
 
       {/* Mobile View Selector - Only visible on mobile */}
-      <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1">
+      <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
         <button
           onClick={() => setMobileView('live')}
           className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
@@ -384,7 +384,7 @@ export default function Home() {
       </div>
 
       {/* Desktop: Two Column Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+      <div className="hidden md:grid grid-cols-2 gap-6 flex-1 overflow-hidden">
         {/* Live Posts Column */}
         <div className="flex flex-col">
           <div className="flex items-center justify-center gap-3 mb-3">
