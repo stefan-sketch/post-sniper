@@ -49,6 +49,8 @@ export const userSettings = pgTable("user_settings", {
   useMockData: boolean("useMockData").default(false), // Use real API by default
   isPlaying: boolean("isPlaying").default(false), // Track if monitoring is active
   lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
+  lastDataHash: text("lastDataHash"), // Hash of last API response to detect changes
+  apiSyncOffset: integer("apiSyncOffset").default(0), // Learned offset in seconds to sync with API updates
   dismissedPosts: text("dismissedPosts"), // JSON array of dismissed post IDs
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),

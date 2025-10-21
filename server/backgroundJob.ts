@@ -4,6 +4,7 @@ import axios from "axios";
 import { eq } from "drizzle-orm";
 import { ENV } from "./_core/env";
 import * as cron from "node-cron";
+import crypto from "crypto";
 
 const PUBLIC_USER_ID = "public";
 
@@ -45,6 +46,13 @@ export class BackgroundJobService {
       const shouldRun = currentSettings?.isPlaying ?? false;
       
       if (shouldRun) {
+        const syncOffset = currentSettings?.apiSyncOffset || 0;
+        
+        if (syncOffset > 0) {
+          console.log(`[BackgroundJob] Delaying ${syncOffset}s to sync with API update cycle`);
+          await new Promise(resolve => setTimeout(resolve, syncOffset * 1000));
+        }
+        
         console.log(`[BackgroundJob] Cron job triggered at ${new Date().toISOString()}`);
         await this.fetchAndCachePosts();
       } else {
@@ -103,6 +111,8 @@ export class BackgroundJobService {
       console.log("[BackgroundJob] Fetching posts...");
       
       const settings = await getUserSettings(PUBLIC_USER_ID);
+      const previousHash = settings?.lastDataHash;
+      const currentOffset = settings?.apiSyncOffset || 0;
       const apiToken = settings?.fanpageKarmaToken || ENV.fanpageKarmaToken;
       
       if (!apiToken) {
@@ -208,6 +218,36 @@ export class BackgroundJobService {
         lastFetchedAt: new Date(),
       });
 
+      // Calculate hash of fetched data to detect changes
+      // We'll hash the total reactions count to detect if metrics changed
+      const allCachedPosts = await db.select().from(cachedPosts);
+      const dataHash = this.calculateDataHash(allCachedPosts);
+      
+      // Check if data actually changed
+      const dataChanged = !previousHash || dataHash !== previousHash;
+      
+      if (!dataChanged) {
+        console.log("[BackgroundJob] ⚠️  Data unchanged - Fanpage Karma hasn't updated yet");
+        console.log("[BackgroundJob] Adjusting next poll time by +2 minutes to sync with API updates");
+        
+        // Adjust offset to poll 2 minutes later next time
+        const newOffset = (currentOffset + 120) % 600; // Keep within 10-minute window
+        await upsertUserSettings({
+          userId: PUBLIC_USER_ID,
+          apiSyncOffset: newOffset,
+        });
+        
+        console.log(`[BackgroundJob] New sync offset: ${newOffset} seconds`);
+      } else {
+        console.log("[BackgroundJob] ✅ Data updated - API sync is good");
+        
+        // Store the new hash
+        await upsertUserSettings({
+          userId: PUBLIC_USER_ID,
+          lastDataHash: dataHash,
+        });
+      }
+      
       console.log("[BackgroundJob] Successfully fetched and cached all posts");
     } catch (error) {
       console.error("[BackgroundJob] Error in fetchAndCachePosts:", error);
@@ -242,6 +282,20 @@ export class BackgroundJobService {
     console.log(`[BackgroundJob] Fetched ${posts.length} posts for profile ${profileId}`);
     
     return posts;
+  }
+  
+  /**
+   * Calculate a hash of the fetched data to detect if it changed
+   * Uses the sum of all post metrics (reactions, comments, shares) as a change detector
+   */
+  private calculateDataHash(posts: any[]): string {
+    // Sum all metrics to create a signature of the current data state
+    const totalReactions = posts.reduce((sum, p) => sum + (p.reactions || 0), 0);
+    const totalComments = posts.reduce((sum, p) => sum + (p.comments || 0), 0);
+    const totalShares = posts.reduce((sum, p) => sum + (p.shares || 0), 0);
+    
+    const hashData = `${totalReactions}:${totalComments}:${totalShares}`;
+    return crypto.createHash('md5').update(hashData).digest('hex');
   }
 }
 
