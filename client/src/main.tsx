@@ -7,6 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
+import { registerServiceWorker, setupInstallPrompt } from "./utils/pwa";
 
 const queryClient = new QueryClient();
 
@@ -59,3 +60,9 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </trpc.Provider>
 );
+
+// Register PWA service worker
+if (import.meta.env.PROD) {
+  registerServiceWorker();
+  setupInstallPrompt();
+}
