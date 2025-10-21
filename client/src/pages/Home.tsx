@@ -458,7 +458,7 @@ export default function Home() {
                     animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                   }}
                 >
-                  <PostCard post={post} reactionIncrease={reactionIncrease} indicatorAge={indicatorAge} />
+                  <PostCard post={post} reactionIncrease={reactionIncrease} />
                 </div>
               );
             })}
@@ -530,9 +530,7 @@ export default function Home() {
                 <PostCard 
                   key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
                   post={post} 
-                  rankingChange={rankingChange}
                   reactionIncrease={reactionIncrease}
-                  indicatorAge={indicatorAge}
                 />
               );
             })}
@@ -626,12 +624,13 @@ export default function Home() {
           </div>
         ) : (
           <div>
-            <div className="flex items-center justify-center gap-3 mb-3">
-              <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-              <h2 className="text-lg font-semibold text-green-400">
-                Popular Posts
-              </h2>
-              <div className="relative">
+            <div className="flex flex-col items-center mb-3">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
+                <h2 className="text-lg font-semibold text-green-400">
+                  Popular Posts
+                </h2>
+                <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
                   className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
@@ -659,7 +658,10 @@ export default function Home() {
                     ))}
                   </div>
                 )}
+                </div>
               </div>
+              {/* Green pulsing underline */}
+              <div className="w-full h-0.5 bg-green-500 animate-pulse"></div>
             </div>
             <div className="space-y-3">
               {postsQuery.isLoading && (
@@ -684,7 +686,6 @@ export default function Home() {
                   <PostCard 
                     key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`} 
                     post={post} 
-                    rankingChange={rankingChange}
                     reactionIncrease={reactionIncrease}
                   />
                 );
