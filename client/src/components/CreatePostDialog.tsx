@@ -10,10 +10,10 @@ import "react-image-crop/dist/ReactCrop.css";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
-const PAGES: { id: PageId; name: string; watermark: string }[] = [
-  { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png" },
-  { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png" },
-  { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png" },
+const PAGES: { id: PageId; name: string; watermark: string; shortName: string }[] = [
+  { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png", shortName: "Footy Feed" },
+  { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png", shortName: "Funnys" },
+  { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png", shortName: "Away Days" },
 ];
 
 interface CreatePostDialogProps {
@@ -217,16 +217,33 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6">
         <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Create Post</h2>
+          {/* Header with Page Pills */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
+              <div className="flex gap-2 flex-wrap">
+                {PAGES.map((page) => (
+                  <button
+                    key={page.id}
+                    onClick={() => togglePage(page.id)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedPages.includes(page.id)
+                        ? "bg-cyan-500 text-white"
+                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                    }`}
+                  >
+                    {page.shortName}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white flex-shrink-0"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -298,7 +315,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                 onCheckedChange={(checked) => setUseWatermark(checked as boolean)}
               />
               <label htmlFor="watermark" className="text-sm text-gray-300 cursor-pointer">
-                Add watermark (only when posting to one page)
+                Add watermark {selectedPages.length > 1 && "(only works with one page)"}
               </label>
             </div>
           )}
@@ -314,30 +331,6 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
               maxLength={2000}
             />
             <p className="text-xs text-gray-500 text-right">{caption.length} / 2000</p>
-          </div>
-
-          {/* Page Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Post to Pages</label>
-            <div className="space-y-2">
-              {PAGES.map((page) => (
-                <div key={page.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={page.id}
-                    checked={selectedPages.includes(page.id)}
-                    onCheckedChange={() => togglePage(page.id)}
-                  />
-                  <label htmlFor={page.id} className="text-sm text-gray-300 cursor-pointer">
-                    {page.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-            {useWatermark && selectedPages.length > 1 && (
-              <p className="text-xs text-yellow-500">
-                ⚠️ Watermark disabled when posting to multiple pages
-              </p>
-            )}
           </div>
 
           {/* Post Button */}
