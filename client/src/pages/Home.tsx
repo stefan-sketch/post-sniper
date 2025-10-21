@@ -384,9 +384,9 @@ export default function Home() {
       </div>
 
       {/* Desktop: Two Column Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-6">
+      <div className="hidden md:grid grid-cols-2 gap-6 h-[calc(100vh-200px)]">
         {/* Live Posts Column */}
-        <div>
+        <div className="flex flex-col">
           <div className="flex items-center justify-center gap-3 mb-3">
             <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
               <span className="relative flex h-3 w-3">
@@ -433,10 +433,10 @@ export default function Home() {
             </div>
           </div>
           {/* Printer line - thin red line where new posts emerge from */}
-          <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
+          <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div className="space-y-3 relative">
+          <div className="space-y-3 relative overflow-y-auto flex-1 pr-2">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -470,7 +470,7 @@ export default function Home() {
         </div>
 
         {/* Popular Posts Column */}
-        <div>
+        <div className="flex flex-col">
           <div className="flex items-center justify-center gap-3 mb-3">
             <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
             <h2 className="text-lg font-semibold text-green-400">
@@ -508,9 +508,9 @@ export default function Home() {
           </div>
           
           {/* Green separator line */}
-          <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3"></div>
+          <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
           
-          <div className="space-y-3">
+          <div className="space-y-3 overflow-y-auto flex-1 pr-2">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
