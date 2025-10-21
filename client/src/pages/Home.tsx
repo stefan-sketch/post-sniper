@@ -17,8 +17,10 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
-  const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('2hr');
+  const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
+  const [livePageFilter, setLivePageFilter] = useState<string>('all'); // 'all' or pageId
+  const [showPageFilter, setShowPageFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
@@ -138,19 +140,25 @@ export default function Home() {
   });
 
   // Process and organize posts (now from cached server data)
-  const { livePosts, popularPosts } = useMemo(() => {
-    if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [] };
+  const { livePosts, popularPosts, availablePages } = useMemo(() => {
+    if (!postsQuery.data?.posts) return { livePosts: [], popularPosts: [], availablePages: [] };
 
     const now = new Date();
     
     // Calculate time threshold based on selected filter
-    const timeThresholds = {
-      '30min': 30 * 60 * 1000,
-      '2hr': 2 * 60 * 60 * 1000,
-      '3hr': 3 * 60 * 60 * 1000,
-      '6hr': 6 * 60 * 60 * 1000,
-    };
-    const timeAgo = new Date(now.getTime() - timeThresholds[popularTimeFilter]);
+    let timeAgo: Date;
+    if (popularTimeFilter === 'today') {
+      // Today since 6am UK time
+      const todayAt6am = new Date();
+      todayAt6am.setHours(6, 0, 0, 0);
+      timeAgo = todayAt6am;
+    } else {
+      const timeThresholds = {
+        '2hr': 2 * 60 * 60 * 1000,
+        '6hr': 6 * 60 * 60 * 1000,
+      };
+      timeAgo = new Date(now.getTime() - timeThresholds[popularTimeFilter]);
+    }
 
     // Convert cached posts to display format
     const allPosts = postsQuery.data.posts.map((post: any) => ({
@@ -174,7 +182,12 @@ export default function Home() {
     }));
 
     // Sort all posts by date (newest first) for live posts
-    const live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
+    let live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
+    
+    // Filter by page if a specific page is selected
+    if (livePageFilter !== 'all') {
+      live = live.filter(post => post.pageId === livePageFilter);
+    }
 
     // Get dismissed post IDs
     const dismissedIds = settingsQuery.data?.dismissedPosts 
@@ -186,8 +199,13 @@ export default function Home() {
       .filter(post => post.postDate >= timeAgo && !dismissedIds.includes(post.id))
       .sort((a, b) => b.reactions - a.reactions);
 
-    return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter]);
+    // Extract unique pages for the filter dropdown
+    const uniquePages = Array.from(
+      new Map(allPosts.map(post => [post.pageId, { id: post.pageId, name: post.pageName }])).values()
+    );
+    
+    return { livePosts: live, popularPosts: popular, availablePages: uniquePages };
+  }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter, livePageFilter]);
 
   // Detect new posts for animation
   useEffect(() => {
@@ -367,6 +385,42 @@ export default function Home() {
               </span>
               Live Posts
             </h2>
+            <div className="relative">
+              <button
+                onClick={() => setShowPageFilter(!showPageFilter)}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-primary hover:bg-primary/80 text-black shadow-lg shadow-primary/50 flex items-center gap-1"
+              >
+                {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showPageFilter && (
+                <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[120px]">
+                  <button
+                    onClick={() => {
+                      setLivePageFilter('all');
+                      setShowPageFilter(false);
+                    }}
+                    className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg ${livePageFilter === 'all' ? 'text-primary' : 'text-white/60'}`}
+                  >
+                    All
+                  </button>
+                  {availablePages.map((page) => (
+                    <button
+                      key={page.id}
+                      onClick={() => {
+                        setLivePageFilter(page.id);
+                        setShowPageFilter(false);
+                      }}
+                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors last:rounded-b-lg ${livePageFilter === page.id ? 'text-primary' : 'text-white/60'}`}
+                    >
+                      {page.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {/* Printer line - thin red line where new posts emerge from */}
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
@@ -417,14 +471,14 @@ export default function Home() {
                 onClick={() => setShowTimeFilter(!showTimeFilter)}
                 className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
               >
-                {popularTimeFilter}
+                {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {showTimeFilter && (
                 <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
-                  {(['30min', '2hr', '3hr', '6hr'] as const).map((time) => (
+                  {(['2hr', '6hr', 'today'] as const).map((time) => (
                     <button
                       key={time}
                       onClick={() => {
@@ -435,7 +489,7 @@ export default function Home() {
                         popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
                       }`}
                     >
-                      {time}
+                      {time === 'today' ? 'Today' : time}
                     </button>
                   ))}
                 </div>
@@ -470,8 +524,6 @@ export default function Home() {
                 <PostCard 
                   key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
                   post={post} 
-                  showDismiss={true}
-                  onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
                   rankingChange={rankingChange}
                   reactionIncrease={reactionIncrease}
                   indicatorAge={indicatorAge}
@@ -486,13 +538,51 @@ export default function Home() {
       <div className="md:hidden">
         {mobileView === 'live' ? (
           <div>
-            <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-              Live Posts
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                Live Posts
+              </h2>
+              <div className="relative">
+                <button
+                  onClick={() => setShowPageFilter(!showPageFilter)}
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-primary hover:bg-primary/80 text-black shadow-lg shadow-primary/50 flex items-center gap-1"
+                >
+                  {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showPageFilter && (
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[120px]">
+                    <button
+                      onClick={() => {
+                        setLivePageFilter('all');
+                        setShowPageFilter(false);
+                      }}
+                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg ${livePageFilter === 'all' ? 'text-primary' : 'text-white/60'}`}
+                    >
+                      All
+                    </button>
+                    {availablePages.map((page) => (
+                      <button
+                        key={page.id}
+                        onClick={() => {
+                          setLivePageFilter(page.id);
+                          setShowPageFilter(false);
+                        }}
+                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors last:rounded-b-lg ${livePageFilter === page.id ? 'text-primary' : 'text-white/60'}`}
+                      >
+                        {page.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             {/* Printer line - thin red line where new posts emerge from */}
             <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
@@ -557,8 +647,6 @@ export default function Home() {
                   <PostCard 
                     key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`} 
                     post={post} 
-                    showDismiss={true}
-                    onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
                     rankingChange={rankingChange}
                     reactionIncrease={reactionIncrease}
                   />
