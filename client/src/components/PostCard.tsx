@@ -1,7 +1,13 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, Download } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, Download, Upload } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { X } from "lucide-react";
 
 interface PostCardProps {
@@ -56,6 +62,52 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
       } catch (error) {
         toast.error("Failed to download image");
       }
+    }
+  };
+
+  const MANUS_CHATS = [
+    { name: "FootballFunnys", sessionId: "EUlhxwbdboxq5GamuZOfw4" },
+    { name: "FootyFeed", sessionId: "kcSypE0vgCTPKqXqLQWr7j" },
+    { name: "FAD", sessionId: "gwbHdSMCBnio6ozpKdD5tJ" },
+  ];
+
+  const handleUploadToManus = async (e: React.MouseEvent, chatName: string, sessionId: string) => {
+    e.stopPropagation();
+    if (!post.image) {
+      toast.error("No image to upload");
+      return;
+    }
+
+    try {
+      toast.loading(`Uploading to ${chatName}...`);
+      
+      // Fetch the image as a blob
+      const response = await fetch(post.image);
+      const blob = await response.blob();
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', blob, `post-${post.id}.jpg`);
+      
+      // Upload to Manus API
+      const uploadResponse = await fetch(`https://api.manus.im/v1/sessions/${sessionId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer sk-MUm0yHQbXecrVv56IYeLMx-UHEQcLM_s4AbJg3fkOZMaCxvaTMNEbEg0V2LVbYaoURDIwnZ7-TzYgnxSvSvOUHSwDxRr',
+        },
+        body: formData,
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+      
+      toast.dismiss();
+      toast.success(`Uploaded to ${chatName}!`);
+    } catch (error) {
+      toast.dismiss();
+      toast.error(`Failed to upload to ${chatName}`);
+      console.error('Manus upload error:', error);
     }
   };
 
@@ -134,17 +186,44 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
             <span className="text-gray-300 font-medium">{shares.toLocaleString()}</span>
           </div>
         </div>
-        {post.message && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-            onClick={handleCopyCaption}
-            title="Copy caption"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {post.image && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Upload to Manus"
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                {MANUS_CHATS.map((chat) => (
+                  <DropdownMenuItem
+                    key={chat.sessionId}
+                    onClick={(e) => handleUploadToManus(e, chat.name, chat.sessionId)}
+                  >
+                    {chat.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {post.message && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+              onClick={handleCopyCaption}
+              title="Copy caption"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Post Image */}
