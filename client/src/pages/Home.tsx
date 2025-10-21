@@ -1,9 +1,9 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -27,6 +27,10 @@ export default function Home() {
   const [previousReactionCounts, setPreviousReactionCounts] = useState<Map<string, number>>(new Map());
   const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
   const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
+  const [showLiveScrollTop, setShowLiveScrollTop] = useState(false);
+  const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
+  const liveScrollRef = useRef<HTMLDivElement>(null);
+  const popularScrollRef = useRef<HTMLDivElement>(null);
   
   const settingsQuery = trpc.settings.get.useQuery();
   const pagesQuery = trpc.pages.list.useQuery();
@@ -237,6 +241,38 @@ export default function Home() {
     }
   }, [livePosts]);
 
+  // Handle scroll to top button visibility
+  useEffect(() => {
+    const handleLiveScroll = () => {
+      if (liveScrollRef.current) {
+        setShowLiveScrollTop(liveScrollRef.current.scrollTop > 300);
+      }
+    };
+
+    const handlePopularScroll = () => {
+      if (popularScrollRef.current) {
+        setShowPopularScrollTop(popularScrollRef.current.scrollTop > 300);
+      }
+    };
+
+    const liveEl = liveScrollRef.current;
+    const popularEl = popularScrollRef.current;
+
+    if (liveEl) liveEl.addEventListener('scroll', handleLiveScroll);
+    if (popularEl) popularEl.addEventListener('scroll', handlePopularScroll);
+
+    return () => {
+      if (liveEl) liveEl.removeEventListener('scroll', handleLiveScroll);
+      if (popularEl) popularEl.removeEventListener('scroll', handlePopularScroll);
+    };
+  }, []);
+
+  const scrollToTop = (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (ref.current) {
+      ref.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Track popular posts rankings for trending indicators
   useEffect(() => {
     if (popularPosts.length > 0) {
@@ -439,7 +475,7 @@ export default function Home() {
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar">
+          <div ref={liveScrollRef} className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -469,6 +505,15 @@ export default function Home() {
                 </div>
               );
             })}
+            {showLiveScrollTop && (
+              <button
+                onClick={() => scrollToTop(liveScrollRef)}
+                className="fixed bottom-6 left-1/4 p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/50 transition-all z-50"
+                aria-label="Scroll to top"
+              >
+                <ArrowUp className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -513,7 +558,7 @@ export default function Home() {
           {/* Green separator line */}
           <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
           
-          <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
+          <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -541,6 +586,15 @@ export default function Home() {
                 />
               );
             })}
+            {showPopularScrollTop && (
+              <button
+                onClick={() => scrollToTop(popularScrollRef)}
+                className="fixed bottom-6 right-6 p-3 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 transition-all z-50"
+                aria-label="Scroll to top"
+              >
+                <ArrowUp className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
