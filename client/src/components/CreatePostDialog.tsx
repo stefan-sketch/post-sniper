@@ -50,7 +50,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [overlayText, setOverlayText] = useState("");
   const [fontSize, setFontSize] = useState(48);
   const [useGradient, setUseGradient] = useState(false);
+  const [textPosition, setTextPosition] = useState({ x: 50, y: 85 }); // percentage from top-left
+  const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
+  const [isDraggingText, setIsDraggingText] = useState(false);
+  const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
@@ -98,7 +103,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   };
 
   const applyWatermark = useCallback(
-    async (imageData: string, watermarkPath: string): Promise<string> => {
+    async (imageData: string, watermarkPath: string, position = watermarkPosition): Promise<string> => {
       return new Promise((resolve, reject) => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -116,13 +121,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           // Load and apply watermark
           const watermark = new Image();
           watermark.onload = () => {
-            // Calculate watermark size (20% of image width, maintain aspect ratio)
-            const watermarkWidth = img.width * 0.2;
+            // Calculate watermark size (15% of image width, maintain aspect ratio)
+            const watermarkWidth = img.width * 0.15;
             const watermarkHeight = (watermark.height / watermark.width) * watermarkWidth;
 
-            // Position in top-right corner with 2% padding
-            const x = img.width - watermarkWidth - img.width * 0.02;
-            const y = img.height * 0.02;
+            // Use draggable position (percentage-based)
+            const x = (watermarkPosition.x / 100) * img.width - watermarkWidth / 2;
+            const y = (watermarkPosition.y / 100) * img.height - watermarkHeight / 2;
 
             ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
             resolve(canvas.toDataURL("image/png"));
@@ -134,7 +139,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         img.src = imageData;
       });
     },
-    []
+    [watermarkPosition]
   );
 
   const getCroppedImage = useCallback(async (): Promise<string | null> => {
@@ -178,20 +183,23 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     if (overlayText.trim()) {
       ctx.font = `bold ${fontSize}px Impact, 'Arial Black', sans-serif`;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
+      ctx.textBaseline = 'middle';
+      
+      const textX = (textPosition.x / 100) * canvas.width;
+      const textY = (textPosition.y / 100) * canvas.height;
       
       // Add black stroke for outline effect
       ctx.strokeStyle = 'black';
       ctx.lineWidth = fontSize * 0.1;
-      ctx.strokeText(overlayText, canvas.width / 2, canvas.height - 40);
+      ctx.strokeText(overlayText, textX, textY);
       
       // Add white fill
       ctx.fillStyle = 'white';
-      ctx.fillText(overlayText, canvas.width / 2, canvas.height - 40);
+      ctx.fillText(overlayText, textX, textY);
     }
 
     return canvas.toDataURL("image/png");
-  }, [completedCrop, image, useGradient, overlayText, fontSize]);
+  }, [completedCrop, image, useGradient, overlayText, fontSize, textPosition, watermarkPosition]);
 
   const handlePost = async () => {
     if (!image) {
@@ -334,7 +342,31 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="relative flex justify-center">
+                <div 
+                  ref={containerRef}
+                  className="relative flex justify-center"
+                  onMouseMove={(e) => {
+                    if (!containerRef.current) return;
+                    const rect = containerRef.current.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    if (isDraggingText) {
+                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                    if (isDraggingWatermark) {
+                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                  }}
+                  onMouseUp={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                  onMouseLeave={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                >
                   <ReactCrop
                     crop={crop}
                     onChange={(c) => setCrop(c)}
@@ -355,6 +387,63 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   </ReactCrop>
 
+                  {/* Gradient Overlay Preview */}
+                  {useGradient && imgRef.current && (
+                    <div 
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: imgRef.current.clientWidth,
+                        height: imgRef.current.clientHeight,
+                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 67%, rgba(0,0,0,0.7) 100%)',
+                      }}
+                    />
+                  )}
+
+                  {/* Text Overlay Preview */}
+                  {overlayText && imgRef.current && (
+                    <div
+                      className="absolute cursor-move select-none"
+                      style={{
+                        left: `calc(50% + ${(textPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                        top: `calc(50% + ${(textPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                        transform: 'translate(-50%, -50%)',
+                        fontSize: `${fontSize * (imgRef.current.clientWidth / 800)}px`,
+                        fontFamily: 'Impact, "Arial Black", sans-serif',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: `
+                          -${fontSize * 0.05}px -${fontSize * 0.05}px 0 black,
+                          ${fontSize * 0.05}px -${fontSize * 0.05}px 0 black,
+                          -${fontSize * 0.05}px ${fontSize * 0.05}px 0 black,
+                          ${fontSize * 0.05}px ${fontSize * 0.05}px 0 black
+                        `,
+                        whiteSpace: 'nowrap',
+                      }}
+                      onMouseDown={() => setIsDraggingText(true)}
+                    >
+                      {overlayText}
+                    </div>
+                  )}
+
+                  {/* Watermark Preview */}
+                  {useWatermark && selectedPages.length === 1 && imgRef.current && (
+                    <img
+                      src={PAGES.find(p => p.id === selectedPages[0])?.watermark}
+                      alt="Watermark"
+                      className="absolute cursor-move select-none"
+                      style={{
+                        left: `calc(50% + ${(watermarkPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                        top: `calc(50% + ${(watermarkPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                        transform: 'translate(-50%, -50%)',
+                        width: imgRef.current.clientWidth * 0.15,
+                        height: 'auto',
+                      }}
+                      onMouseDown={() => setIsDraggingWatermark(true)}
+                    />
+                  )}
                 </div>
                 <Button
                   variant="outline"
