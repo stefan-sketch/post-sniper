@@ -7,6 +7,7 @@ import * as db from "./db";
 import { nanoid } from "nanoid";
 import { cachedPostsRouter } from "./routers/cachedPosts";
 import { manualFetchRouter } from "./routers/manualFetch";
+import { publerRouter } from "./routers/publer";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -15,6 +16,7 @@ export const appRouter = router({
   system: systemRouter,
   cachedPosts: cachedPostsRouter,
   manualFetch: manualFetchRouter,
+  publer: publerRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

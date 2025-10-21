@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
+import { CreatePostDialog } from "@/components/CreatePostDialog";
 
 export default function Home() {
   // No authentication required - public access
@@ -15,6 +16,7 @@ export default function Home() {
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
@@ -382,6 +384,14 @@ export default function Home() {
                   {unreadCountQuery.data}
                 </span>
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowCreatePost(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             <Button
               variant="ghost"
@@ -766,6 +776,7 @@ export default function Home() {
         isFetching={manualFetchMutation.isPending}
       />
       <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
+      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} />
     </div>
   );
 }
