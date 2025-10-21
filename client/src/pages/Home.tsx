@@ -164,6 +164,7 @@ export default function Home() {
       link: post.link,
       postDate: new Date(post.postDate),
       reactions: post.reactions || 0,
+      previousReactions: post.previousReactions || 0,
       kpi: {
         page_posts_comments_count: { value: post.comments || 0 },
         page_posts_shares_count: { value: post.shares || 0 },
@@ -384,8 +385,9 @@ export default function Home() {
             )}
             {livePosts.map((post) => {
               const isNew = newPostIds.has(post.id);
-              const previousReactions = previousReactionCounts.get(post.id);
-              const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+              const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
+                ? post.reactions - post.previousReactions 
+                : undefined;
               const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
               
               return (
@@ -406,14 +408,14 @@ export default function Home() {
         {/* Popular Posts Column */}
         <div>
           <div className="flex items-center justify-center gap-3 mb-3">
-            <TrendingUp className="h-5 w-5 text-green-400" />
+            <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
             <h2 className="text-lg font-semibold text-green-400">
               Popular Posts
             </h2>
             <div className="relative">
               <button
                 onClick={() => setShowTimeFilter(!showTimeFilter)}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-secondary text-white shadow-lg shadow-secondary/50 flex items-center gap-1"
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
               >
                 {popularTimeFilter}
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -459,8 +461,9 @@ export default function Home() {
               const currentRank = index + 1;
               const previousRank = previousPopularRankings.get(post.id);
               const rankingChange = previousRank ? previousRank - currentRank : undefined;
-              const previousReactions = previousReactionCounts.get(post.id);
-              const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+              const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
+                ? post.reactions - post.previousReactions 
+                : undefined;
               const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
               
               return (
@@ -507,8 +510,9 @@ export default function Home() {
               )}
               {livePosts.map((post) => {
                 const isNew = newPostIds.has(post.id);
-                const previousReactions = previousReactionCounts.get(post.id);
-                const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+                const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
+                  ? post.reactions - post.previousReactions 
+                  : undefined;
                 
                 return (
                   <div
@@ -545,8 +549,9 @@ export default function Home() {
                 const currentRank = index + 1;
                 const previousRank = previousPopularRankings.get(post.id);
                 const rankingChange = previousRank ? previousRank - currentRank : undefined;
-                const previousReactions = previousReactionCounts.get(post.id);
-                const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+                const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
+                  ? post.reactions - post.previousReactions 
+                  : undefined;
                 
                 return (
                   <PostCard 

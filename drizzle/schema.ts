@@ -97,6 +97,7 @@ export const cachedPosts = pgTable("cached_posts", {
   link: text("link"),
   postDate: timestamp("postDate").notNull(),
   reactions: integer("reactions").default(0),
+  previousReactions: integer("previousReactions").default(0),
   comments: integer("comments").default(0),
   shares: integer("shares").default(0),
   alertThreshold: integer("alertThreshold"),

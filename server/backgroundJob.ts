@@ -181,13 +181,23 @@ export class BackgroundJobService {
               updatedAt: new Date(),
             };
 
-            // Upsert cached post
+            // Get existing post to track previous reactions
+            const existingPost = await db
+              .select()
+              .from(cachedPosts)
+              .where(eq(cachedPosts.id, cachedPost.id))
+              .limit(1);
+            
+            const previousReactions = existingPost[0]?.reactions || cachedPost.reactions;
+
+            // Upsert cached post with previousReactions tracking
             await db
               .insert(cachedPosts)
-              .values(cachedPost)
+              .values({ ...cachedPost, previousReactions })
               .onConflictDoUpdate({
                 target: cachedPosts.id,
                 set: {
+                  previousReactions: previousReactions,
                   reactions: cachedPost.reactions,
                   comments: cachedPost.comments,
                   shares: cachedPost.shares,
