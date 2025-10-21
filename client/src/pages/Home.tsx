@@ -397,19 +397,17 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <div className="mb-3">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <TrendingUp className="h-5 w-5 text-secondary" />
-              <h2 className="text-lg font-semibold text-secondary">
-                Popular Posts
-              </h2>
-            </div>
-            <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <TrendingUp className="h-5 w-5 text-secondary" />
+            <h2 className="text-lg font-semibold text-secondary">
+              Popular Posts
+            </h2>
+            <div className="flex items-center gap-2">
               {(['30min', '2hr', '3hr', '6hr'] as const).map((time) => (
                 <button
                   key={time}
                   onClick={() => setPopularTimeFilter(time)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                     popularTimeFilter === time
                       ? 'bg-secondary text-white shadow-lg shadow-secondary/50'
                       : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
