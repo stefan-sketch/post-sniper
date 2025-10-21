@@ -309,9 +309,8 @@ export default function Home() {
               <img 
                 src="/logo.png" 
                 alt="SDL Media" 
-                className="h-8 w-8 md:h-10 md:w-10 rounded-lg object-contain"
+                className="h-12 w-12 md:h-14 md:w-14 rounded-lg object-contain"
               />
-              <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
           </div>
                 <div className="flex items-center gap-2">
