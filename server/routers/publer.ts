@@ -105,8 +105,8 @@ export const publerRouter = router({
           },
         };
 
-        // Post to Publer
-        const response = await fetch("https://app.publer.com/api/v1/posts", {
+        // Post to Publer (immediate publish endpoint)
+        const response = await fetch("https://app.publer.com/api/v1/posts/schedule/publish", {
           method: "POST",
           headers: {
             "Authorization": `Bearer-API ${PUBLER_API_KEY}`,
@@ -122,9 +122,32 @@ export const publerRouter = router({
         }
 
         const data = await response.json();
+        
+        // Publer returns a job_id that we need to poll for status
+        const jobId = data.data?.job_id || data.job_id;
+        
+        if (!jobId) {
+          throw new Error("No job ID returned from Publer");
+        }
+
+        // Poll job status (simplified - wait a bit then check)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const statusResponse = await fetch(`https://app.publer.com/api/v1/job_status/${jobId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer-API ${PUBLER_API_KEY}`,
+            "Publer-Workspace-Id": PUBLER_WORKSPACE_ID,
+          },
+        });
+        
+        const statusData = await statusResponse.json();
+        
         return {
           success: true,
-          postIds: data.posts || [],
+          jobId,
+          status: statusData.data?.status || statusData.status,
+          result: statusData.data?.result || statusData,
         };
       } catch (error: any) {
         console.error("Publer post error:", error);
