@@ -184,7 +184,6 @@ export default function Home() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="SDL MEDIA" className="w-8 h-8 md:w-10 md:h-10" />
               <h1 className="text-lg md:text-xl font-bold">SDL MEDIA</h1>
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
