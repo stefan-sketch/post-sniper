@@ -132,6 +132,9 @@ export class BackgroundJobService {
         return;
       }
 
+      // Collect all fetched posts to calculate hash BEFORE caching
+      const allFetchedPosts: any[] = [];
+
       // Fetch posts for each page
       for (const page of pages) {
         try {
@@ -139,6 +142,9 @@ export class BackgroundJobService {
             page.profileId,
             apiToken
           );
+
+          // Store posts for hash calculation
+          allFetchedPosts.push(...posts);
 
           // Cache each post
           for (const post of posts) {
@@ -211,17 +217,16 @@ export class BackgroundJobService {
         }
       }
 
+      // Calculate hash of FETCHED data to detect changes
+      // We'll hash the total reactions count to detect if metrics changed
+      const dataHash = this.calculateDataHash(allFetchedPosts);
+      
       // Update lastFetchedAt
       const { upsertUserSettings } = await import("./db");
       await upsertUserSettings({
         userId: PUBLIC_USER_ID,
         lastFetchedAt: new Date(),
       });
-
-      // Calculate hash of fetched data to detect changes
-      // We'll hash the total reactions count to detect if metrics changed
-      const allCachedPosts = await db.select().from(cachedPosts);
-      const dataHash = this.calculateDataHash(allCachedPosts);
       
       // Check if data actually changed
       const dataChanged = !previousHash || dataHash !== previousHash;
@@ -290,9 +295,19 @@ export class BackgroundJobService {
    */
   private calculateDataHash(posts: any[]): string {
     // Sum all metrics to create a signature of the current data state
-    const totalReactions = posts.reduce((sum, p) => sum + (p.reactions || 0), 0);
-    const totalComments = posts.reduce((sum, p) => sum + (p.comments || 0), 0);
-    const totalShares = posts.reduce((sum, p) => sum + (p.shares || 0), 0);
+    // Handle both API format (kpi.page_posts_reactions.value) and cached format (reactions)
+    const totalReactions = posts.reduce((sum, p) => {
+      const reactions = p.reactions ?? p.kpi?.page_posts_reactions?.value ?? 0;
+      return sum + reactions;
+    }, 0);
+    const totalComments = posts.reduce((sum, p) => {
+      const comments = p.comments ?? p.kpi?.page_posts_comments_count?.value ?? 0;
+      return sum + comments;
+    }, 0);
+    const totalShares = posts.reduce((sum, p) => {
+      const shares = p.shares ?? p.kpi?.page_posts_shares_count?.value ?? 0;
+      return sum + shares;
+    }, 0);
     
     const hashData = `${totalReactions}:${totalComments}:${totalShares}`;
     return crypto.createHash('md5').update(hashData).digest('hex');
