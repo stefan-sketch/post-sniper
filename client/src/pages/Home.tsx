@@ -20,6 +20,7 @@ export default function Home() {
   const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('6hr');
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
+  const [isFetching, setIsFetching] = useState(false);
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -64,7 +65,7 @@ export default function Home() {
       return;
     }
 
-    const interval = settingsQuery.data?.refreshInterval || 600;
+    const interval = settingsQuery.data?.refreshInterval || 300; // 5 minutes = 300 seconds
     const lastFetched = settingsQuery.data?.lastFetchedAt;
 
     const calculateRemainingTime = () => {
@@ -87,6 +88,12 @@ export default function Home() {
     const countdown = setInterval(() => {
       const remaining = calculateRemainingTime();
       setTimer(remaining);
+      
+      // Show "Fetching Data" when timer hits 0 and for 10 seconds after
+      if (remaining === 0) {
+        setIsFetching(true);
+        setTimeout(() => setIsFetching(false), 10000); // Show for 10 seconds
+      }
     }, 1000);
 
     return () => clearInterval(countdown);
@@ -208,7 +215,7 @@ export default function Home() {
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
-    <div className="min-h-screen w-full md:w-[770px] md:mx-auto px-2 md:px-0">
+    <div className="min-h-screen w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4">
       {/* Header */}
       <header className="glass-card p-2 md:p-3 mb-4 rounded-xl">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -217,7 +224,11 @@ export default function Home() {
               <h1 className="text-lg md:text-xl font-bold">SDL MEDIA</h1>
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
-            {postsQuery.data?.lastFetchedAt && (
+            {isFetching ? (
+              <span className="text-xs md:text-sm text-green-400 font-semibold hidden sm:inline animate-pulse">
+                Fetching Data...
+              </span>
+            ) : postsQuery.data?.lastFetchedAt && (
               <span className="text-xs md:text-sm text-white/60 hidden sm:inline">
                 Last updated: {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
               </span>

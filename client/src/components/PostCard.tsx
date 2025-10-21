@@ -139,7 +139,17 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
           </div>
         </div>
         <div className="flex items-center gap-1">
-
+          {post.image && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+              onClick={handleDownloadImage}
+              title="Download image"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
           {post.message && (
             <Button
               size="sm"
