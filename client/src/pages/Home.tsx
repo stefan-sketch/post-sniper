@@ -221,7 +221,20 @@ export default function Home() {
       
       // Only update if we have previous rankings to compare
       if (previousPopularRankings.size > 0) {
-        setPreviousPopularRankings(currentRankings);
+        // Check if rankings actually changed
+        let hasChanges = false;
+        currentRankings.forEach((rank, id) => {
+          if (previousPopularRankings.get(id) !== rank) {
+            hasChanges = true;
+          }
+        });
+        // Only update if there were actual changes
+        if (hasChanges) {
+          // Wait before updating to show the changes
+          setTimeout(() => {
+            setPreviousPopularRankings(currentRankings);
+          }, 10000); // Keep showing changes for 10 seconds
+        }
       } else {
         // First load, just store rankings without showing changes
         setPreviousPopularRankings(currentRankings);
@@ -237,9 +250,22 @@ export default function Home() {
         currentReactions.set(post.id, post.reactions || 0);
       });
       
-      // Only update if we have previous data to compare
+      // Only update previous counts if they're different (data actually changed)
       if (previousReactionCounts.size > 0) {
-        setPreviousReactionCounts(currentReactions);
+        // Check if any values actually changed
+        let hasChanges = false;
+        currentReactions.forEach((count, id) => {
+          if (previousReactionCounts.get(id) !== count) {
+            hasChanges = true;
+          }
+        });
+        // Only update if there were actual changes
+        if (hasChanges) {
+          // Wait a bit before updating to allow UI to show the changes
+          setTimeout(() => {
+            setPreviousReactionCounts(currentReactions);
+          }, 10000); // Keep showing changes for 10 seconds
+        }
       } else {
         // First load, just store counts without showing changes
         setPreviousReactionCounts(currentReactions);
