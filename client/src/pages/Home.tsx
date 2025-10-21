@@ -623,10 +623,41 @@ export default function Home() {
           </div>
         ) : (
           <div>
-            <h2 className="text-lg font-semibold mb-3 text-secondary text-center flex items-center justify-center gap-2">
-              <TrendingUp className="h-5 w-5 text-secondary" />
-              Popular Posts
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
+              <h2 className="text-lg font-semibold text-green-400">
+                Popular Posts
+              </h2>
+              <div className="relative">
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
+                >
+                  {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTimeFilter && (
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                    {(['2hr', '6hr', 'today'] as const).map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          setPopularTimeFilter(time);
+                          setShowTimeFilter(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                          popularTimeFilter === time ? 'bg-green-500/20 text-green-400' : 'text-white'
+                        }`}
+                      >
+                        {time === 'today' ? 'Today' : time}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="space-y-3">
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
