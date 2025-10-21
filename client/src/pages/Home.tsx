@@ -18,6 +18,8 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('6hr');
+  const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
+  const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -175,6 +177,31 @@ export default function Home() {
     return { livePosts: live, popularPosts: popular };
   }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter]);
 
+  // Detect new posts for animation
+  useEffect(() => {
+    if (livePosts.length > 0) {
+      const currentPostIds = new Set(livePosts.map(p => p.id));
+      
+      // Find new posts that weren't in the previous set
+      const newIds = new Set<string>();
+      currentPostIds.forEach(id => {
+        if (!previousPostIds.has(id)) {
+          newIds.add(id);
+        }
+      });
+      
+      if (newIds.size > 0) {
+        setNewPostIds(newIds);
+        // Remove animation after 2 seconds
+        setTimeout(() => {
+          setNewPostIds(new Set());
+        }, 2000);
+      }
+      
+      setPreviousPostIds(currentPostIds);
+    }
+  }, [livePosts]);
+
   // No authentication required - removed loading and login screens
 
   // API status based on postsQuery success/error
@@ -278,7 +305,11 @@ export default function Home() {
             </span>
             Live Posts
           </h2>
-          <div className="space-y-3">
+          {/* Printer line - thin red line where new posts emerge from */}
+          <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
+          </div>
+          <div className="space-y-3 relative">
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -289,9 +320,20 @@ export default function Home() {
                 <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
               </div>
             )}
-            {livePosts.map((post) => (
-              <PostCard key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}`} post={post} />
-            ))}
+            {livePosts.map((post) => {
+              const isNew = newPostIds.has(post.id);
+              return (
+                <div
+                  key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}`}
+                  className={isNew ? 'animate-slideIn' : ''}
+                  style={{
+                    animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+                  }}
+                >
+                  <PostCard post={post} />
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -348,7 +390,11 @@ export default function Home() {
               </span>
               Live Posts
             </h2>
-            <div className="space-y-3">
+            {/* Printer line - thin red line where new posts emerge from */}
+            <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
+            </div>
+            <div className="space-y-3 relative">
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading posts...</p>
@@ -359,9 +405,20 @@ export default function Home() {
                   <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
                 </div>
               )}
-              {livePosts.map((post) => (
-                <PostCard key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile`} post={post} />
-              ))}
+              {livePosts.map((post) => {
+                const isNew = newPostIds.has(post.id);
+                return (
+                  <div
+                    key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile`}
+                    className={isNew ? 'animate-slideIn' : ''}
+                    style={{
+                      animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+                    }}
+                  >
+                    <PostCard post={post} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (
