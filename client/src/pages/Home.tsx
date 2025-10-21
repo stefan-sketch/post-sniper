@@ -18,6 +18,7 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('2hr');
+  const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
@@ -288,15 +289,6 @@ export default function Home() {
               <h1 className="text-lg md:text-xl font-bold">SDL MEDIA</h1>
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
-            {postsQuery.isFetching ? (
-              <span className="text-xs md:text-sm text-green-400 font-semibold hidden sm:inline animate-pulse">
-                Fetching Data...
-              </span>
-            ) : postsQuery.data?.lastFetchedAt && (
-              <span className="text-xs md:text-sm text-white/60 hidden sm:inline">
-                Last updated: {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-2 md:gap-3">
             <Button
@@ -353,13 +345,24 @@ export default function Home() {
       <div className="hidden md:grid grid-cols-2 gap-6">
         {/* Live Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-primary text-center flex items-center justify-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
-            Live Posts
-          </h2>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              Live Posts
+            </h2>
+            {postsQuery.isFetching ? (
+              <span className="text-xs text-green-400 font-semibold animate-pulse">
+                Fetching Data...
+              </span>
+            ) : postsQuery.data?.lastFetchedAt && (
+              <span className="text-xs text-white/60">
+                {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
+              </span>
+            )}
+          </div>
           {/* Printer line - thin red line where new posts emerge from */}
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
@@ -402,20 +405,34 @@ export default function Home() {
             <h2 className="text-lg font-semibold text-secondary">
               Popular Posts
             </h2>
-            <div className="flex items-center gap-2">
-              {(['30min', '2hr', '3hr', '6hr'] as const).map((time) => (
-                <button
-                  key={time}
-                  onClick={() => setPopularTimeFilter(time)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                    popularTimeFilter === time
-                      ? 'bg-secondary text-white shadow-lg shadow-secondary/50'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
+            <div className="relative">
+              <button
+                onClick={() => setShowTimeFilter(!showTimeFilter)}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-secondary text-white shadow-lg shadow-secondary/50 flex items-center gap-1"
+              >
+                {popularTimeFilter}
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showTimeFilter && (
+                <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                  {(['30min', '2hr', '3hr', '6hr'] as const).map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => {
+                        setPopularTimeFilter(time);
+                        setShowTimeFilter(false);
+                      }}
+                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                        popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           
