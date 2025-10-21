@@ -1,75 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1760983371888,
-      "tag": "0000_heavy_ink",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1760983442187,
-      "tag": "0001_chunky_synch",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1760984313849,
-      "tag": "0002_rapid_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1760984964227,
-      "tag": "0003_mean_the_watchers",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1760986222458,
-      "tag": "0004_groovy_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1760987674933,
-      "tag": "0005_tricky_nick_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1760988028905,
-      "tag": "0006_mysterious_zombie",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1760988387197,
-      "tag": "0007_famous_dreadnoughts",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1760990309163,
-      "tag": "0008_chemical_ricochet",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1760990535637,
-      "tag": "0009_messy_red_wolf",
+      "version": "7",
+      "when": 1761050766450,
+      "tag": "0000_busy_molten_man",
       "breakpoints": true
     }
   ]

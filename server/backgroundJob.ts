@@ -36,11 +36,11 @@ export class BackgroundJobService {
       await this.fetchAndCachePosts();
     }
 
-    // Schedule to run every 5 minutes using cron expression
-    // Cron expression: "*/5 * * * *" = every 5 minutes
-    console.log("[BackgroundJob] Setting up cron job to run every 5 minutes");
+    // Schedule to run every 3 minutes using cron expression
+    // Cron expression: "*/3 * * * *" = every 3 minutes
+    console.log("[BackgroundJob] Setting up cron job to run every 3 minutes");
     
-    this.cronTask = cron.schedule("*/5 * * * *", async () => {
+    this.cronTask = cron.schedule("*/3 * * * *", async () => {
       // Check if monitoring is enabled before running
       const currentSettings = await getUserSettings(PUBLIC_USER_ID);
       const shouldRun = currentSettings?.isPlaying ?? false;
@@ -226,10 +226,11 @@ export class BackgroundJobService {
       // We'll hash the total reactions count to detect if metrics changed
       const dataHash = this.calculateDataHash(allFetchedPosts);
       
-      // Update lastFetchedAt
+      // Update lastFetchedAt and set API status to success
       await upsertUserSettings({
         userId: PUBLIC_USER_ID,
         lastFetchedAt: new Date(),
+        lastAPIStatus: "success",
       });
       
       // Check if data actually changed
@@ -264,6 +265,8 @@ export class BackgroundJobService {
       // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
     } catch (error) {
       console.error("[BackgroundJob] Error in fetchAndCachePosts:", error);
+      // Set API status to error
+      await upsertUserSettings({ userId: PUBLIC_USER_ID, lastAPIStatus: "error" });
       // Set isFetchingFromAPI to false even on error
       // TEMPORARILY DISABLED until migration runs
       // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
@@ -271,10 +274,10 @@ export class BackgroundJobService {
   }
 
   private async fetchPostsForPage(profileId: string, apiToken: string) {
-    // Calculate date range (last 24 hours)
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
+    // Calculate date range (only today in UK timezone)
+    // UK timezone is Europe/London (GMT/BST)
+    const nowUK = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    
     const formatDate = (date: Date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -282,8 +285,9 @@ export class BackgroundJobService {
       return `${year}-${month}-${day}`;
     };
 
-    const startDate = formatDate(yesterday);
-    const endDate = formatDate(now);
+    // Start of today in UK time
+    const startDate = formatDate(nowUK);
+    const endDate = formatDate(nowUK);
     const period = `${startDate}_${endDate}`;
 
     // Use the correct Fanpage Karma API endpoint (same as original working code)

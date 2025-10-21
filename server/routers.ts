@@ -85,6 +85,7 @@ export const appRouter = router({
           useMockData: false,
           isPlaying: false,
           lastFetchedAt: null,
+          lastAPIStatus: "success",
           dismissedPosts: null,
         };
       }

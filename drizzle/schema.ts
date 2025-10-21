@@ -51,6 +51,7 @@ export const userSettings = pgTable("user_settings", {
   // TEMPORARILY REMOVED - will add back after proper migration
   // isFetchingFromAPI: boolean("isFetchingFromAPI").default(false), // Track if currently fetching from Fanpage Karma API
   lastFetchedAt: timestamp("lastFetchedAt"), // Track when posts were last fetched
+  lastAPIStatus: text("lastAPIStatus").default("success"), // Track last API call status: 'success' or 'error'
   lastDataHash: text("lastDataHash"), // Hash of last API response to detect changes
   apiSyncOffset: integer("apiSyncOffset").default(0), // Learned offset in seconds to sync with API updates
   dismissedPosts: text("dismissedPosts"), // JSON array of dismissed post IDs

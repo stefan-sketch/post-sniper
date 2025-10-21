@@ -1,1 +1,0 @@
-ALTER TABLE `user_settings` ADD `isPlaying` boolean DEFAULT false;

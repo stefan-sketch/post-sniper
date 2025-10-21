@@ -69,7 +69,7 @@ export default function Home() {
       return;
     }
 
-    const interval = settingsQuery.data?.refreshInterval || 300; // 5 minutes = 300 seconds
+    const interval = settingsQuery.data?.refreshInterval || 180; // 3 minutes = 180 seconds
     const lastFetched = settingsQuery.data?.lastFetchedAt;
 
     const calculateRemainingTime = () => {
@@ -291,7 +291,19 @@ export default function Home() {
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
+                <div className="flex items-center gap-2">
+            {/* API Status Indicator */}
+            <div className="relative flex h-3 w-3 mr-1" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
+              {settingsQuery.data?.lastAPIStatus === "success" ? (
+                <>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </>
+              ) : (
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              )}
+            </div>
+            
             <Button
               variant="ghost"
               size="icon"
@@ -354,15 +366,6 @@ export default function Home() {
               </span>
               Live Posts
             </h2>
-            {false ? ( // TEMPORARILY DISABLED: settingsQuery.data?.isFetchingFromAPI
-              <span className="text-xs text-green-400 font-semibold animate-pulse">
-                Fetching Data...
-              </span>
-            ) : postsQuery.data?.lastFetchedAt && (
-              <span className="text-xs text-white/60">
-                {minutesSinceUpdate === 0 ? 'just now' : `${minutesSinceUpdate}m ago`}
-              </span>
-            )}
           </div>
           {/* Printer line - thin red line where new posts emerge from */}
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
