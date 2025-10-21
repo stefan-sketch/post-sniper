@@ -36,11 +36,11 @@ export class BackgroundJobService {
       await this.fetchAndCachePosts();
     }
 
-    // Schedule to run every 10 minutes using cron expression
-    // Cron expression: "*/10 * * * *" = every 10 minutes
-    console.log("[BackgroundJob] Setting up cron job to run every 10 minutes");
+    // Schedule to run every 5 minutes using cron expression
+    // Cron expression: "*/5 * * * *" = every 5 minutes
+    console.log("[BackgroundJob] Setting up cron job to run every 5 minutes");
     
-    this.cronTask = cron.schedule("*/10 * * * *", async () => {
+    this.cronTask = cron.schedule("*/5 * * * *", async () => {
       // Check if monitoring is enabled before running
       const currentSettings = await getUserSettings(PUBLIC_USER_ID);
       const shouldRun = currentSettings?.isPlaying ?? false;
@@ -235,8 +235,8 @@ export class BackgroundJobService {
         console.log("[BackgroundJob] ⚠️  Data unchanged - Fanpage Karma hasn't updated yet");
         console.log("[BackgroundJob] Adjusting next poll time by +2 minutes to sync with API updates");
         
-        // Adjust offset to poll 2 minutes later next time
-        const newOffset = (currentOffset + 120) % 600; // Keep within 10-minute window
+        // Adjust offset to poll 1 minute later next time
+        const newOffset = (currentOffset + 60) % 300; // Keep within 5-minute window
         await upsertUserSettings({
           userId: PUBLIC_USER_ID,
           apiSyncOffset: newOffset,

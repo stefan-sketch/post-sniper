@@ -45,6 +45,9 @@ export default function Home() {
   // Use cached posts from server (fetched by background job)
   const postsQuery = trpc.cachedPosts.getAll.useQuery(undefined, {
     refetchInterval: 5000, // Poll every 5 seconds to get latest cached data
+    staleTime: 0, // Always consider data stale to ensure fresh updates
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
   const unreadCountQuery = trpc.alerts.unreadCount.useQuery(undefined, {
     refetchInterval: 30000, // Check every 30 seconds
