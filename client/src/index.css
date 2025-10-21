@@ -234,3 +234,59 @@
   animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+
+/* Enhanced react-image-crop styling */
+.ReactCrop {
+  position: relative;
+  display: inline-block;
+  cursor: crosshair;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.ReactCrop__crop-selection {
+  border: 2px solid rgba(6, 182, 212, 0.8) !important;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ReactCrop__drag-handle {
+  width: 12px !important;
+  height: 12px !important;
+  background-color: #06b6d4 !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ReactCrop__drag-handle:hover {
+  transform: scale(1.3);
+  background-color: #0891b2 !important;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.5);
+}
+
+.ReactCrop__drag-bar {
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ReactCrop__drag-bar:hover {
+  opacity: 0.8;
+}
+
+/* Smooth fade-in for crop area */
+@keyframes cropFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ReactCrop__crop-selection {
+  animation: cropFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

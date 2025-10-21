@@ -39,7 +39,7 @@ export const publerRouter = router({
         const response = await fetch("https://app.publer.com/api/v1/media", {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${PUBLER_API_KEY}`,
+            "Authorization": `Bearer-API ${PUBLER_API_KEY}`,
             "Publer-Workspace-Id": PUBLER_WORKSPACE_ID,
             ...form.getHeaders(),
           },
@@ -109,7 +109,7 @@ export const publerRouter = router({
         const response = await fetch("https://app.publer.com/api/v1/posts", {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${PUBLER_API_KEY}`,
+            "Authorization": `Bearer-API ${PUBLER_API_KEY}`,
             "Publer-Workspace-Id": PUBLER_WORKSPACE_ID,
             "Content-Type": "application/json",
           },

@@ -40,7 +40,14 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setCrop(undefined);
+        // Start with full image selected
+        setCrop({
+          unit: '%',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+        });
         setCompletedCrop(undefined);
       };
       reader.readAsDataURL(file);
@@ -54,7 +61,14 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setCrop(undefined);
+        // Start with full image selected
+        setCrop({
+          unit: '%',
+          x: 0,
+          y: 0,
+          width: 100,
+          height: 100,
+        });
         setCompletedCrop(undefined);
       };
       reader.readAsDataURL(file);
@@ -278,8 +292,19 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
                     className="max-h-96"
+                    style={{
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
                   >
-                    <img ref={imgRef} src={image} alt="Upload" className="max-w-full" />
+                    <img 
+                      ref={imgRef} 
+                      src={image} 
+                      alt="Upload" 
+                      className="max-w-full"
+                      style={{
+                        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      }}
+                    />
                   </ReactCrop>
                   {/* Watermark Preview */}
                   {getWatermarkPreview() && (
@@ -298,7 +323,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                     setCrop(undefined);
                     setCompletedCrop(undefined);
                   }}
-                  className="w-full"
+                  className="w-full transition-all duration-200 hover:scale-[1.02]"
                 >
                   Remove Image
                 </Button>
