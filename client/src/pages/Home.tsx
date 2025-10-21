@@ -17,7 +17,7 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
-  const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('6hr');
+  const [popularTimeFilter, setPopularTimeFilter] = useState<'30min' | '2hr' | '3hr' | '6hr'>('2hr');
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
@@ -371,21 +371,28 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-secondary" />
-            <h2 className="text-lg font-semibold text-secondary">
-              Popular Posts
-            </h2>
-            <select
-              value={popularTimeFilter}
-              onChange={(e) => setPopularTimeFilter(e.target.value as '30min' | '2hr' | '3hr' | '6hr')}
-              className="ml-2 px-2 py-1 rounded-lg text-sm font-medium bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
-            >
-              <option value="30min" className="bg-background">30min</option>
-              <option value="2hr" className="bg-background">2hr</option>
-              <option value="3hr" className="bg-background">3hr</option>
-              <option value="6hr" className="bg-background">6hr</option>
-            </select>
+          <div className="mb-3">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <TrendingUp className="h-5 w-5 text-secondary" />
+              <h2 className="text-lg font-semibold text-secondary">
+                Popular Posts
+              </h2>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              {(['30min', '2hr', '3hr', '6hr'] as const).map((time) => (
+                <button
+                  key={time}
+                  onClick={() => setPopularTimeFilter(time)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    popularTimeFilter === time
+                      ? 'bg-secondary text-white shadow-lg shadow-secondary/50'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
+                  }`}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
           </div>
           
           <div className="space-y-3">
