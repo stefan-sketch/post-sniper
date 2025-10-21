@@ -2,7 +2,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { X, Upload, RefreshCw } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
@@ -20,10 +20,26 @@ const PAGES: { id: PageId; name: string; watermark: string; shortName: string }[
 interface CreatePostDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialImage?: string | null;
 }
 
-export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) {
+export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePostDialogProps) {
   const [image, setImage] = useState<string | null>(null);
+
+  // Set image when initialImage is provided
+  useEffect(() => {
+    if (initialImage) {
+      setImage(initialImage);
+      // Start with full image selected
+      setCrop({
+        unit: '%',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+      });
+    }
+  }, [initialImage]);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [caption, setCaption] = useState("");

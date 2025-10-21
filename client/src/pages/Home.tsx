@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -17,6 +17,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [droppedImage, setDroppedImage] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
@@ -365,15 +366,37 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: SDL MEDIA with Create Post button */}
+          {/* Center: Drag-drop icon + SDL MEDIA + Create Post button */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            <div
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setDroppedImage(reader.result as string);
+                    setShowCreatePost(true);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg hover:border-cyan-500 transition-colors cursor-pointer group"
+              title="Drag & drop image here"
+            >
+              <ImagePlus className="h-4 w-4 md:h-5 md:w-5 text-gray-500 group-hover:text-cyan-500 transition-colors" />
+            </div>
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowCreatePost(true)}
+              onClick={() => {
+                setDroppedImage(null);
+                setShowCreatePost(true);
+              }}
               className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
             >
               <Plus className="h-4 w-4 md:h-5 md:w-5" />
@@ -778,7 +801,14 @@ export default function Home() {
         isFetching={manualFetchMutation.isPending}
       />
       <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
-      <CreatePostDialog open={showCreatePost} onOpenChange={setShowCreatePost} />
+      <CreatePostDialog 
+        open={showCreatePost} 
+        onOpenChange={(open) => {
+          setShowCreatePost(open);
+          if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
+        }}
+        initialImage={droppedImage}
+      />
     </div>
   );
 }
