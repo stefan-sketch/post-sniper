@@ -306,11 +306,11 @@ export default function Home() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-2">
-              <img 
-                src="/logo.png" 
-                alt="SDL Media" 
-                className="h-12 w-12 md:h-14 md:w-14 rounded-lg object-contain"
-              />
+          <img
+            src="/header-logo.png"
+            alt="SDL Media"
+            className="h-10 md:h-12 object-contain"
+          />
             </div>
           </div>
                 <div className="flex items-center gap-2">
