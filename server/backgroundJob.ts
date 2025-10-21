@@ -41,31 +41,43 @@ export class BackgroundJobService {
     console.log("[BackgroundJob] Setting up cron job to run every 3 minutes");
     
     this.cronTask = cron.schedule("*/3 * * * *", async () => {
-      // Check if monitoring is enabled before running
-      const currentSettings = await getUserSettings(PUBLIC_USER_ID);
-      const shouldRun = currentSettings?.isPlaying ?? false;
-      
-      if (shouldRun) {
-        const syncOffset = currentSettings?.apiSyncOffset || 0;
+      try {
+        // Check if monitoring is enabled before running
+        const currentSettings = await getUserSettings(PUBLIC_USER_ID);
+        const shouldRun = currentSettings?.isPlaying ?? false;
         
-        if (syncOffset > 0) {
-          console.log(`[BackgroundJob] Delaying ${syncOffset}s to sync with API update cycle`);
-          await new Promise(resolve => setTimeout(resolve, syncOffset * 1000));
+        if (shouldRun) {
+          const syncOffset = currentSettings?.apiSyncOffset || 0;
+          
+          if (syncOffset > 0) {
+            console.log(`[BackgroundJob] Delaying ${syncOffset}s to sync with API update cycle`);
+            await new Promise(resolve => setTimeout(resolve, syncOffset * 1000));
+          }
+          
+          console.log(`[BackgroundJob] Cron job triggered at ${new Date().toISOString()}`);
+          await this.fetchAndCachePosts();
+        } else {
+          console.log(`[BackgroundJob] Cron job skipped (monitoring paused) at ${new Date().toISOString()}`);
         }
-        
-        console.log(`[BackgroundJob] Cron job triggered at ${new Date().toISOString()}`);
-        await this.fetchAndCachePosts();
-      } else {
-        console.log(`[BackgroundJob] Cron job skipped (monitoring paused) at ${new Date().toISOString()}`);
+      } catch (error) {
+        console.error(`[BackgroundJob] Cron job error:`, error);
       }
+    }, {
+      timezone: "Europe/London"
     });
     
     // Schedule daily reset at 6am
     // Cron expression: "0 6 * * *" = every day at 6:00 AM
     console.log("[BackgroundJob] Setting up daily reset at 6:00 AM");
     this.dailyResetTask = cron.schedule("0 6 * * *", async () => {
-      console.log(`[BackgroundJob] Daily reset triggered at ${new Date().toISOString()}`);
-      await this.dailyReset();
+      try {
+        console.log(`[BackgroundJob] Daily reset triggered at ${new Date().toISOString()}`);
+        await this.dailyReset();
+      } catch (error) {
+        console.error(`[BackgroundJob] Daily reset error:`, error);
+      }
+    }, {
+      timezone: "Europe/London"
     });
     
     console.log("[BackgroundJob] Cron jobs scheduled successfully");
