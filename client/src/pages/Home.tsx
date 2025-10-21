@@ -262,7 +262,7 @@ export default function Home() {
               <h1 className="text-lg md:text-xl font-bold">SDL MEDIA</h1>
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">LIVE</span>
             </div>
-            {isFetching ? (
+            {postsQuery.isFetching ? (
               <span className="text-xs md:text-sm text-green-400 font-semibold hidden sm:inline animate-pulse">
                 Fetching Data...
               </span>
