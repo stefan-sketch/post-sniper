@@ -25,9 +25,10 @@ interface PostCardProps {
   };
   showDismiss?: boolean;
   onDismiss?: () => void;
+  rankingChange?: number; // Positive = moved up, negative = moved down, 0 or undefined = no change
 }
 
-export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss, rankingChange }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
@@ -96,7 +97,17 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold truncate">{post.pageName}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold truncate">{post.pageName}</p>
+            {rankingChange !== undefined && rankingChange !== 0 && (
+              <span className={`text-sm font-bold flex items-center gap-0.5 ${
+                rankingChange > 0 ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {rankingChange > 0 ? '↑' : '↓'}
+                {Math.abs(rankingChange)}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
         {showDismiss && onDismiss && (

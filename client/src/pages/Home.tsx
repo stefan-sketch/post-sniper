@@ -21,6 +21,7 @@ export default function Home() {
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
+  const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -209,6 +210,24 @@ export default function Home() {
     }
   }, [livePosts]);
 
+  // Track popular posts rankings for trending indicators
+  useEffect(() => {
+    if (popularPosts.length > 0) {
+      const currentRankings = new Map<string, number>();
+      popularPosts.forEach((post, index) => {
+        currentRankings.set(post.id, index + 1); // 1-indexed ranking
+      });
+      
+      // Only update if we have previous rankings to compare
+      if (previousPopularRankings.size > 0) {
+        setPreviousPopularRankings(currentRankings);
+      } else {
+        // First load, just store rankings without showing changes
+        setPreviousPopularRankings(currentRankings);
+      }
+    }
+  }, [popularPosts]);
+
   // No authentication required - removed loading and login screens
 
   // API status based on postsQuery success/error
@@ -238,35 +257,6 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowSettings(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10"
-            >
-              <Settings className="h-4 w-4 md:h-5 md:w-5" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="relative h-8 w-8 md:h-10 md:w-10"
-            >
-              {isPlaying ? <Pause className="h-4 w-4 md:h-5 md:w-5" /> : <Play className="h-4 w-4 md:h-5 md:w-5" />}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleManualFetch}
-              disabled={manualFetchMutation.isPending}
-              className="relative h-8 w-8 md:h-10 md:w-10"
-              title="Fetch Now"
-            >
-              <RefreshCw className={`h-4 w-4 md:h-5 md:w-5 ${manualFetchMutation.isPending ? 'animate-spin' : ''}`} />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
               onClick={() => setShowAlerts(true)}
               className="relative h-8 w-8 md:h-10 md:w-10"
             >
@@ -276,6 +266,15 @@ export default function Home() {
                   {unreadCountQuery.data}
                 </span>
               )}
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10"
+            >
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
           </div>
         </div>
@@ -378,14 +377,21 @@ export default function Home() {
                 <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
               </div>
             )}
-            {popularPosts.map((post) => (
-              <PostCard 
-                key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
-                post={post} 
-                showDismiss={true}
-                onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
-              />
-            ))}
+            {popularPosts.map((post, index) => {
+              const currentRank = index + 1;
+              const previousRank = previousPopularRankings.get(post.id);
+              const rankingChange = previousRank ? previousRank - currentRank : undefined;
+              
+              return (
+                <PostCard 
+                  key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
+                  post={post} 
+                  showDismiss={true}
+                  onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
+                  rankingChange={rankingChange}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -449,21 +455,35 @@ export default function Home() {
                   <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
                 </div>
               )}
-              {popularPosts.map((post) => (
-                <PostCard 
-                  key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`} 
-                  post={post} 
-                  showDismiss={true}
-                  onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
-                />
-              ))}
+              {popularPosts.map((post, index) => {
+                const currentRank = index + 1;
+                const previousRank = previousPopularRankings.get(post.id);
+                const rankingChange = previousRank ? previousRank - currentRank : undefined;
+                
+                return (
+                  <PostCard 
+                    key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`} 
+                    post={post} 
+                    showDismiss={true}
+                    onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
+                    rankingChange={rankingChange}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
       </div>
 
       {/* Dialogs */}
-      <SettingsDialog open={showSettings} onOpenChange={setShowSettings} />
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(!isPlaying)}
+        onManualFetch={handleManualFetch}
+        isFetching={manualFetchMutation.isPending}
+      />
       <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
     </div>
   );

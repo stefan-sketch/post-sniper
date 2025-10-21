@@ -17,9 +17,13 @@ import { nanoid } from "nanoid";
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+  onManualFetch: () => void;
+  isFetching: boolean;
 }
 
-export default function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+export default function SettingsDialog({ open, onOpenChange, isPlaying, onTogglePlay, onManualFetch, isFetching }: SettingsDialogProps) {
   const utils = trpc.useUtils();
   const [pages, setPages] = useState<any[]>([]);
   
@@ -130,6 +134,28 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsDialogPro
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Control Buttons Section */}
+          <div className="space-y-4">
+            <Label>Controls</Label>
+            <div className="flex gap-3">
+              <Button
+                onClick={onTogglePlay}
+                variant="outline"
+                size="sm"
+              >
+                {isPlaying ? 'Pause' : 'Play'} Monitoring
+              </Button>
+              <Button
+                onClick={onManualFetch}
+                variant="outline"
+                size="sm"
+                disabled={isFetching}
+              >
+                {isFetching ? 'Fetching...' : 'Fetch Now'}
+              </Button>
+            </div>
+          </div>
+
           {/* Data Management Section */}
           <div className="space-y-4">
             <Label>Data Management</Label>
