@@ -122,6 +122,7 @@ export const publerRouter = router({
         }
 
         const data = await response.json();
+        console.log("Publer initial response:", JSON.stringify(data, null, 2));
         
         // Publer returns a job_id that we need to poll for status
         const jobId = data.data?.job_id || data.job_id;
@@ -130,8 +131,8 @@ export const publerRouter = router({
           throw new Error("No job ID returned from Publer");
         }
 
-        // Poll job status (simplified - wait a bit then check)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Poll job status (wait longer for processing)
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
         const statusResponse = await fetch(`https://app.publer.com/api/v1/job_status/${jobId}`, {
           method: "GET",
@@ -142,12 +143,32 @@ export const publerRouter = router({
         });
         
         const statusData = await statusResponse.json();
+        console.log("Publer job status:", JSON.stringify(statusData, null, 2));
+        
+        const status = statusData.data?.status || statusData.status;
+        const result = statusData.data?.result || statusData;
+        
+        // Check for failures in the result
+        if (result?.payload?.failures) {
+          console.error("Publer job failures:", result.payload.failures);
+          throw new Error(`Post failed: ${JSON.stringify(result.payload.failures)}`);
+        }
+        
+        // If still working, let user know
+        if (status === "working") {
+          return {
+            success: true,
+            jobId,
+            status: "processing",
+            message: "Post is being processed. Check Publer dashboard for status.",
+          };
+        }
         
         return {
           success: true,
           jobId,
-          status: statusData.data?.status || statusData.status,
-          result: statusData.data?.result || statusData,
+          status,
+          result,
         };
       } catch (error: any) {
         console.error("Publer post error:", error);
