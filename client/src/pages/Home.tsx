@@ -22,6 +22,7 @@ export default function Home() {
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
   const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
+  const [previousReactionCounts, setPreviousReactionCounts] = useState<Map<string, number>>(new Map());
   
   const settingsQuery = trpc.settings.get.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
@@ -228,6 +229,24 @@ export default function Home() {
     }
   }, [popularPosts]);
 
+  // Track reaction count changes for all posts
+  useEffect(() => {
+    if (postsQuery.data?.posts && postsQuery.data.posts.length > 0) {
+      const currentReactions = new Map<string, number>();
+      postsQuery.data.posts.forEach((post: any) => {
+        currentReactions.set(post.id, post.reactions || 0);
+      });
+      
+      // Only update if we have previous data to compare
+      if (previousReactionCounts.size > 0) {
+        setPreviousReactionCounts(currentReactions);
+      } else {
+        // First load, just store counts without showing changes
+        setPreviousReactionCounts(currentReactions);
+      }
+    }
+  }, [postsQuery.data?.posts]);
+
   // No authentication required - removed loading and login screens
 
   // API status based on postsQuery success/error
@@ -332,6 +351,9 @@ export default function Home() {
             )}
             {livePosts.map((post) => {
               const isNew = newPostIds.has(post.id);
+              const previousReactions = previousReactionCounts.get(post.id);
+              const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+              
               return (
                 <div
                   key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}`}
@@ -340,7 +362,7 @@ export default function Home() {
                     animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                   }}
                 >
-                  <PostCard post={post} />
+                  <PostCard post={post} reactionIncrease={reactionIncrease} />
                 </div>
               );
             })}
@@ -381,6 +403,8 @@ export default function Home() {
               const currentRank = index + 1;
               const previousRank = previousPopularRankings.get(post.id);
               const rankingChange = previousRank ? previousRank - currentRank : undefined;
+              const previousReactions = previousReactionCounts.get(post.id);
+              const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
               
               return (
                 <PostCard 
@@ -389,6 +413,7 @@ export default function Home() {
                   showDismiss={true}
                   onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
                   rankingChange={rankingChange}
+                  reactionIncrease={reactionIncrease}
                 />
               );
             })}
@@ -424,6 +449,9 @@ export default function Home() {
               )}
               {livePosts.map((post) => {
                 const isNew = newPostIds.has(post.id);
+                const previousReactions = previousReactionCounts.get(post.id);
+                const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
+                
                 return (
                   <div
                     key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile`}
@@ -432,7 +460,7 @@ export default function Home() {
                       animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                     }}
                   >
-                    <PostCard post={post} />
+                    <PostCard post={post} reactionIncrease={reactionIncrease} />
                   </div>
                 );
               })}
@@ -459,6 +487,8 @@ export default function Home() {
                 const currentRank = index + 1;
                 const previousRank = previousPopularRankings.get(post.id);
                 const rankingChange = previousRank ? previousRank - currentRank : undefined;
+                const previousReactions = previousReactionCounts.get(post.id);
+                const reactionIncrease = previousReactions ? post.reactions - previousReactions : undefined;
                 
                 return (
                   <PostCard 
@@ -467,6 +497,7 @@ export default function Home() {
                     showDismiss={true}
                     onDismiss={() => dismissPostMutation.mutate({ postId: post.id })}
                     rankingChange={rankingChange}
+                    reactionIncrease={reactionIncrease}
                   />
                 );
               })}

@@ -26,9 +26,10 @@ interface PostCardProps {
   showDismiss?: boolean;
   onDismiss?: () => void;
   rankingChange?: number; // Positive = moved up, negative = moved down, 0 or undefined = no change
+  reactionIncrease?: number; // Number of reactions gained since last update
 }
 
-export default function PostCard({ post, showDismiss, onDismiss, rankingChange }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss, rankingChange, reactionIncrease }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   const timeAgo = formatDistanceToNow(post.postDate, { addSuffix: true });
@@ -139,6 +140,9 @@ export default function PostCard({ post, showDismiss, onDismiss, rankingChange }
           <div className="flex items-center gap-2">
             <ThumbsUp className="h-4 w-4 text-gray-400" strokeWidth={2} />
             <span className="text-gray-300 font-medium">{post.reactions.toLocaleString()}</span>
+            {reactionIncrease !== undefined && reactionIncrease > 0 && (
+              <span className="text-green-400 text-xs font-semibold">+{reactionIncrease.toLocaleString()}</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
