@@ -307,52 +307,55 @@ export default function Home() {
   return (
     <div className="h-screen w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="glass-card p-2 md:p-3 mb-4 rounded-xl flex-shrink-0">
-        <div className="flex items-center justify-between gap-2 md:gap-4">
-          {/* Spacer for balance */}
-          <div className="w-8 md:w-10 flex-shrink-0"></div>
-
-          {/* Centered group: API indicator + SDL MEDIA + Bell */}
-          <div className="flex-1 flex items-center justify-center gap-2">
-            {/* API Status Indicator - Before SDL */}
-            <div className="relative flex h-3 w-3 flex-shrink-0" title={settingsQuery.data?.lastAPIStatus === "success" ? "API Status: OK" : "API Status: Error"}>
-              {settingsQuery.data?.lastAPIStatus === "success" ? (
-                <>
+      <header className="mb-3 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          {/* Left: API Status */}
+          <div className="flex items-center gap-1.5 text-xs">
+            {settingsQuery.data?.lastAPIStatus === "success" ? (
+              <>
+                <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </>
-              ) : (
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              )}
-            </div>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-green-400 font-medium">Online</span>
+              </>
+            ) : (
+              <>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <span className="text-red-400 font-medium">Offline</span>
+              </>
+            )}
+          </div>
 
-            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
-              SDL MEDIA
-            </h1>
+          {/* Center: SDL MEDIA */}
+          <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider absolute left-1/2 transform -translate-x-1/2" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+            SDL MEDIA
+          </h1>
 
-            {/* Alerts Icon - After MEDIA */}
-            <div
+          {/* Right: Notifications + Settings */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setShowAlerts(true)}
-              className="relative cursor-pointer flex-shrink-0"
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
             >
-              <Bell className="h-4 w-4 md:h-5 md:w-5 text-white" />
+              <Bell className="h-4 w-4 md:h-5 md:w-5" />
               {(unreadCountQuery.data || 0) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {unreadCountQuery.data}
                 </span>
               )}
-            </div>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
           </div>
-
-          {/* Settings Icon - Right Corner */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowSettings(true)}
-            className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-          >
-            <Settings className="h-4 w-4 md:h-5 md:w-5" />
-          </Button>
         </div>
       </header>
 
