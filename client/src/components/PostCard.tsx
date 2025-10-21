@@ -2,6 +2,7 @@ import { ThumbsUp, MessageCircle, Share2, Copy, Download, Upload } from "lucide-
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,8 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
     { name: "FAD", sessionId: "gwbHdSMCBnio6ozpKdD5tJ" },
   ];
 
+  const uploadMutation = trpc.manus.uploadImage.useMutation();
+
   const handleUploadToManus = async (e: React.MouseEvent, chatName: string, sessionId: string) => {
     e.stopPropagation();
     if (!post.image) {
@@ -79,33 +82,17 @@ export default function PostCard({ post, showDismiss, onDismiss }: PostCardProps
     }
 
     try {
-      toast.loading(`Uploading to ${chatName}...`);
+      const toastId = toast.loading(`Uploading to ${chatName}...`);
       
-      // Fetch the image as a blob
-      const response = await fetch(post.image);
-      const blob = await response.blob();
-      
-      // Create form data
-      const formData = new FormData();
-      formData.append('file', blob, `post-${post.id}.jpg`);
-      
-      // Upload to Manus API
-      const uploadResponse = await fetch(`https://api.manus.im/v1/sessions/${sessionId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer sk-MUm0yHQbXecrVv56IYeLMx-UHEQcLM_s4AbJg3fkOZMaCxvaTMNEbEg0V2LVbYaoURDIwnZ7-TzYgnxSvSvOUHSwDxRr',
-        },
-        body: formData,
+      const result = await uploadMutation.mutateAsync({
+        imageUrl: post.image,
+        sessionId,
+        chatName,
       });
       
-      if (!uploadResponse.ok) {
-        throw new Error('Upload failed');
-      }
-      
-      toast.dismiss();
+      toast.dismiss(toastId);
       toast.success(`Uploaded to ${chatName}!`);
     } catch (error) {
-      toast.dismiss();
       toast.error(`Failed to upload to ${chatName}`);
       console.error('Manus upload error:', error);
     }
