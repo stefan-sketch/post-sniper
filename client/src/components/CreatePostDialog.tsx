@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-import { X, Upload } from "lucide-react";
+import { X, Upload, RefreshCw } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -30,10 +30,12 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
   const [selectedPages, setSelectedPages] = useState<PageId[]>([]);
   const [useWatermark, setUseWatermark] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
+  const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -341,7 +343,41 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
           {/* Caption */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Caption</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-300">Caption</label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  if (!caption.trim()) {
+                    toast.error("Enter a caption first to regenerate");
+                    return;
+                  }
+                  setIsRegenerating(true);
+                  try {
+                    const result = await regenerateCaptionMutation.mutateAsync({
+                      originalCaption: caption,
+                    });
+                    if (result.success && result.caption) {
+                      setCaption(result.caption);
+                      toast.success("Caption regenerated!");
+                    } else {
+                      toast.error(result.error || "Failed to regenerate caption");
+                    }
+                  } catch (error: any) {
+                    toast.error(error.message || "Failed to regenerate caption");
+                  } finally {
+                    setIsRegenerating(false);
+                  }
+                }}
+                disabled={isRegenerating || !caption.trim()}
+                className="text-xs gap-1 h-7 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+              >
+                <RefreshCw className={`h-3 w-3 ${isRegenerating ? 'animate-spin' : ''}`} />
+                {isRegenerating ? "Regenerating..." : "Regenerate"}
+              </Button>
+            </div>
             <Textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}

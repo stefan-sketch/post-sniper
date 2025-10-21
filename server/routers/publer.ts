@@ -193,5 +193,62 @@ export const publerRouter = router({
         };
       }
     }),
+
+  // Regenerate caption using OpenAI
+  regenerateCaption: publicProcedure
+    .input(z.object({
+      originalCaption: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+        
+        if (!OPENAI_API_KEY) {
+          throw new Error("OpenAI API key not configured");
+        }
+
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "You are a witty social media caption writer for football/soccer content. Your job is to rephrase captions while maintaining the same humor, tone, and vibe. Keep it casual, funny, and engaging. You can change emojis, restructure sentences, or add rhetorical questions, but keep the core message and humor intact. Keep it concise and punchy."
+              },
+              {
+                role: "user",
+                content: `Rephrase this caption while keeping the same humor and vibe:\n\n${input.originalCaption}`
+              }
+            ],
+            temperature: 0.9,
+            max_tokens: 150,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`OpenAI API error: ${error}`);
+        }
+
+        const data = await response.json() as any;
+        const regeneratedCaption = data.choices[0]?.message?.content?.trim() || "";
+
+        return {
+          success: true,
+          caption: regeneratedCaption,
+        };
+      } catch (error: any) {
+        console.error("Caption regeneration error:", error);
+        return {
+          success: false,
+          error: error.message || "Failed to regenerate caption",
+        };
+      }
+    }),
 });
 
