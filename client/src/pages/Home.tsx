@@ -279,26 +279,21 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 text-secondary text-center flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 mb-3">
             <TrendingUp className="h-5 w-5 text-secondary" />
-            Popular Posts
-          </h2>
-          
-          {/* Time Filter Tabs */}
-          <div className="flex gap-2 mb-3 justify-center">
-            {(['30min', '2hr', '3hr', '6hr'] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setPopularTimeFilter(filter)}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  popularTimeFilter === filter
-                    ? 'bg-secondary text-secondary-foreground'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
+            <h2 className="text-lg font-semibold text-secondary">
+              Popular Posts
+            </h2>
+            <select
+              value={popularTimeFilter}
+              onChange={(e) => setPopularTimeFilter(e.target.value as '30min' | '2hr' | '3hr' | '6hr')}
+              className="ml-2 px-2 py-1 rounded-lg text-sm font-medium bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+            >
+              <option value="30min" className="bg-background">30min</option>
+              <option value="2hr" className="bg-background">2hr</option>
+              <option value="3hr" className="bg-background">3hr</option>
+              <option value="6hr" className="bg-background">6hr</option>
+            </select>
           </div>
           
           <div className="space-y-3">
