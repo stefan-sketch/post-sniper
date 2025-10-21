@@ -1,43 +1,37 @@
-import { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Upload, X, Crop, Loader2 } from "lucide-react";
-import Cropper from "react-easy-crop";
+import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
+import { X, Upload } from "lucide-react";
+import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
+
+type PageId = "footy-feed" | "football-funnys" | "football-away-days";
+
+const PAGES: { id: PageId; name: string }[] = [
+  { id: "footy-feed", name: "The Footy Feed" },
+  { id: "football-funnys", name: "Football Funnys" },
+  { id: "football-away-days", name: "Football Away Days" },
+];
 
 interface CreatePostDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const PAGES = [
-  { id: "footy-feed", name: "The Footy Feed" },
-  { id: "football-funnys", name: "Football Funnys" },
-  { id: "football-away-days", name: "Football Away Days" },
-] as const;
-
-type PageId = typeof PAGES[number]["id"];
-
 export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) {
   const [image, setImage] = useState<string | null>(null);
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [caption, setCaption] = useState("");
   const [selectedPages, setSelectedPages] = useState<PageId[]>([]);
-  const [showCropper, setShowCropper] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
-
-  const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,7 +39,9 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setShowCropper(true);
+        // Reset crop when new image is loaded
+        setCrop(undefined);
+        setCompletedCrop(undefined);
       };
       reader.readAsDataURL(file);
     }
@@ -58,61 +54,54 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setShowCropper(true);
+        setCrop(undefined);
+        setCompletedCrop(undefined);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const createCroppedImage = async () => {
-    if (!image || !croppedAreaPixels) return;
+  const getCroppedImage = useCallback(async (): Promise<string | null> => {
+    if (!completedCrop || !imgRef.current) {
+      return image; // Return original if no crop
+    }
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
 
-    const imageElement = new Image();
-    imageElement.src = image;
+    const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
+    const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
 
-    await new Promise((resolve) => {
-      imageElement.onload = resolve;
-    });
-
-    canvas.width = croppedAreaPixels.width;
-    canvas.height = croppedAreaPixels.height;
+    canvas.width = completedCrop.width;
+    canvas.height = completedCrop.height;
 
     ctx.drawImage(
-      imageElement,
-      croppedAreaPixels.x,
-      croppedAreaPixels.y,
-      croppedAreaPixels.width,
-      croppedAreaPixels.height,
+      imgRef.current,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
       0,
       0,
-      croppedAreaPixels.width,
-      croppedAreaPixels.height
+      completedCrop.width,
+      completedCrop.height
     );
 
     return canvas.toDataURL("image/jpeg", 0.9);
-  };
-
-  const handleCropConfirm = async () => {
-    const croppedImg = await createCroppedImage();
-    if (croppedImg) {
-      setCroppedImage(croppedImg);
-      setShowCropper(false);
-    }
-  };
+  }, [completedCrop, image]);
 
   const handlePost = async () => {
-    if (!croppedImage) {
-      alert("Please upload and crop an image");
+    if (!image) {
+      alert("Please upload an image");
       return;
     }
+
     if (!caption.trim()) {
       alert("Please enter a caption");
       return;
     }
+
     if (selectedPages.length === 0) {
       alert("Please select at least one page");
       return;
@@ -121,6 +110,12 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
     setIsUploading(true);
 
     try {
+      // Get cropped image
+      const croppedImage = await getCroppedImage();
+      if (!croppedImage) {
+        throw new Error("Failed to process image");
+      }
+
       // Upload media to Publer
       const uploadResult = await uploadMediaMutation.mutateAsync({
         imageData: croppedImage,
@@ -146,7 +141,8 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
       // Reset form
       setImage(null);
-      setCroppedImage(null);
+      setCrop(undefined);
+      setCompletedCrop(undefined);
       setCaption("");
       setSelectedPages([]);
       onOpenChange(false);
@@ -165,98 +161,90 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create Post</DialogTitle>
-        </DialogHeader>
-
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800">
         <div className="space-y-4">
-          {/* Image Upload / Cropper */}
-          {!image && !croppedImage && (
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-cyan-500 transition-colors"
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Create Post</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="text-gray-400 hover:text-white"
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                id="image-upload"
-              />
-              <label htmlFor="image-upload" className="cursor-pointer">
-                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-300">Drag & drop an image or click to upload</p>
-              </label>
-            </div>
-          )}
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
 
-          {showCropper && image && (
-            <div className="space-y-4">
-              <div className="relative h-96 bg-black rounded-lg overflow-hidden">
-                <Cropper
-                  image={image}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
+          {/* Image Upload/Crop */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Image</label>
+            {!image ? (
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-gray-600 transition-colors"
+                onClick={() => document.getElementById("image-upload")?.click()}
+              >
+                <Upload className="h-12 w-12 mx-auto mb-3 text-gray-500" />
+                <p className="text-gray-400 mb-1">Drag & drop an image here</p>
+                <p className="text-sm text-gray-500">or click to browse</p>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button onClick={handleCropConfirm} className="flex-1">
-                  <Crop className="w-4 h-4 mr-2" />
-                  Confirm Crop
-                </Button>
+            ) : (
+              <div className="space-y-2">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  className="max-h-96"
+                >
+                  <img
+                    ref={imgRef}
+                    src={image}
+                    alt="Upload"
+                    className="max-w-full"
+                  />
+                </ReactCrop>
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => {
                     setImage(null);
-                    setShowCropper(false);
+                    setCrop(undefined);
+                    setCompletedCrop(undefined);
                   }}
+                  className="w-full"
                 >
-                  <X className="w-4 h-4" />
+                  Remove Image
                 </Button>
               </div>
-            </div>
-          )}
-
-          {croppedImage && !showCropper && (
-            <div className="relative">
-              <img src={croppedImage} alt="Cropped" className="w-full rounded-lg" />
-              <Button
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2"
-                onClick={() => {
-                  setCroppedImage(null);
-                  setImage(null);
-                }}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Caption */}
-          <div>
-            <Label htmlFor="caption">Caption</Label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Caption</label>
             <Textarea
-              id="caption"
-              placeholder="Write your caption..."
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              rows={4}
-              className="mt-2"
+              placeholder="Write your caption..."
+              className="min-h-24 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+              maxLength={2000}
             />
+            <p className="text-xs text-gray-500 text-right">{caption.length} / 2000</p>
           </div>
 
           {/* Page Selection */}
-          <div>
-            <Label>Post to Pages</Label>
-            <div className="space-y-2 mt-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Post to Pages</label>
+            <div className="space-y-2">
               {PAGES.map((page) => (
                 <div key={page.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -264,9 +252,12 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
                     checked={selectedPages.includes(page.id)}
                     onCheckedChange={() => togglePage(page.id)}
                   />
-                  <Label htmlFor={page.id} className="cursor-pointer">
+                  <label
+                    htmlFor={page.id}
+                    className="text-sm text-gray-300 cursor-pointer"
+                  >
                     {page.name}
-                  </Label>
+                  </label>
                 </div>
               ))}
             </div>
@@ -275,17 +266,10 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
           {/* Post Button */}
           <Button
             onClick={handlePost}
-            disabled={isUploading || !croppedImage || !caption || selectedPages.length === 0}
-            className="w-full"
+            disabled={isUploading || !image || !caption.trim() || selectedPages.length === 0}
+            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
           >
-            {isUploading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Posting...
-              </>
-            ) : (
-              "Post Now"
-            )}
+            {isUploading ? "Posting..." : "Post"}
           </Button>
         </div>
       </DialogContent>
