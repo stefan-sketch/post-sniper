@@ -1428,12 +1428,34 @@ export default function Home() {
             {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
               managedPagesQuery.data.slice(0, 3).map((page: any) => (
                 <div key={page.id} className="flex flex-col h-full overflow-hidden">
-                  <h2 
-                    className="text-lg font-semibold mb-3 text-center"
-                    style={{ color: page.borderColor }}
-                  >
-                    {page.profileName}
-                  </h2>
+                  {/* Page Header with Icon */}
+                  <div className="flex items-center gap-3 mb-3 px-2">
+                    <div 
+                      className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
+                      style={{ 
+                        border: `2px solid ${page.borderColor}`,
+                        boxShadow: `0 0 10px ${page.borderColor}40`
+                      }}
+                    >
+                      {page.profilePicture ? (
+                        <img 
+                          src={page.profilePicture} 
+                          alt={page.profileName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-muted flex items-center justify-center text-sm font-bold">
+                          {page.profileName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <h2 
+                      className="text-lg font-semibold"
+                      style={{ color: page.borderColor }}
+                    >
+                      {page.profileName}
+                    </h2>
+                  </div>
                   <FacebookPageColumn 
                     pageId={page.id}
                     pageName={page.profileName}
@@ -1455,8 +1477,36 @@ export default function Home() {
                 {managedPagesQuery.data.map((page: any, index: number) => (
                   <div 
                     key={page.id}
-                    className={`h-full ${index === 0 && pagesView === 'away-days' ? 'block' : index === 1 && pagesView === 'funnys' ? 'block' : index === 2 && pagesView === 'footy-feed' ? 'block' : 'hidden'}`}
+                    className={`h-full flex flex-col ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
                   >
+                    {/* Page Header with Icon */}
+                    <div className="flex items-center gap-3 mb-3 px-2">
+                      <div 
+                        className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
+                        style={{ 
+                          border: `2px solid ${page.borderColor}`,
+                          boxShadow: `0 0 10px ${page.borderColor}40`
+                        }}
+                      >
+                        {page.profilePicture ? (
+                          <img 
+                            src={page.profilePicture} 
+                            alt={page.profileName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-muted flex items-center justify-center text-sm font-bold">
+                            {page.profileName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <h2 
+                        className="text-lg font-semibold"
+                        style={{ color: page.borderColor }}
+                      >
+                        {page.profileName}
+                      </h2>
+                    </div>
                     <FacebookPageColumn 
                       pageId={page.id}
                       pageName={page.profileName}

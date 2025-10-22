@@ -27,9 +27,10 @@ interface PostCardProps {
   onDismiss?: () => void;
   reactionIncrease?: number; // Number of reactions gained since last update
   hideActions?: boolean; // Hide download and copy buttons
+  hidePageHeader?: boolean; // Hide page name and profile picture
 }
 
-export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   
@@ -101,6 +102,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
       className="glass-card rounded-xl overflow-hidden transition-all"
     >
       {/* Profile Header */}
+      {!hidePageHeader && (
       <div className="p-4 flex items-center gap-3">
         <div 
           className="h-12 w-12 rounded-full overflow-hidden flex-shrink-0"
@@ -144,6 +146,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           </Button>
         )}
       </div>
+      )}
 
       {/* Post Message */}
       {post.message && (
