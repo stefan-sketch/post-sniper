@@ -18,7 +18,7 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
-  const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
+  const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
@@ -33,7 +33,7 @@ export default function Home() {
   const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
   const [showLiveScrollTop, setShowLiveScrollTop] = useState(false);
   const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
-  const [isInQuietHours, setIsInQuietHours] = useState(false);
+  const [twitterPlaying, setTwitterPlaying] = useState(true); // Control Twitter API polling
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -41,30 +41,13 @@ export default function Home() {
   const pagesQuery = trpc.pages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
-  // Check if current time is in quiet hours (12am-8am)
-  const isQuietHours = () => {
-    const now = new Date();
-    const hour = now.getHours();
-    return hour >= 0 && hour < 8; // 12am (0) to 8am
-  };
 
-  // Monitor quiet hours and update state every minute to trigger query re-evaluation
-  useEffect(() => {
-    const checkQuietHours = () => {
-      setIsInQuietHours(isQuietHours());
-    };
-    
-    checkQuietHours(); // Initial check
-    const interval = setInterval(checkQuietHours, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }, []);
 
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
     { cursor: undefined }, 
     { 
-      enabled: feedType === 'twitter' && !isInQuietHours,
-      refetchInterval: (feedType === 'twitter' && !isInQuietHours) ? 300000 : false, // Refresh every 5 minutes (300000ms) when viewing Twitter, not during quiet hours (12am-8am)
+      enabled: feedType === 'twitter' && twitterPlaying,
+      refetchInterval: (feedType === 'twitter' && twitterPlaying) ? 300000 : false, // Refresh every 5 minutes when playing
       staleTime: 0,
     }
   );
@@ -490,7 +473,7 @@ export default function Home() {
               : 'text-white/60 hover:text-white/80'
           }`}
         >
-          🔴 Live Posts
+          🔴 Live
         </button>
         <button
           onClick={() => setMobileView('popular')}
@@ -503,6 +486,19 @@ export default function Home() {
           📈 Popular
           {mobileView === 'popular' && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></span>
+          )}
+        </button>
+        <button
+          onClick={() => setMobileView('twitter')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all relative ${
+            mobileView === 'twitter' 
+              ? 'bg-blue-500 text-white' 
+              : 'text-white/60 hover:text-white/80'
+          }`}
+        >
+          𝕏 Twitter
+          {mobileView === 'twitter' && (
+            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 animate-pulse"></span>
           )}
         </button>
       </div>
@@ -627,6 +623,25 @@ export default function Home() {
                 </svg>
               </span>
             </button>
+            {/* Twitter Play/Pause Button */}
+            {feedType === 'twitter' && (
+              <button
+                onClick={() => setTwitterPlaying(!twitterPlaying)}
+                className={`p-2 rounded-full transition-all ${
+                  twitterPlaying
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/50'
+                    : 'bg-gray-600 hover:bg-gray-500 text-white shadow-lg'
+                }`}
+                title={twitterPlaying ? 'Pause Twitter updates' : 'Resume Twitter updates'}
+              >
+                {twitterPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </button>
+            )}
+            {/* Time Filter for Popular Posts */}
             <div className="relative">
               <button
                 onClick={() => feedType === 'popular' && setShowTimeFilter(!showTimeFilter)}
@@ -699,11 +714,6 @@ export default function Home() {
               </>
             ) : (
               <>
-                {isInQuietHours && (
-                  <div className="glass-card p-4 rounded-xl text-center border border-yellow-500/30 bg-yellow-500/5 mb-3">
-                    <p className="text-yellow-400 text-sm">🌙 Quiet Hours (12am-8am) - Twitter updates paused</p>
-                  </div>
-                )}
                 {twitterQuery.isLoading && (
                   <div className="glass-card p-6 rounded-xl text-center">
                     <p className="text-muted-foreground">Loading tweets...</p>
@@ -711,7 +721,7 @@ export default function Home() {
                 )}
                 {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                   <div className="glass-card p-6 rounded-xl text-center">
-                    <p className="text-muted-foreground">{isInQuietHours ? 'Twitter updates will resume at 8am' : 'No tweets found in your list.'}</p>
+                    <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                   </div>
                 )}
                 {twitterQuery.data?.tweets?.map((tweet: any) => {
@@ -870,7 +880,7 @@ export default function Home() {
               })}
             </div>
           </div>
-        ) : (
+        ) : mobileView === 'popular' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
               <div className="flex items-center justify-center gap-3 mb-2">
@@ -936,6 +946,104 @@ export default function Home() {
                     post={post} 
                     reactionIncrease={reactionIncrease}
                   />
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex flex-col items-center mb-3 flex-shrink-0">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <h2 className="text-lg font-semibold text-blue-400">
+                  Twitter Feed
+                </h2>
+                <button
+                  onClick={() => setTwitterPlaying(!twitterPlaying)}
+                  className={`p-1.5 rounded-full transition-all ${
+                    twitterPlaying
+                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/50'
+                      : 'bg-gray-600 hover:bg-gray-500 text-white shadow-lg'
+                  }`}
+                  title={twitterPlaying ? 'Pause Twitter updates' : 'Resume Twitter updates'}
+                >
+                  {twitterPlaying ? (
+                    <Pause className="h-3 w-3" />
+                  ) : (
+                    <Play className="h-3 w-3" />
+                  )}
+                </button>
+              </div>
+              {/* Blue pulsing underline */}
+              <div className="w-full h-0.5 bg-blue-500 animate-pulse"></div>
+            </div>
+            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar">
+              {twitterQuery.isLoading && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">Loading tweets...</p>
+                </div>
+              )}
+              {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
+                <div className="glass-card p-6 rounded-xl text-center">
+                  <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
+                </div>
+              )}
+              {twitterQuery.data?.tweets?.map((tweet: any) => {
+                const getTimeAgo = (dateString: string): string => {
+                  const date = new Date(dateString);
+                  const now = new Date();
+                  const diffMs = now.getTime() - date.getTime();
+                  const diffMins = Math.floor(diffMs / 60000);
+                  
+                  if (diffMins < 1) return 'just now';
+                  if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+                  
+                  const diffHours = diffMins / 60;
+                  const roundedHours = Math.round(diffHours);
+                  
+                  if (roundedHours < 24) {
+                    return `${roundedHours} hour${roundedHours === 1 ? '' : 's'} ago`;
+                  }
+                  
+                  const diffDays = Math.round(diffHours / 24);
+                  return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+                };
+                
+                const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
+                
+                return (
+                <div key={tweet.id} className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
+                  <div className="flex items-start gap-3 mb-3">
+                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-white">{tweet.author.name}</span>
+                        <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
+                      </div>
+                      {timeAgo && <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>}
+                      <p className="text-white/90 mt-2">{tweet.text}</p>
+                    </div>
+                  </div>
+                  {tweet.image && (
+                    <img 
+                      src={tweet.image} 
+                      alt="Tweet image" 
+                      className="w-full rounded-lg mb-3"
+                      draggable="true"
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/uri-list', tweet.image);
+                      }}
+                    />
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
+                    <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
+                    <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
+                    {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                  </div>
+                </div>
                 );
               })}
             </div>
