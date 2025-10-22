@@ -240,3 +240,25 @@ export async function clearAllCachedPosts(): Promise<void> {
   await db.delete(cachedPosts);
 }
 
+export async function clearManagedPagesPosts(userId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get all managed page IDs for this user
+  const managed = await getManagedPages(userId);
+  const managedPageIds = managed.map(p => p.profileId);
+  
+  if (managedPageIds.length === 0) {
+    console.log("[Database] No managed pages to clear posts for");
+    return;
+  }
+  
+  const { cachedPosts } = await import("../drizzle/schema");
+  const { inArray } = await import("drizzle-orm");
+  
+  // Delete only posts from managed pages
+  await db.delete(cachedPosts).where(inArray(cachedPosts.pageId, managedPageIds));
+  
+  console.log(`[Database] Cleared posts from ${managedPageIds.length} managed pages`);
+}
+

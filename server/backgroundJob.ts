@@ -98,10 +98,10 @@ export class BackgroundJobService {
     try {
       console.log("[BackgroundJob] Starting daily reset...");
       
-      // Clear all cached posts
-      const { clearAllCachedPosts, upsertUserSettings } = await import("./db");
-      await clearAllCachedPosts();
-      console.log("[BackgroundJob] Cleared all cached posts");
+      // Clear only managed pages posts (Pages tab), keep monitored pages (Live Posts)
+      const { clearManagedPagesPosts, upsertUserSettings } = await import("./db");
+      await clearManagedPagesPosts(PUBLIC_USER_ID);
+      console.log("[BackgroundJob] Cleared managed pages posts");
       
       // Turn monitoring ON (set isPlaying to true)
       await upsertUserSettings({ userId: PUBLIC_USER_ID, isPlaying: true });
