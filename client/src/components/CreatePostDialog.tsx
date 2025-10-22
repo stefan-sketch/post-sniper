@@ -154,20 +154,23 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
     const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
 
-    canvas.width = completedCrop.width;
-    canvas.height = completedCrop.height;
+    // Use ORIGINAL image dimensions for canvas (not preview dimensions)
+    const cropWidth = completedCrop.width * scaleX;
+    const cropHeight = completedCrop.height * scaleY;
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
 
-    // Draw cropped image
+    // Draw cropped image at full resolution
     ctx.drawImage(
       imgRef.current,
       completedCrop.x * scaleX,
       completedCrop.y * scaleY,
-      completedCrop.width * scaleX,
-      completedCrop.height * scaleY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      completedCrop.width,
-      completedCrop.height
+      cropWidth,
+      cropHeight
     );
 
     // Add gradient overlay if enabled
@@ -181,14 +184,16 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
     // Add text overlay if provided
     if (overlayText.trim()) {
-      ctx.font = `bold ${fontSize}px Impact, 'Arial Black', sans-serif`;
+      // Scale font size based on original image dimensions
+      const scaledFontSize = fontSize * scaleX;
+      ctx.font = `bold ${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
       const textX = (textPosition.x / 100) * canvas.width;
       const textY = (textPosition.y / 100) * canvas.height;
       const maxWidth = canvas.width * 0.9;
-      const lineHeight = fontSize * 1.2;
+      const lineHeight = scaledFontSize * 1.2;
       
       // Split text by manual line breaks
       const paragraphs = overlayText.split('\n');
@@ -224,7 +229,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       lines.forEach(line => {
         // Add black stroke for outline effect
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = fontSize * 0.1;
+        ctx.lineWidth = scaledFontSize * 0.1;
         ctx.strokeText(line, textX, currentY);
         
         // Add white fill
