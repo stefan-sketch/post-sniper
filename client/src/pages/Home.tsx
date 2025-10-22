@@ -1495,39 +1495,6 @@ export default function Home() {
                     key={page.id}
                     className={`h-full flex flex-col scrollbar-hide ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
                   >
-                    {/* Page Header with Icon */}
-                    <div className="flex items-center gap-3 mb-3 px-2">
-                      <div 
-                        className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
-                        style={{ 
-                          border: `2px solid ${page.borderColor}`,
-                          boxShadow: `0 0 10px ${page.borderColor}40`
-                        }}
-                      >
-                        {page.profilePicture ? (
-                          <img 
-                            src={page.profilePicture} 
-                            alt={page.profileName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-muted flex items-center justify-center text-sm font-bold">
-                            {page.profileName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <h2 
-                        className="text-sm font-semibold"
-                        style={{ 
-                          color: page.profileName === 'Football Funnys' ? '#FCD34D' : 
-                                 page.profileName === 'The Footy Feed' ? '#FFFFFF' : 
-                                 page.profileName === 'Football Away Days' ? '#EF4444' : 
-                                 page.borderColor 
-                        }}
-                      >
-                        {page.profileName}
-                      </h2>
-                    </div>
                     <FacebookPageColumn 
                       pageId={page.id}
                       pageName={page.profileName}

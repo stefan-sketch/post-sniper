@@ -122,7 +122,9 @@
     @apply bg-background text-foreground overflow-x-hidden;
     max-width: 100vw;
     width: 100%;
-    position: relative;
+    position: fixed;
+    touch-action: pan-y pinch-zoom;
+    overscroll-behavior-x: none;
   }
   
   #root {
