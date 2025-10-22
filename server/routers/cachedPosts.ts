@@ -1,7 +1,7 @@
 import { router, publicProcedure } from "../_core/trpc";
 import { z } from "zod";
 import { getDb, getUserSettings } from "../db";
-import { cachedPosts, monitoredPages } from "../../drizzle/schema";
+import { cachedPosts, monitoredPages, managedPages } from "../../drizzle/schema";
 import { desc, and, gte, eq } from "drizzle-orm";
 
 const PUBLIC_USER_ID = "public";
@@ -46,7 +46,10 @@ export const cachedPostsRouter = router({
         .where(gte(cachedPosts.postDate, oneDayAgo))
         .orderBy(desc(cachedPosts.postDate));
 
-      console.log(`[CachedPosts] Found ${posts.length} posts in database`);
+      // Filter to only include posts that have a matching monitored page (exclude managed pages)
+      const filteredPosts = posts.filter(post => post.pageName !== null);
+      
+      console.log(`[CachedPosts] Found ${filteredPosts.length} monitored pages posts in database`);
       if (posts.length > 0) {
         console.log('[CachedPosts] Sample post:', JSON.stringify(posts[0], null, 2));
       }
@@ -56,7 +59,7 @@ export const cachedPostsRouter = router({
       console.log('[CachedPosts] Last fetched at:', settings?.lastFetchedAt);
 
       return {
-        posts: posts.map((post) => ({
+        posts: filteredPosts.map((post) => ({
           id: post.id,
           pageId: post.pageId,
           pageName: post.pageName || '',
@@ -101,14 +104,24 @@ export const cachedPostsRouter = router({
         
         console.log(`[CachedPosts] Fetching posts for page ${input.pageId}...`);
         
-        // Get page config
-        const pageData = await db
+        // Try to get page config from monitored pages first
+        let pageData: any[] = await db
           .select()
           .from(monitoredPages)
           .where(eq(monitoredPages.id, input.pageId))
           .limit(1);
 
+        // If not found in monitored pages, check managed pages
         if (!pageData || pageData.length === 0) {
+          pageData = await db
+            .select()
+            .from(managedPages)
+            .where(eq(managedPages.id, input.pageId))
+            .limit(1);
+        }
+
+        if (!pageData || pageData.length === 0) {
+          console.log(`[CachedPosts] Page ${input.pageId} not found in monitored or managed pages`);
           return { posts: [], pageConfig: null };
         }
 
@@ -163,5 +176,74 @@ export const cachedPostsRouter = router({
         return { posts: [], pageConfig: null };
       }
     }),
+
+  /**
+   * Get cached posts for managed pages (Pages view)
+   */
+  getManagedPosts: publicProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) {
+      return { posts: [], lastFetchedAt: null };
+    }
+
+    try {
+      // Get all posts from last 24 hours for managed pages
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      console.log('[CachedPosts] Fetching managed pages posts from database...');
+      
+      // Join cached posts with managed pages
+      const posts = await db
+        .select({
+          id: cachedPosts.id,
+          pageId: cachedPosts.pageId,
+          pageName: managedPages.profileName,
+          borderColor: managedPages.borderColor,
+          profilePicture: managedPages.profilePicture,
+          message: cachedPosts.message,
+          image: cachedPosts.image,
+          link: cachedPosts.link,
+          postDate: cachedPosts.postDate,
+          reactions: cachedPosts.reactions,
+          previousReactions: cachedPosts.previousReactions,
+          comments: cachedPosts.comments,
+          shares: cachedPosts.shares,
+        })
+        .from(cachedPosts)
+        .leftJoin(managedPages, eq(cachedPosts.pageId, managedPages.id))
+        .where(gte(cachedPosts.postDate, oneDayAgo))
+        .orderBy(desc(cachedPosts.postDate));
+
+      // Filter to only include posts that have a matching managed page
+      const filteredPosts = posts.filter(post => post.pageName !== null);
+
+      console.log(`[CachedPosts] Found ${filteredPosts.length} managed pages posts in database`);
+
+      // Get last fetched time
+      const settings = await getUserSettings(PUBLIC_USER_ID);
+
+      return {
+        posts: filteredPosts.map((post) => ({
+          id: post.id,
+          pageId: post.pageId,
+          pageName: post.pageName || '',
+          borderColor: post.borderColor || '#22d3ee',
+          profilePicture: post.profilePicture || null,
+          message: post.message,
+          image: post.image,
+          link: post.link,
+          postDate: post.postDate,
+          reactions: post.reactions || 0,
+          previousReactions: post.previousReactions || 0,
+          comments: post.comments || 0,
+          shares: post.shares || 0,
+        })),
+        lastFetchedAt: settings?.lastFetchedAt || null,
+      };
+    } catch (error) {
+      console.error("[CachedPosts] Error fetching managed posts:", error);
+      return { posts: [], lastFetchedAt: null };
+    }
+  }),
 });
 
