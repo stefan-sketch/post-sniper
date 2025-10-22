@@ -463,59 +463,20 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 <div className="mb-2 p-2 bg-cyan-500/20 border border-cyan-500 rounded-lg">
                   <p className="text-sm text-cyan-300">📐 Step 1: Crop your image</p>
                 </div>
+                {/* Crop container with padding for visible handles */}
                 <div 
                   ref={containerRef}
-                  className="relative flex justify-center"
-                  onMouseMove={(e) => {
-                    if (!containerRef.current || !imgRef.current) return;
-                    const rect = imgRef.current.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    
-                    if (isDraggingText) {
-                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                    if (isDraggingWatermark) {
-                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                  }}
-                  onTouchMove={(e) => {
-                    if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
-                    const rect = imgRef.current.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const x = ((touch.clientX - rect.left) / rect.width) * 100;
-                    const y = ((touch.clientY - rect.top) / rect.height) * 100;
-                    
-                    if (isDraggingText) {
-                      e.preventDefault();
-                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                    if (isDraggingWatermark) {
-                      e.preventDefault();
-                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                  }}
-                  onMouseUp={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
-                  }}
-                  onTouchEnd={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
-                  }}
-                  onMouseLeave={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
+                  className="relative flex justify-center p-8 bg-gray-900/50 rounded-lg"
+                  style={{
+                    minHeight: '300px',
                   }}
                 >
                   <ReactCrop
                     crop={crop}
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    className="max-h-[600px] touch-crop"
-                    style={{
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}
+                    className="max-h-[600px]"
+                    ruleOfThirds
                   >
                     <img 
                       ref={imgRef} 
@@ -523,7 +484,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       alt="Upload" 
                       className="max-w-full select-none"
                       style={{
-                        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        maxHeight: '500px',
+                        objectFit: 'contain',
                         WebkitUserSelect: 'none',
                         WebkitTouchCallout: 'none',
                         pointerEvents: 'none',
