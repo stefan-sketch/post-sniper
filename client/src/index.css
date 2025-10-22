@@ -139,7 +139,6 @@
     width: 100%;
     height: 100vh;
     height: -webkit-fill-available;
-    position: fixed;  /* Prevent any scroll behavior */
   }
   
   body {
@@ -149,7 +148,6 @@
     width: 100%;
     height: 100vh;
     height: -webkit-fill-available;
-    position: fixed;  /* Prevent any scroll behavior */
     touch-action: none;
     overscroll-behavior: none;
   }
@@ -159,7 +157,6 @@
     max-width: 100vw;
     width: 100%;
     height: 100%;
-    position: fixed;  /* Prevent any scroll behavior */
     touch-action: pan-y pinch-zoom;
     overscroll-behavior: none;
   }
