@@ -1337,7 +1337,7 @@ export default function Home() {
                   <div 
                     className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
                     style={{ 
-                      border: `2px solid ${page.borderColor}`
+                      border: `1px solid ${page.borderColor}`
                     }}
                   >
                     {page.profilePicture ? (
@@ -1370,7 +1370,7 @@ export default function Home() {
                     <div 
                       className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
                       style={{ 
-                        border: `2px solid ${page.borderColor}`,
+                        border: `1px solid ${page.borderColor}`,
                         boxShadow: `0 0 10px ${page.borderColor}40`
                       }}
                     >
