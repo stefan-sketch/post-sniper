@@ -1370,28 +1370,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Dialogs */}
-      <SettingsDialog 
-        open={showSettings} 
-        onOpenChange={setShowSettings}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onManualFetch={handleManualFetch}
-        isFetching={manualFetchMutation.isPending}
-      />
-      <PagesSettingsDialog 
-        open={showPagesSettings} 
-        onOpenChange={setShowPagesSettings}
-      />
-      <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
-      <CreatePostDialog 
-        open={showCreatePost} 
-        onOpenChange={(open) => {
-          setShowCreatePost(open);
-          if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
-        }}
-        initialImage={droppedImage}
-      />
         </>
       ) : (
         /* Pages View - 3 Facebook Pages */
@@ -1480,6 +1458,29 @@ export default function Home() {
           </div>
         </>
       )}
+
+      {/* Dialogs - Rendered outside view conditionals to appear as overlays */}
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings}
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying(!isPlaying)}
+        onManualFetch={handleManualFetch}
+        isFetching={manualFetchMutation.isPending}
+      />
+      <PagesSettingsDialog 
+        open={showPagesSettings} 
+        onOpenChange={setShowPagesSettings}
+      />
+      <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
+      <CreatePostDialog 
+        open={showCreatePost} 
+        onOpenChange={(open) => {
+          setShowCreatePost(open);
+          if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
+        }}
+        initialImage={droppedImage}
+      />
     </div>
   );
 }
