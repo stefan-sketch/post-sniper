@@ -1,0 +1,22 @@
+{
+  "query": "SELECT userId, COUNT(*) as count FROM monitored_pages GROUP BY userId",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT userId, COUNT(*) as count FROM monitored_pages GROUP BY userId",
+  "rows": [
+    {
+      "userId": "test-user-123",
+      "count": "4"
+    },
+    {
+      "userId": "public",
+      "count": "2"
+    },
+    {
+      "userId": "8zocpvayrrSow64UeKNBpj",
+      "count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "userId\tcount\ntest-user-123\t4\npublic\t2\n8zocpvayrrSow64UeKNBpj\t2\n",
+  "stderr": "",
+  "execution_time_ms": 122
+}
