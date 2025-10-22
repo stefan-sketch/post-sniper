@@ -294,14 +294,23 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
       toast.success(`Success! Posted to ${selectedPages.length} page${selectedPages.length > 1 ? "s" : ""}`);
 
-      // Reset form
+      // Reset form completely
       setImage(null);
       setCrop(undefined);
       setCompletedCrop(undefined);
       setCaption("");
       setSelectedPages([]);
       setUseWatermark(true);
-      onOpenChange(false);
+      setOverlayText("");
+      setFontSize(48);
+      setUseGradient(false);
+      setTextPosition({ x: 50, y: 85 });
+      setWatermarkPosition({ x: 85, y: 10 });
+      
+      // Close dialog after short delay to show success message
+      setTimeout(() => {
+        onOpenChange(false);
+      }, 1500);
     } catch (error: any) {
       toast.error(error.message || "Failed to create post");
     } finally {
