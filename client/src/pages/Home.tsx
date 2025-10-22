@@ -36,6 +36,10 @@ export default function Home() {
   const [showPageFilter, setShowPageFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
+  const [newTweetIds, setNewTweetIds] = useState<Set<string>>(new Set());
+  const [previousTweetIds, setPreviousTweetIds] = useState<Set<string>>(new Set());
+  const [newManagedPostIds, setNewManagedPostIds] = useState<Set<string>>(new Set());
+  const [previousManagedPostIds, setPreviousManagedPostIds] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
   const [previousReactionCounts, setPreviousReactionCounts] = useState<Map<string, number>>(new Map());
   const [previousPopularRankings, setPreviousPopularRankings] = useState<Map<string, number>>(new Map());
@@ -292,6 +296,31 @@ export default function Home() {
       setPreviousPostIds(currentPostIds);
     }
   }, [livePosts]);
+
+  // Detect new tweets for animation
+  useEffect(() => {
+    if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0) {
+      const currentTweetIds = new Set(twitterQuery.data.tweets.map((t: any) => t.id));
+      
+      // Find new tweets that weren't in the previous set
+      const newIds = new Set<string>();
+      currentTweetIds.forEach(id => {
+        if (!previousTweetIds.has(id)) {
+          newIds.add(id);
+        }
+      });
+      
+      if (newIds.size > 0) {
+        setNewTweetIds(newIds);
+        // Remove animation after 2 seconds
+        setTimeout(() => {
+          setNewTweetIds(new Set());
+        }, 2000);
+      }
+      
+      setPreviousTweetIds(currentTweetIds);
+    }
+  }, [twitterQuery.data?.tweets]);
 
   // Handle scroll to top button visibility
   useEffect(() => {
@@ -1187,8 +1216,17 @@ export default function Home() {
                   }
                 };
                 
+                const isNew = newTweetIds.has(tweet.id);
+                
                 return (
-                <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
+                <div
+                  key={tweet.id}
+                  className={isNew ? 'animate-slideIn' : ''}
+                  style={{
+                    animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+                  }}
+                >
+                  <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
                   {/* Profile Header */}
                   <div className="p-4 flex items-center gap-3">
                     <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
@@ -1291,6 +1329,7 @@ export default function Home() {
                         </Button>
                       )}
                     </div>
+                  </div>
                   </div>
                 </div>
                 );
