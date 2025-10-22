@@ -66,18 +66,22 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const createPostMutation = trpc.publer.createPost.useMutation();
   const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
 
-  // Auto-focus text when it's added
+  // Auto-focus text when it's first added
   useEffect(() => {
-    if (overlayText && textRef.current) {
-      textRef.current.focus();
-      // Select all text
-      const range = document.createRange();
-      range.selectNodeContents(textRef.current);
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+    if (overlayText === 'Text' && textRef.current) {
+      setTimeout(() => {
+        if (textRef.current) {
+          textRef.current.focus();
+          // Select all text
+          const range = document.createRange();
+          range.selectNodeContents(textRef.current);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      }, 0);
     }
-  }, [overlayText]);
+  }, [overlayText === 'Text']);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -608,7 +612,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         transform: 'translate(-50%, -50%)',
                         width: imgRef.current.clientWidth,
                         height: imgRef.current.clientHeight,
-                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%)',
+                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.95) 100%)',
                       }}
                     />
                   )}
@@ -627,6 +631,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         const text = e.currentTarget.textContent || '';
                         if (!text.trim()) {
                           setOverlayText('');
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent default behavior that might interfere
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          document.execCommand('insertLineBreak');
                         }
                       }}
                       className="absolute cursor-text select-text text-center outline-none"
@@ -651,9 +662,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         lineHeight: 1.2,
                         minWidth: '50px',
                       }}
-                    >
-                      {overlayText}
-                    </div>
+                      dangerouslySetInnerHTML={{ __html: overlayText.replace(/\n/g, '<br>') }}
+                    />
                   )}
 
                   {/* Watermark Preview */}
