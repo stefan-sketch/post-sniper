@@ -25,11 +25,15 @@ interface CreatePostDialogProps {
 
 export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePostDialogProps) {
   const [image, setImage] = useState<string | null>(null);
+  const [cropMode, setCropMode] = useState(true); // Start in crop mode
+  const [croppedImage, setCroppedImage] = useState<string | null>(null); // Store the cropped result
 
   // Set image when initialImage is provided
   useEffect(() => {
     if (initialImage) {
       setImage(initialImage);
+      setCropMode(true);
+      setCroppedImage(null);
       // Start with full image selected
       setCrop({
         unit: '%',
@@ -67,6 +71,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
+        setCropMode(true);
+        setCroppedImage(null);
         // Start with full image selected
         setCrop({
           unit: '%',
@@ -88,6 +94,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
+        setCropMode(true);
+        setCroppedImage(null);
         // Start with full image selected
         setCrop({
           unit: '%',
@@ -154,7 +162,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     [watermarkPosition]
   );
 
-  const getCroppedImage = useCallback(async (): Promise<string | null> => {
+  // Step 1: Just crop the image
+  const cropImageOnly = useCallback(async (): Promise<string | null> => {
     if (!completedCrop || !imgRef.current) {
       return image; // Return original if no crop
     }
@@ -185,80 +194,124 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       cropHeight
     );
 
-    // Add gradient overlay if enabled
-    if (useGradient) {
-      const gradient = ctx.createLinearGradient(0, canvas.height * 0.67, 0, canvas.height);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    // Add text overlay if provided
-    if (overlayText.trim()) {
-      // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
-      const scaledFontSize = (fontSize / 800) * canvas.width;
-      ctx.font = `bold ${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      const textX = (textPosition.x / 100) * canvas.width;
-      const textY = (textPosition.y / 100) * canvas.height;
-      const maxWidth = canvas.width * 0.9;
-      const lineHeight = scaledFontSize * 1.2;
-      
-      // Split text by manual line breaks
-      const paragraphs = overlayText.split('\n');
-      const lines: string[] = [];
-      
-      // Word wrap each paragraph
-      paragraphs.forEach(paragraph => {
-        const words = paragraph.split(' ');
-        let currentLine = '';
-        
-        words.forEach((word, i) => {
-          const testLine = currentLine + (currentLine ? ' ' : '') + word;
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            currentLine = testLine;
-          }
-          
-          if (i === words.length - 1) {
-            lines.push(currentLine);
-          }
-        });
-      });
-      
-      // Calculate starting Y position to center all lines
-      const totalHeight = lines.length * lineHeight;
-      let currentY = textY - (totalHeight / 2) + (lineHeight / 2);
-      
-      // Render each line
-      lines.forEach(line => {
-        // Add black stroke for outline effect
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = scaledFontSize * 0.1;
-        ctx.strokeText(line, textX, currentY);
-        
-        // Add white fill
-        ctx.fillStyle = 'white';
-        ctx.fillText(line, textX, currentY);
-        
-        currentY += lineHeight;
-      });
-    }
-
-    // Use JPEG with high quality for better file size and quality
+    // Use JPEG with high quality
     return canvas.toDataURL("image/jpeg", 0.95);
-  }, [completedCrop, image, useGradient, overlayText, fontSize, textPosition, watermarkPosition]);
+  }, [completedCrop, image]);
+
+  // Step 2: Apply overlays to the cropped image
+  const applyOverlays = useCallback(async (baseImage: string): Promise<string | null> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0);
+
+        // Add gradient overlay if enabled
+        if (useGradient) {
+          const gradient = ctx.createLinearGradient(0, canvas.height * 0.67, 0, canvas.height);
+          gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Add text overlay if provided
+        if (overlayText.trim()) {
+          // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
+          const scaledFontSize = (fontSize / 800) * canvas.width;
+          ctx.font = `bold ${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          const textX = (textPosition.x / 100) * canvas.width;
+          const textY = (textPosition.y / 100) * canvas.height;
+          const maxWidth = canvas.width * 0.9;
+          const lineHeight = scaledFontSize * 1.2;
+          
+          // Split text by manual line breaks
+          const paragraphs = overlayText.split('\n');
+          const lines: string[] = [];
+          
+          // Word wrap each paragraph
+          paragraphs.forEach(paragraph => {
+            const words = paragraph.split(' ');
+            let currentLine = '';
+            
+            words.forEach((word, i) => {
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const metrics = ctx.measureText(testLine);
+              
+              if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+              
+              if (i === words.length - 1) {
+                lines.push(currentLine);
+              }
+            });
+          });
+          
+          // Calculate starting Y position to center all lines
+          const totalHeight = lines.length * lineHeight;
+          let currentY = textY - (totalHeight / 2) + (lineHeight / 2);
+          
+          // Render each line
+          lines.forEach(line => {
+            // Add black stroke for outline effect
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = scaledFontSize * 0.1;
+            ctx.strokeText(line, textX, currentY);
+            
+            // Add white fill
+            ctx.fillStyle = 'white';
+            ctx.fillText(line, textX, currentY);
+            
+            currentY += lineHeight;
+          });
+        }
+
+        // Use JPEG with high quality
+        resolve(canvas.toDataURL("image/jpeg", 0.95));
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = baseImage;
+    });
+  }, [useGradient, overlayText, fontSize, textPosition]);
+
+  // Handle confirming the crop
+  const handleConfirmCrop = async () => {
+    const cropped = await cropImageOnly();
+    if (cropped) {
+      setCroppedImage(cropped);
+      setCropMode(false);
+      toast.success("Crop confirmed! Now add overlays and watermark.");
+    }
+  };
+
+  // Handle going back to crop mode
+  const handleBackToCrop = () => {
+    setCropMode(true);
+    setCroppedImage(null);
+  };
 
   const handlePost = async () => {
-    if (!image) {
-      toast.error("Please upload an image");
+    if (!croppedImage) {
+      toast.error("Please crop the image first");
       return;
     }
 
@@ -275,11 +328,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setIsUploading(true);
 
     try {
-      // Get cropped image
-      let processedImage = await getCroppedImage();
-      if (!processedImage) {
-        throw new Error("Failed to process image");
-      }
+      // Start with the cropped image
+      let processedImage = croppedImage;
+      
+      // Apply overlays (gradient and text)
+      processedImage = await applyOverlays(processedImage) || processedImage;
 
       // Apply watermark if enabled and only one page selected
       if (useWatermark && selectedPages.length === 1) {
@@ -404,8 +457,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   className="hidden"
                 />
               </div>
-            ) : (
+            ) : cropMode ? (
               <div className="space-y-2">
+                {/* Step 1: Crop Mode */}
+                <div className="mb-2 p-2 bg-cyan-500/20 border border-cyan-500 rounded-lg">
+                  <p className="text-sm text-cyan-300">📐 Step 1: Crop your image</p>
+                </div>
                 <div 
                   ref={containerRef}
                   className="relative flex justify-center"
@@ -475,6 +532,95 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       onContextMenu={(e) => e.preventDefault()}
                     />
                   </ReactCrop>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setImage(null);
+                      setCrop(undefined);
+                      setCompletedCrop(undefined);
+                      setCropMode(true);
+                      setCroppedImage(null);
+                    }}
+                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    Remove Image
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleConfirmCrop}
+                    className="flex-1 bg-cyan-500 hover:bg-cyan-600 transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    ✓ Confirm Crop
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {/* Step 2: Overlay Mode */}
+                <div className="mb-2 p-2 bg-green-500/20 border border-green-500 rounded-lg">
+                  <p className="text-sm text-green-300">✨ Step 2: Add overlays and watermark</p>
+                </div>
+                <div 
+                  ref={containerRef}
+                  className="relative flex justify-center"
+                  onMouseMove={(e) => {
+                    if (!containerRef.current || !imgRef.current) return;
+                    const rect = imgRef.current.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    if (isDraggingText) {
+                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                    if (isDraggingWatermark) {
+                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                  }}
+                  onTouchMove={(e) => {
+                    if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
+                    const rect = imgRef.current.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                    
+                    if (isDraggingText) {
+                      e.preventDefault();
+                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                    if (isDraggingWatermark) {
+                      e.preventDefault();
+                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                  }}
+                  onMouseUp={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                  onTouchEnd={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                  onMouseLeave={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                >
+                  {/* Show the cropped image */}
+                  <img 
+                    ref={imgRef} 
+                    src={croppedImage || image} 
+                    alt="Cropped" 
+                    className="max-w-full max-h-[600px] select-none"
+                    style={{
+                      WebkitUserSelect: 'none',
+                      WebkitTouchCallout: 'none',
+                    }}
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
 
                   {/* Gradient Overlay Preview */}
                   {useGradient && imgRef.current && (
@@ -559,24 +705,36 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setImage(null);
-                    setCrop(undefined);
-                    setCompletedCrop(undefined);
-                  }}
-                  className="w-full transition-all duration-200 hover:scale-[1.02]"
-                >
-                  Remove Image
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBackToCrop}
+                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    ← Back to Crop
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setImage(null);
+                      setCrop(undefined);
+                      setCompletedCrop(undefined);
+                      setCropMode(true);
+                      setCroppedImage(null);
+                    }}
+                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    Remove Image
+                  </Button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Watermark Toggle */}
-          {image && (
+          {/* Watermark Toggle - Only in overlay mode */}
+          {image && !cropMode && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="watermark"
@@ -589,8 +747,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             </div>
           )}
 
-          {/* Gradient Overlay Toggle */}
-          {image && (
+          {/* Gradient Overlay Toggle - Only in overlay mode */}
+          {image && !cropMode && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="gradient"
@@ -603,8 +761,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             </div>
           )}
 
-          {/* Text Overlay */}
-          {image && (
+          {/* Text Overlay - Only in overlay mode */}
+          {image && !cropMode && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Text Overlay</label>
               <textarea

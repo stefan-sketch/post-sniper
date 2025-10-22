@@ -22,6 +22,8 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live');
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Minimum swipe distance (in px) to trigger a view change
   const minSwipeDistance = 50;
@@ -32,7 +34,16 @@ export default function Home() {
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+    
+    // Calculate swipe offset for visual feedback
+    if (touchStart !== null && !isTransitioning) {
+      const diff = currentTouch - touchStart;
+      // Limit the swipe distance to prevent over-scrolling
+      const limitedDiff = Math.max(-100, Math.min(100, diff * 0.5));
+      setSwipeOffset(limitedDiff);
+    }
   };
 
   const onTouchEnd = () => {
@@ -41,6 +52,8 @@ export default function Home() {
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
+    
+    setIsTransitioning(true);
     
     if (isLeftSwipe) {
       // Swipe left: go to next view
@@ -53,6 +66,10 @@ export default function Home() {
       if (mobileView === 'twitter') setMobileView('popular');
       else if (mobileView === 'popular') setMobileView('live');
     }
+    
+    // Reset swipe offset with animation
+    setSwipeOffset(0);
+    setTimeout(() => setIsTransitioning(false), 300);
   }; // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
@@ -963,7 +980,13 @@ export default function Home() {
         onTouchEnd={onTouchEnd}
       >
         {mobileView === 'live' ? (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div 
+            className="flex flex-col h-full overflow-hidden"
+            style={{
+              transform: `translateX(${swipeOffset}px)`,
+              transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+            }}
+          >
             <div className="flex items-center justify-center gap-3 mb-3">
               <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
@@ -1045,7 +1068,13 @@ export default function Home() {
             </div>
           </div>
         ) : mobileView === 'popular' ? (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div 
+            className="flex flex-col h-full overflow-hidden"
+            style={{
+              transform: `translateX(${swipeOffset}px)`,
+              transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+            }}
+          >
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
@@ -1115,7 +1144,13 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col h-full overflow-hidden">
+          <div 
+            className="flex flex-col h-full overflow-hidden"
+            style={{
+              transform: `translateX(${swipeOffset}px)`,
+              transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+            }}
+          >
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
