@@ -422,7 +422,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     crop={crop}
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    className="max-h-96"
+                    className="max-h-[600px]"
                     style={{
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
@@ -458,10 +458,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     <div
                       className="absolute cursor-move select-none text-center"
                       style={{
+                        pointerEvents: 'auto',
+                        zIndex: 10,
                         left: `calc(50% + ${(textPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
                         top: `calc(50% + ${(textPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
                         transform: 'translate(-50%, -50%)',
-                        fontSize: `${fontSize * (imgRef.current.clientWidth / 800)}px`,
+                        fontSize: `${fontSize * (imgRef.current.clientWidth / imgRef.current.naturalWidth)}px`,
                         fontFamily: 'Impact, "Arial Black", sans-serif',
                         fontWeight: 'bold',
                         color: 'white',
@@ -488,6 +490,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       alt="Watermark"
                       className="absolute cursor-move select-none"
                       style={{
+                        pointerEvents: 'auto',
+                        zIndex: 10,
                         left: `calc(50% + ${(watermarkPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
                         top: `calc(50% + ${(watermarkPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
                         transform: 'translate(-50%, -50%)',
