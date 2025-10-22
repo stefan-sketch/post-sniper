@@ -8,6 +8,13 @@
       "when": 1761050766450,
       "tag": "0000_busy_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761143528162,
+      "tag": "0001_next_vargas",
+      "breakpoints": true
     }
   ]
 }

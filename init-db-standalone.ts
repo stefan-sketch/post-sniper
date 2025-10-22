@@ -1,27 +1,27 @@
-import { getDb } from "./db";
-import { sql } from "drizzle-orm";
+import postgres from 'postgres';
 
-export async function initializeDatabase() {
-  const db = await getDb();
-  if (!db) {
-    console.warn("[InitDB] Database not available, skipping initialization");
-    return;
-  }
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  console.error('DATABASE_URL environment variable is required');
+  process.exit(1);
+}
+
+async function initDatabase() {
+  console.log('[Init] Connecting to database...');
+  
+  const sql = postgres(DATABASE_URL, {
+    ssl: { rejectUnauthorized: true },
+    max: 1,
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
 
   try {
-    console.log("[InitDB] Initializing database tables...");
-    
-    // Add missing columns to existing tables if needed (for schema updates)
-    try {
-      await db.execute(sql`ALTER TABLE monitored_pages ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW()`);
-      await db.execute(sql`ALTER TABLE cached_posts ADD COLUMN IF NOT EXISTS "fetchedAt" TIMESTAMP DEFAULT NOW()`);
-      console.log("[InitDB] Updated existing table schemas");
-    } catch (e) {
-      // Tables might not exist yet, will be created below
-    }
+    console.log('[Init] Creating tables...');
 
     // Create users table
-    await db.execute(sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(64) PRIMARY KEY,
         name TEXT,
@@ -31,10 +31,10 @@ export async function initializeDatabase() {
         "createdAt" TIMESTAMP DEFAULT NOW(),
         "lastSignedIn" TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
 
     // Create monitored_pages table
-    await db.execute(sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS monitored_pages (
         id VARCHAR(64) PRIMARY KEY,
         "userId" VARCHAR(64) NOT NULL,
@@ -48,10 +48,25 @@ export async function initializeDatabase() {
         "createdAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
+
+    // Create managed_pages table
+    await sql`
+      CREATE TABLE IF NOT EXISTS managed_pages (
+        id VARCHAR(64) PRIMARY KEY,
+        "userId" VARCHAR(64) NOT NULL,
+        "profileId" VARCHAR(128) NOT NULL,
+        "profileName" VARCHAR(255) NOT NULL,
+        "profilePicture" TEXT,
+        "borderColor" VARCHAR(7) NOT NULL,
+        network VARCHAR(32) DEFAULT 'facebook' NOT NULL,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `;
 
     // Create user_settings table
-    await db.execute(sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS user_settings (
         "userId" VARCHAR(64) PRIMARY KEY,
         "fanpageKarmaToken" TEXT,
@@ -60,14 +75,17 @@ export async function initializeDatabase() {
         "useMockData" BOOLEAN DEFAULT false,
         "isPlaying" BOOLEAN DEFAULT false,
         "lastFetchedAt" TIMESTAMP,
+        "lastAPIStatus" TEXT DEFAULT 'success',
+        "lastDataHash" TEXT,
+        "apiSyncOffset" INTEGER DEFAULT 0,
         "dismissedPosts" TEXT,
         "createdAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
 
     // Create alerts table
-    await db.execute(sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS alerts (
         id VARCHAR(64) PRIMARY KEY,
         "userId" VARCHAR(64) NOT NULL,
@@ -82,25 +100,33 @@ export async function initializeDatabase() {
         "triggeredAt" TIMESTAMP DEFAULT NOW(),
         "isRead" BOOLEAN DEFAULT false
       )
-    `);
+    `;
 
-    // Create managed_pages table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS managed_pages (
-        id VARCHAR(64) PRIMARY KEY,
-        "userId" VARCHAR(64) NOT NULL,
-        "profileId" VARCHAR(128) NOT NULL,
-        "profileName" VARCHAR(255) NOT NULL,
-        "profilePicture" TEXT,
+    // Create cached_posts table
+    await sql`
+      CREATE TABLE IF NOT EXISTS cached_posts (
+        id VARCHAR(255) PRIMARY KEY,
+        "pageId" VARCHAR(64) NOT NULL,
+        "pageName" VARCHAR(255) NOT NULL,
         "borderColor" VARCHAR(7) NOT NULL,
-        network VARCHAR(32) DEFAULT 'facebook' NOT NULL,
-        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "profilePicture" TEXT,
+        message TEXT,
+        image TEXT,
+        link TEXT,
+        "postDate" TIMESTAMP NOT NULL,
+        reactions INTEGER DEFAULT 0,
+        "previousReactions" INTEGER DEFAULT 0,
+        comments INTEGER DEFAULT 0,
+        shares INTEGER DEFAULT 0,
+        "alertThreshold" INTEGER,
+        "alertEnabled" BOOLEAN,
+        "fetchedAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
 
     // Create twitter_posts table
-    await db.execute(sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS twitter_posts (
         id VARCHAR(64) PRIMARY KEY,
         text TEXT,
@@ -117,33 +143,36 @@ export async function initializeDatabase() {
         "fetchedAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
 
-    // Create cached_posts table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS cached_posts (
-        id VARCHAR(255) PRIMARY KEY,
-        "pageId" VARCHAR(64) NOT NULL,
-        "pageName" VARCHAR(255) NOT NULL,
-        "borderColor" VARCHAR(7) NOT NULL,
-        "profilePicture" TEXT,
-        message TEXT,
-        image TEXT,
-        link TEXT,
-        "postDate" TIMESTAMP NOT NULL,
-        reactions INTEGER DEFAULT 0,
-        comments INTEGER DEFAULT 0,
-        shares INTEGER DEFAULT 0,
-        "alertThreshold" INTEGER,
-        "alertEnabled" BOOLEAN,
-        "fetchedAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `);
-
-    console.log("[InitDB] ✅ Database tables initialized successfully!");
+    console.log('[Init] ✅ All tables created successfully!');
+    
+    // Verify tables
+    const tables = await sql`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      ORDER BY table_name
+    `;
+    
+    console.log('[Init] Tables in database:');
+    tables.forEach((t: any) => console.log(`  - ${t.table_name}`));
+    
   } catch (error) {
-    console.error("[InitDB] ❌ Failed to initialize database:", error);
+    console.error('[Init] ❌ Error:', error);
+    throw error;
+  } finally {
+    await sql.end();
   }
 }
+
+initDatabase()
+  .then(() => {
+    console.log('[Init] Database initialization complete');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('[Init] Failed to initialize database:', error);
+    process.exit(1);
+  });
 

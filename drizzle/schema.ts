@@ -29,7 +29,6 @@ export const monitoredPages = pgTable("monitored_pages", {
   profilePicture: text("profilePicture"),
   borderColor: varchar("borderColor", { length: 7 }).notNull(), // hex color
   network: varchar("network", { length: 32 }).default("facebook").notNull(),
-  publerPageId: varchar("publerPageId", { length: 128 }), // Publer page ID for deletion
   alertThreshold: integer("alertThreshold").default(100), // reactions threshold for alerts
   alertEnabled: boolean("alertEnabled").default(true),
   createdAt: timestamp("createdAt").defaultNow(),
@@ -38,6 +37,24 @@ export const monitoredPages = pgTable("monitored_pages", {
 
 export type MonitoredPage = typeof monitoredPages.$inferSelect;
 export type InsertMonitoredPage = typeof monitoredPages.$inferInsert;
+
+/**
+ * Managed Facebook pages (for Pages tab)
+ */
+export const managedPages = pgTable("managed_pages", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  userId: varchar("userId", { length: 64 }).notNull(),
+  profileId: varchar("profileId", { length: 128 }).notNull(),
+  profileName: varchar("profileName", { length: 255 }).notNull(),
+  profilePicture: text("profilePicture"),
+  borderColor: varchar("borderColor", { length: 7 }).notNull(), // hex color
+  network: varchar("network", { length: 32 }).default("facebook").notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
+});
+
+export type ManagedPage = typeof managedPages.$inferSelect;
+export type InsertManagedPage = typeof managedPages.$inferInsert;
 
 /**
  * User settings

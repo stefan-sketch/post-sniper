@@ -7,6 +7,9 @@ import {
   monitoredPages, 
   InsertMonitoredPage,
   MonitoredPage,
+  managedPages,
+  InsertManagedPage,
+  ManagedPage,
   userSettings,
   InsertUserSettings,
   UserSettings,
@@ -22,7 +25,11 @@ let _client: ReturnType<typeof postgres> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _client = postgres(process.env.DATABASE_URL);
+      _client = postgres(process.env.DATABASE_URL, {
+        ssl: { rejectUnauthorized: true },
+        idle_timeout: 20,
+        connect_timeout: 10,
+      });
       _db = drizzle(_client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
@@ -129,6 +136,37 @@ export async function deleteMonitoredPage(id: string): Promise<void> {
   if (!db) throw new Error("Database not available");
   
   await db.delete(monitoredPages).where(eq(monitoredPages.id, id));
+}
+
+// Managed Pages (for Pages tab)
+export async function getManagedPages(userId: string): Promise<ManagedPage[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(managedPages).where(eq(managedPages.userId, userId));
+}
+
+export async function createManagedPage(page: InsertManagedPage): Promise<ManagedPage> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(managedPages).values(page);
+  const result = await db.select().from(managedPages).where(eq(managedPages.id, page.id!)).limit(1);
+  return result[0];
+}
+
+export async function updateManagedPage(id: string, updates: Partial<InsertManagedPage>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(managedPages).set({ ...updates, updatedAt: new Date() }).where(eq(managedPages.id, id));
+}
+
+export async function deleteManagedPage(id: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(managedPages).where(eq(managedPages.id, id));
 }
 
 // User Settings

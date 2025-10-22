@@ -23,22 +23,22 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
   const utils = trpc.useUtils();
   const [pages, setPages] = useState<any[]>([]);
   
-  const pagesQuery = trpc.pages.list.useQuery();
-  const createPage = trpc.pages.create.useMutation({
+  const pagesQuery = trpc.managedPages.list.useQuery();
+  const createPage = trpc.managedPages.create.useMutation({
     onSuccess: () => {
-      utils.pages.list.invalidate();
+      utils.managedPages.list.invalidate();
       toast.success("Page added successfully");
     },
   });
-  const updatePage = trpc.pages.update.useMutation({
+  const updatePage = trpc.managedPages.update.useMutation({
     onSuccess: () => {
-      utils.pages.list.invalidate();
+      utils.managedPages.list.invalidate();
       toast.success("Page updated successfully");
     },
   });
-  const deletePage = trpc.pages.delete.useMutation({
+  const deletePage = trpc.managedPages.delete.useMutation({
     onSuccess: () => {
-      utils.pages.list.invalidate();
+      utils.managedPages.list.invalidate();
       toast.success("Page deleted successfully");
     },
   });
@@ -57,9 +57,6 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
       profilePicture: "",
       borderColor: "#22d3ee",
       network: "facebook",
-      publerPageId: "",
-      alertThreshold: 100,
-      alertEnabled: true,
       isNew: true,
     };
     setPages([...pages, newPage]);
@@ -110,7 +107,7 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
         <DialogHeader>
           <DialogTitle>Pages Settings</DialogTitle>
           <DialogDescription>
-            Configure Facebook pages for the Pages view
+            Configure your Facebook pages for the Pages view
           </DialogDescription>
         </DialogHeader>
 
@@ -118,8 +115,8 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
           {/* Facebook Pages Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Facebook Pages</Label>
-              <Button onClick={handleAddPage} size="sm" variant="outline">
+              <Label>Facebook Pages (Max 3)</Label>
+              <Button onClick={handleAddPage} size="sm" variant="outline" disabled={pages.length >= 3}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Page
               </Button>
@@ -147,23 +144,13 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs">Profile Picture URL (optional)</Label>
-                      <Input
-                        placeholder="https://..."
-                        value={page.profilePicture || ""}
-                        onChange={(e) => handleUpdatePage(page.id, "profilePicture", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Publer Page ID (for deletion)</Label>
-                      <Input
-                        placeholder="e.g., 688e7d0f74c67046be7b456d"
-                        value={page.publerPageId || ""}
-                        onChange={(e) => handleUpdatePage(page.id, "publerPageId", e.target.value)}
-                      />
-                    </div>
+                  <div>
+                    <Label className="text-xs">Profile Picture URL (optional)</Label>
+                    <Input
+                      placeholder="https://..."
+                      value={page.profilePicture || ""}
+                      onChange={(e) => handleUpdatePage(page.id, "profilePicture", e.target.value)}
+                    />
                   </div>
 
                   <div>

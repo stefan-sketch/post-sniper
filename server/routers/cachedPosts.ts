@@ -156,7 +156,6 @@ export const cachedPostsRouter = router({
             name: pageConfig.profileName,
             borderColor: pageConfig.borderColor,
             profilePicture: pageConfig.profilePicture,
-            publerPageId: pageConfig.publerPageId,
           },
         };
       } catch (error) {

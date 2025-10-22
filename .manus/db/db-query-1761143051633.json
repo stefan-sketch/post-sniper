@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE managed_pages (\n  id VARCHAR(64) PRIMARY KEY,\n  userId VARCHAR(64) NOT NULL,\n  profileId VARCHAR(128) NOT NULL,\n  profileName VARCHAR(255) NOT NULL,\n  profilePicture TEXT,\n  borderColor VARCHAR(7) NOT NULL,\n  network VARCHAR(32) NOT NULL DEFAULT 'facebook',\n  publerPageId VARCHAR(128),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute CREATE TABLE managed_pages (\n  id VARCHAR(64) PRIMARY KEY,\n  userId VARCHAR(64) NOT NULL,\n  profileId VARCHAR(128) NOT NULL,\n  profileName VARCHAR(255) NOT NULL,\n  profilePicture TEXT,\n  borderColor VARCHAR(7) NOT NULL,\n  network VARCHAR(32) NOT NULL DEFAULT 'facebook',\n  publerPageId VARCHAR(128),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 165
+}

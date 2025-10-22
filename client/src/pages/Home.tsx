@@ -96,6 +96,7 @@ export default function Home() {
   
   const settingsQuery = trpc.settings.get.useQuery();
   const pagesQuery = trpc.pages.list.useQuery();
+  const managedPagesQuery = trpc.managedPages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
 
@@ -1424,8 +1425,8 @@ export default function Home() {
 
           {/* Desktop: Three Column Layout */}
           <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden">
-            {pagesQuery.data && pagesQuery.data.length > 0 ? (
-              pagesQuery.data.slice(0, 3).map((page: any) => (
+            {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
+              managedPagesQuery.data.slice(0, 3).map((page: any) => (
                 <div key={page.id} className="flex flex-col h-full overflow-hidden">
                   <h2 
                     className="text-lg font-semibold mb-3 text-center"
@@ -1449,9 +1450,9 @@ export default function Home() {
 
           {/* Mobile: Single Column with Swipe */}
           <div className="md:hidden flex-1 overflow-hidden">
-            {pagesQuery.data && pagesQuery.data.length > 0 ? (
+            {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
               <div className="h-full">
-                {pagesQuery.data.map((page: any, index: number) => (
+                {managedPagesQuery.data.map((page: any, index: number) => (
                   <div 
                     key={page.id}
                     className={`h-full ${index === 0 && pagesView === 'away-days' ? 'block' : index === 1 && pagesView === 'funnys' ? 'block' : index === 2 && pagesView === 'footy-feed' ? 'block' : 'hidden'}`}
