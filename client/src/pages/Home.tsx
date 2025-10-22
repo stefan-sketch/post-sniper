@@ -395,7 +395,7 @@ export default function Home() {
   return (
     <div className="w-full md:w-[770px] md:mx-auto px-4 md:px-6 flex flex-col overflow-hidden max-w-full" style={{ height: '100vh', paddingTop: 'max(1rem, env(safe-area-inset-top))', touchAction: 'none', overscrollBehavior: 'none' }}>
       {/* Header */}
-      <header className="mb-3 flex-shrink-0">
+      <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           {/* Left: View Toggle - Single Switch Icon */}
           <button
@@ -529,7 +529,7 @@ export default function Home() {
       {currentView === 'feed' ? (
         <>
       {/* Mobile View Selector - Only visible on mobile */}
-      <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
+      <div className="md:hidden mb-2 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
         <button
           onClick={() => setMobileView('live')}
           className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
@@ -955,7 +955,7 @@ export default function Home() {
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="flex items-center justify-center gap-3 mb-2">
               <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -1001,7 +1001,7 @@ export default function Home() {
               </div>
             </div>
             {/* Printer line - thin red line where new posts emerge from */}
-            <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
+            <div className="relative h-0.5 bg-red-500/30 mb-2 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
             </div>
             <div className="space-y-3 relative overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
@@ -1314,7 +1314,7 @@ export default function Home() {
         /* Pages View - 3 Facebook Pages */
         <>
           {/* Mobile View Selector - Icons only */}
-          <div className="md:hidden mb-3 flex gap-2 justify-center items-center flex-shrink-0">
+          <div className="md:hidden mb-2 flex gap-2 justify-center items-center flex-shrink-0">
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
@@ -1358,7 +1358,7 @@ export default function Home() {
           </div>
           
           {/* Blue divider line under page icons - Mobile only */}
-          <div className="md:hidden h-[2px] bg-gradient-to-r from-transparent via-[#1877F2] to-transparent mb-3 flex-shrink-0"></div>
+          <div className="md:hidden h-[2px] bg-gradient-to-r from-transparent via-[#1877F2] to-transparent mb-2 flex-shrink-0"></div>
 
           {/* Desktop: Three Column Layout */}
           <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden overflow-x-hidden max-w-full">
