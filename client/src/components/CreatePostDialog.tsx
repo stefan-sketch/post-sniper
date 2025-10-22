@@ -249,7 +249,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         if (overlayText.trim()) {
           // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
           const scaledFontSize = (fontSize / 800) * canvas.width;
-          ctx.font = `${scaledFontSize}px Norwester, Impact, 'Arial Black', sans-serif`;
+          ctx.font = `${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           

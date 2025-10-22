@@ -1,14 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Norwester Font */
-@font-face {
+/* Norwester Font - Temporarily disabled due to Vite build issue */
+/* @font-face {
   font-family: 'Norwester';
   src: url('/fonts/norwester.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
-}
+} */
 
 @custom-variant dark (&:is(.dark *));
 
