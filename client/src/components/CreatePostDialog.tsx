@@ -48,7 +48,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [caption, setCaption] = useState("");
   const [selectedPages, setSelectedPages] = useState<PageId[]>([]);
-  const [useWatermark, setUseWatermark] = useState(true);
+  const [useWatermark, setUseWatermark] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [overlayText, setOverlayText] = useState("");
@@ -58,6 +58,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [tempText, setTempText] = useState("");
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -633,6 +635,14 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         e.stopPropagation();
                         setIsDraggingText(true);
                       }}
+                      onClick={(e) => {
+                        if (!isDraggingText) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setTempText(overlayText);
+                          setIsEditingText(true);
+                        }
+                      }}
                     >
                       {overlayText}
                     </div>
@@ -695,46 +705,66 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             )}
           </div>
 
-          {/* Watermark Toggle - Only in overlay mode */}
-          {image && !cropMode && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="watermark"
-                checked={useWatermark}
-                onCheckedChange={(checked) => setUseWatermark(checked as boolean)}
-              />
-              <label htmlFor="watermark" className="text-sm text-gray-300 cursor-pointer">
-                Add watermark {selectedPages.length > 1 && "(only works with one page)"}
-              </label>
-            </div>
-          )}
-
-          {/* Gradient Overlay Toggle - Only in overlay mode */}
-          {image && !cropMode && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="gradient"
-                checked={useGradient}
-                onCheckedChange={(checked) => setUseGradient(checked as boolean)}
-              />
-              <label htmlFor="gradient" className="text-sm text-gray-300 cursor-pointer">
-                Add dark gradient (bottom 1/3)
-              </label>
-            </div>
-          )}
-
-          {/* Text Overlay - Only in overlay mode */}
+          {/* Compact Overlay Controls - Only in overlay mode */}
           {image && !cropMode && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Text Overlay</label>
-              <textarea
-                value={overlayText}
-                onChange={(e) => setOverlayText(e.target.value)}
-                placeholder="Add text to image... (Press Enter for new line)"
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-                maxLength={200}
-                rows={3}
-              />
+              <label className="text-sm font-medium text-gray-300">Overlays</label>
+              <div className="flex gap-2">
+                {/* Text Button */}
+                <Button
+                  type="button"
+                  variant={overlayText ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    if (!overlayText) {
+                      setOverlayText("Text");
+                    } else {
+                      setOverlayText("");
+                    }
+                  }}
+                  className={`flex-1 transition-all duration-200 ${
+                    overlayText
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                  }`}
+                >
+                  {overlayText ? "✓ Text" : "Text"}
+                </Button>
+
+                {/* Watermark Button */}
+                <Button
+                  type="button"
+                  variant={useWatermark ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseWatermark(!useWatermark)}
+                  disabled={selectedPages.length !== 1}
+                  className={`flex-1 transition-all duration-200 ${
+                    useWatermark
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                  }`}
+                  title={selectedPages.length > 1 ? "Only works with one page" : ""}
+                >
+                  {useWatermark ? "✓ Watermark" : "Watermark"}
+                </Button>
+
+                {/* Gradient Button */}
+                <Button
+                  type="button"
+                  variant={useGradient ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseGradient(!useGradient)}
+                  className={`flex-1 transition-all duration-200 ${
+                    useGradient
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                  }`}
+                >
+                  {useGradient ? "✓ Gradient" : "Gradient"}
+                </Button>
+              </div>
+              
+              {/* Font Size Slider - Only show when text is active */}
               {overlayText && (
                 <div className="space-y-1">
                   <label className="text-xs text-gray-400">Font Size: {fontSize}px</label>
@@ -808,6 +838,56 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           </Button>
         </div>
       </DialogContent>
+
+      {/* Text Editing Modal */}
+      {isEditingText && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]"
+          onClick={() => {
+            setIsEditingText(false);
+            setTempText("");
+          }}
+        >
+          <div 
+            className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-white mb-4">Edit Text Overlay</h3>
+            <textarea
+              value={tempText}
+              onChange={(e) => setTempText(e.target.value)}
+              placeholder="Enter your text..."
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
+              maxLength={200}
+              rows={4}
+              autoFocus
+            />
+            <p className="text-xs text-gray-500 mt-1">{tempText.length} / 200</p>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditingText(false);
+                  setTempText("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setOverlayText(tempText);
+                  setIsEditingText(false);
+                  setTempText("");
+                }}
+                className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Dialog>
   );
 }
