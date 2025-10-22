@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, varchar, integer, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, varchar, integer, boolean, pgEnum, index } from "drizzle-orm/pg-core";
 
 /**
  * Core user table backing auth flow.
@@ -78,7 +78,10 @@ export const alerts = pgTable("alerts", {
   postDate: timestamp("postDate"),
   triggeredAt: timestamp("triggeredAt").defaultNow(),
   isRead: boolean("isRead").default(false),
-});
+}, (table) => ({
+  userIdIdx: index("idx_alerts_user_id").on(table.userId),
+  triggeredAtIdx: index("idx_alerts_triggered_at").on(table.triggeredAt.desc()),
+}));
 
 export type Alert = typeof alerts.$inferSelect;
 export type InsertAlert = typeof alerts.$inferInsert;
@@ -104,7 +107,11 @@ export const cachedPosts = pgTable("cached_posts", {
   alertEnabled: boolean("alertEnabled"),
   fetchedAt: timestamp("fetchedAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
-});
+}, (table) => ({
+  postDateIdx: index("idx_cached_posts_post_date").on(table.postDate.desc()),
+  pageIdIdx: index("idx_cached_posts_page_id").on(table.pageId),
+  reactionsIdx: index("idx_cached_posts_reactions").on(table.reactions.desc()),
+}));
 
 export type CachedPost = typeof cachedPosts.$inferSelect;
 export type InsertCachedPost = typeof cachedPosts.$inferInsert;
@@ -127,7 +134,9 @@ export const twitterPosts = pgTable("twitter_posts", {
   createdAt: timestamp("createdAt").notNull(),
   fetchedAt: timestamp("fetchedAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
-});
+}, (table) => ({
+  createdAtIdx: index("idx_twitter_posts_created_at").on(table.createdAt.desc()),
+}));
 
 export type TwitterPost = typeof twitterPosts.$inferSelect;
 export type InsertTwitterPost = typeof twitterPosts.$inferInsert;

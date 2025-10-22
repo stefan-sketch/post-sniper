@@ -48,8 +48,8 @@ export default function Home() {
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
     { limit: 50 }, 
     { 
-      refetchInterval: 30000, // Refresh UI every 30 seconds from database
-      staleTime: 0,
+      refetchInterval: 60000, // Refresh UI every 60 seconds from database (reduced from 30s)
+      staleTime: 30000, // Consider data fresh for 30 seconds
     }
   );
   
@@ -96,8 +96,8 @@ export default function Home() {
   }, [isPlaying]);
   // Use cached posts from server (fetched by background job)
   const postsQuery = trpc.cachedPosts.getAll.useQuery(undefined, {
-    refetchInterval: 5000, // Poll every 5 seconds to get latest cached data
-    staleTime: 0, // Always consider data stale to ensure fresh updates
+    refetchInterval: 10000, // Poll every 10 seconds to get latest cached data (reduced from 5s)
+    staleTime: 5000, // Consider data fresh for 5 seconds
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
   });
@@ -790,7 +790,7 @@ export default function Home() {
                   <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
                     {/* Profile Header */}
                     <div className="p-4 flex items-center gap-3">
-                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" />
+                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white">{tweet.author.name}</span>
@@ -857,7 +857,9 @@ export default function Home() {
                     {tweet.image && (
                       <div className="w-full overflow-hidden">
                         <img 
-                          src={tweet.image} 
+                          src={tweet.image}
+                          loading="lazy"
+                          decoding="async" 
                           alt="Tweet image" 
                           className="w-full h-auto object-contain"
                           draggable="true"
@@ -1126,7 +1128,7 @@ export default function Home() {
                 <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
                   {/* Profile Header */}
                   <div className="p-4 flex items-center gap-3">
-                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" />
+                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-white">{tweet.author.name}</span>
@@ -1194,7 +1196,9 @@ export default function Home() {
                     <div className="w-full overflow-hidden">
                       <img 
                         src={tweet.image} 
-                        alt="Tweet image" 
+                        alt="Tweet image"
+                        loading="lazy"
+                        decoding="async" 
                         className="w-full h-auto object-contain"
                         draggable="true"
                         onDragStart={(e) => {

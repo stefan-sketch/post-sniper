@@ -112,6 +112,8 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
             <img 
               src={post.profilePicture} 
               alt={post.pageName}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
             />
           ) : (
@@ -205,6 +207,8 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           <img 
             src={post.image} 
             alt="Post content"
+            loading="lazy"
+            decoding="async"
             className="w-full h-auto object-contain"
             draggable="true"
             onDragStart={(e) => {
