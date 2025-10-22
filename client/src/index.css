@@ -301,32 +301,58 @@
   animation: none !important;
 }
 
+/* Corner handles - small squares */
 .ReactCrop__drag-handle {
-  width: 24px !important;
-  height: 24px !important;
+  width: 8px !important;
+  height: 8px !important;
   background-color: #06b6d4 !important;
-  border: 3px solid white !important;
-  border-radius: 50% !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(6, 182, 212, 0.3);
-  transition: none !important; /* Remove transition for smoother dragging */
+  border: 2px solid white !important;
+  border-radius: 2px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: none !important;
   opacity: 1 !important;
   z-index: 100 !important;
 }
 
-/* Make crop handles even larger on mobile/touch devices */
+/* Edge handles - thin bars */
+.ReactCrop__drag-handle.ord-n,
+.ReactCrop__drag-handle.ord-s {
+  width: 40px !important;
+  height: 4px !important;
+  border-radius: 2px !important;
+}
+
+.ReactCrop__drag-handle.ord-e,
+.ReactCrop__drag-handle.ord-w {
+  width: 4px !important;
+  height: 40px !important;
+  border-radius: 2px !important;
+}
+
+/* Make handles slightly larger on mobile for easier touch */
 @media (max-width: 768px) {
   .ReactCrop__drag-handle {
-    width: 32px !important;
-    height: 32px !important;
-    border: 4px solid white !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(6, 182, 212, 0.4);
+    width: 12px !important;
+    height: 12px !important;
+  }
+  
+  .ReactCrop__drag-handle.ord-n,
+  .ReactCrop__drag-handle.ord-s {
+    width: 60px !important;
+    height: 6px !important;
+  }
+  
+  .ReactCrop__drag-handle.ord-e,
+  .ReactCrop__drag-handle.ord-w {
+    width: 6px !important;
+    height: 60px !important;
   }
 }
 
 .ReactCrop__drag-handle:hover,
 .ReactCrop__drag-handle:active {
   background-color: #0891b2 !important;
-  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.6), 0 0 0 2px rgba(6, 182, 212, 0.5);
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.8);
 }
 
 .ReactCrop__drag-bar {
