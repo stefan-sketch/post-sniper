@@ -19,7 +19,41 @@ export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
-  const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live'); // For mobile dropdown
+  const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live');
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px) to trigger a view change
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      // Swipe left: go to next view
+      if (mobileView === 'live') setMobileView('popular');
+      else if (mobileView === 'popular') setMobileView('twitter');
+    }
+    
+    if (isRightSwipe) {
+      // Swipe right: go to previous view
+      if (mobileView === 'twitter') setMobileView('popular');
+      else if (mobileView === 'popular') setMobileView('live');
+    }
+  }; // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
@@ -889,7 +923,12 @@ export default function Home() {
       </div>
 
       {/* Mobile: Single Column with Switchable View */}
-      <div className="md:hidden flex flex-col flex-1 overflow-hidden">
+      <div 
+        className="md:hidden flex flex-col flex-1 overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-3 mb-3">
