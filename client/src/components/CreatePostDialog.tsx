@@ -113,13 +113,20 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         }
 
         const img = new Image();
+        img.crossOrigin = 'anonymous'; // Enable CORS for external images
         img.onload = () => {
           canvas.width = img.width;
           canvas.height = img.height;
+          
+          // Enable high-quality image smoothing
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          
           ctx.drawImage(img, 0, 0);
 
           // Load and apply watermark
           const watermark = new Image();
+          watermark.crossOrigin = 'anonymous';
           watermark.onload = () => {
             // Calculate watermark size (15% of image width, maintain aspect ratio)
             const watermarkWidth = img.width * 0.15;
@@ -129,8 +136,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             const x = (watermarkPosition.x / 100) * img.width - watermarkWidth / 2;
             const y = (watermarkPosition.y / 100) * img.height - watermarkHeight / 2;
 
+            // Draw watermark with high quality
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
-            resolve(canvas.toDataURL("image/png"));
+            
+            // Use JPEG with high quality for better file size and quality
+            resolve(canvas.toDataURL("image/jpeg", 0.95));
           };
           watermark.onerror = () => reject(new Error("Failed to load watermark"));
           watermark.src = watermarkPath;
@@ -184,8 +196,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
     // Add text overlay if provided
     if (overlayText.trim()) {
-      // Scale font size based on original image dimensions
-      const scaledFontSize = fontSize * scaleX;
+      // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
+      const scaledFontSize = (fontSize / 800) * canvas.width;
       ctx.font = `bold ${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -240,7 +252,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       });
     }
 
-    return canvas.toDataURL("image/png");
+    // Use JPEG with high quality for better file size and quality
+    return canvas.toDataURL("image/jpeg", 0.95);
   }, [completedCrop, image, useGradient, overlayText, fontSize, textPosition, watermarkPosition]);
 
   const handlePost = async () => {
