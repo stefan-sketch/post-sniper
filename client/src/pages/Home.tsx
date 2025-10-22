@@ -586,32 +586,38 @@ export default function Home() {
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
             <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFeedType('popular')}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
-                  feedType === 'popular'
-                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/50'
-                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+            {/* Toggle Switch */}
+            <button
+              onClick={() => setFeedType(feedType === 'popular' ? 'twitter' : 'popular')}
+              className="relative inline-flex h-8 w-32 items-center rounded-full bg-gray-700 transition-all hover:bg-gray-600"
+            >
+              <span
+                className={`inline-block h-7 w-16 transform rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg transition-transform ${
+                  feedType === 'twitter' ? 'translate-x-[60px]' : 'translate-x-0.5'
                 }`}
-              >
-                Popular Posts
-              </button>
-              <button
-                onClick={() => setFeedType('twitter')}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
-                  feedType === 'twitter'
-                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/50'
-                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-                }`}
-              >
-                Twitter List
-              </button>
-            </div>
+              />
+              <span className="absolute left-2 flex items-center gap-1 text-xs font-medium text-white pointer-events-none">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                FB
+              </span>
+              <span className="absolute right-2 flex items-center gap-1 text-xs font-medium text-white pointer-events-none">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                X
+              </span>
+            </button>
             <div className="relative">
               <button
-                onClick={() => setShowTimeFilter(!showTimeFilter)}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
+                onClick={() => feedType === 'popular' && setShowTimeFilter(!showTimeFilter)}
+                disabled={feedType === 'twitter'}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1 ${
+                  feedType === 'twitter'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
+                    : 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50'
+                }`}
               >
                 {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
