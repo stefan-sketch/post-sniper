@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
@@ -749,6 +749,25 @@ export default function Home() {
                   };
                   
                   const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
+                  // Remove t.co URLs from tweet text
+                  const cleanText = tweet.text ? tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim() : '';
+                  
+                  const handleDownload = async (imageUrl: string) => {
+                    try {
+                      const response = await fetch(imageUrl);
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `tweet-${tweet.id}.jpg`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                    } catch (error) {
+                      console.error('Download failed:', error);
+                    }
+                  };
                   
                   return (
                   <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
@@ -765,14 +784,14 @@ export default function Home() {
                     </div>
                     
                     {/* Tweet Text */}
-                    {tweet.text && (
+                    {cleanText && (
                       <div className="px-4 pb-3">
-                        <p className="text-sm text-white/90">{tweet.text}</p>
+                        <p className="text-sm text-white/90">{cleanText}</p>
                       </div>
                     )}
                     
                     {/* Tweet Image */}
-                    <div className="relative w-full overflow-hidden">
+                    <div className="relative w-full overflow-hidden group">
                       <img 
                         src={tweet.image} 
                         alt="Tweet image" 
@@ -783,6 +802,13 @@ export default function Home() {
                           e.dataTransfer.effectAllowed = 'copy';
                         }}
                       />
+                      <button
+                        onClick={() => handleDownload(tweet.image)}
+                        className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Download image"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
                     </div>
                     
                     {/* Engagement Stats */}
@@ -1026,6 +1052,25 @@ export default function Home() {
                 };
                 
                 const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
+                // Remove t.co URLs from tweet text
+                const cleanText = tweet.text ? tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim() : '';
+                
+                const handleDownload = async (imageUrl: string) => {
+                  try {
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tweet-${tweet.id}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  } catch (error) {
+                    console.error('Download failed:', error);
+                  }
+                };
                 
                 return (
                 <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
@@ -1042,14 +1087,14 @@ export default function Home() {
                   </div>
                   
                   {/* Tweet Text */}
-                  {tweet.text && (
+                  {cleanText && (
                     <div className="px-4 pb-3">
-                      <p className="text-sm text-white/90">{tweet.text}</p>
+                      <p className="text-sm text-white/90">{cleanText}</p>
                     </div>
                   )}
                   
                   {/* Tweet Image */}
-                  <div className="relative w-full overflow-hidden">
+                  <div className="relative w-full overflow-hidden group">
                     <img 
                       src={tweet.image} 
                       alt="Tweet image" 
@@ -1060,6 +1105,13 @@ export default function Home() {
                         e.dataTransfer.effectAllowed = 'copy';
                       }}
                     />
+                    <button
+                      onClick={() => handleDownload(tweet.image)}
+                      className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Download image"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
                   </div>
                   
                   {/* Engagement Stats */}
