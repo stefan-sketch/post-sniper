@@ -1391,36 +1391,47 @@ export default function Home() {
         <>
           {/* Mobile View Selector - Only visible on mobile */}
           <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
-            <button
-              onClick={() => setPagesView('away-days')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
-                pagesView === 'away-days' 
-                  ? 'bg-purple-500 text-white' 
-                  : 'text-white/60 hover:text-white/80'
-              }`}
-            >
-              Away Days
-            </button>
-            <button
-              onClick={() => setPagesView('funnys')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
-                pagesView === 'funnys' 
-                  ? 'bg-orange-500 text-white' 
-                  : 'text-white/60 hover:text-white/80'
-              }`}
-            >
-              Funnys
-            </button>
-            <button
-              onClick={() => setPagesView('footy-feed')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
-                pagesView === 'footy-feed' 
-                  ? 'bg-cyan-500 text-white' 
-                  : 'text-white/60 hover:text-white/80'
-              }`}
-            >
-              Footy Feed
-            </button>
+            {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
+              const isActive = (index === 0 && pagesView === 'away-days') || 
+                               (index === 1 && pagesView === 'funnys') || 
+                               (index === 2 && pagesView === 'footy-feed');
+              const viewName = index === 0 ? 'away-days' : index === 1 ? 'funnys' : 'footy-feed';
+              
+              return (
+                <button
+                  key={page.id}
+                  onClick={() => setPagesView(viewName as any)}
+                  className={`flex-1 py-3 px-3 rounded-lg transition-all flex items-center justify-center ${
+                    isActive 
+                      ? 'ring-2 ring-white/30' 
+                      : 'opacity-60 hover:opacity-80'
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? page.borderColor : 'transparent'
+                  }}
+                >
+                  <div 
+                    className="h-8 w-8 rounded-full overflow-hidden"
+                    style={{ 
+                      border: `2px solid ${page.borderColor}`,
+                      boxShadow: isActive ? `0 0 10px ${page.borderColor}80` : 'none'
+                    }}
+                  >
+                    {page.profilePicture ? (
+                      <img 
+                        src={page.profilePicture} 
+                        alt={page.profileName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-bold">
+                        {page.profileName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Desktop: Three Column Layout */}
@@ -1482,7 +1493,7 @@ export default function Home() {
                 {managedPagesQuery.data.map((page: any, index: number) => (
                   <div 
                     key={page.id}
-                    className={`h-full flex flex-col ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
+                    className={`h-full flex flex-col scrollbar-hide ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
                   >
                     {/* Page Header with Icon */}
                     <div className="flex items-center gap-3 mb-3 px-2">
