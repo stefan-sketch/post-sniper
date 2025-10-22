@@ -1486,6 +1486,8 @@ export default function Home() {
       <PagesSettingsDialog 
         open={showPagesSettings} 
         onOpenChange={setShowPagesSettings}
+        onManualFetch={handleManualFetch}
+        isFetching={manualFetchMutation.isPending}
       />
       <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
       <CreatePostDialog 

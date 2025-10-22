@@ -17,9 +17,11 @@ import { nanoid } from "nanoid";
 interface PagesSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onManualFetch: () => void;
+  isFetching: boolean;
 }
 
-export default function PagesSettingsDialog({ open, onOpenChange }: PagesSettingsDialogProps) {
+export default function PagesSettingsDialog({ open, onOpenChange, onManualFetch, isFetching }: PagesSettingsDialogProps) {
   const utils = trpc.useUtils();
   const [pages, setPages] = useState<any[]>([]);
   
@@ -112,6 +114,21 @@ export default function PagesSettingsDialog({ open, onOpenChange }: PagesSetting
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Controls Section */}
+          <div className="space-y-4">
+            <Label>Controls</Label>
+            <div className="flex gap-3">
+              <Button
+                onClick={onManualFetch}
+                variant="outline"
+                size="sm"
+                disabled={isFetching}
+              >
+                {isFetching ? 'Fetching...' : 'Fetch Now'}
+              </Button>
+            </div>
+          </div>
+
           {/* Facebook Pages Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
