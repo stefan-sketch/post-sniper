@@ -422,7 +422,27 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
                     }
                   }}
+                  onTouchMove={(e) => {
+                    if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
+                    const rect = imgRef.current.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                    
+                    if (isDraggingText) {
+                      e.preventDefault();
+                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                    if (isDraggingWatermark) {
+                      e.preventDefault();
+                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+                    }
+                  }}
                   onMouseUp={() => {
+                    setIsDraggingText(false);
+                    setIsDraggingWatermark(false);
+                  }}
+                  onTouchEnd={() => {
                     setIsDraggingText(false);
                     setIsDraggingWatermark(false);
                   }}
@@ -495,6 +515,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         e.stopPropagation();
                         setIsDraggingText(true);
                       }}
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingText(true);
+                      }}
                     >
                       {overlayText}
                     </div>
@@ -517,6 +542,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         height: 'auto',
                       }}
                       onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingWatermark(true);
+                      }}
+                      onTouchStart={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         setIsDraggingWatermark(true);
