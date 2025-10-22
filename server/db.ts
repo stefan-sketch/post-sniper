@@ -26,7 +26,7 @@ export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
       _client = postgres(process.env.DATABASE_URL, {
-        ssl: { rejectUnauthorized: true },
+        ssl: { rejectUnauthorized: false },
         idle_timeout: 20,
         connect_timeout: 10,
       });
