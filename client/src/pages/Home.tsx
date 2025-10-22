@@ -29,9 +29,11 @@ export default function Home() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
+  const [pagesSwipeOffset, setPagesSwipeOffset] = useState(0);
+  const [isPagesTransitioning, setIsPagesTransitioning] = useState(false);
 
   // Minimum swipe distance (in px) to trigger a view change
-  const minSwipeDistance = 50;
+  const minSwipeDistance = 100; // Increased to prevent accidental swipes
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -75,7 +77,56 @@ export default function Home() {
     // Reset swipe offset with animation
     setSwipeOffset(0);
     setTimeout(() => setIsTransitioning(false), 300);
-  }; // For mobile dropdown
+  };
+
+  // Pages tab swipe handlers
+  const onPagesTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onPagesTouchMove = (e: React.TouchEvent) => {
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+    
+    if (touchStart !== null && !isPagesTransitioning) {
+      const diff = currentTouch - touchStart;
+      // Add friction (0.4) to make swipe feel more deliberate
+      // Also limit max offset to prevent over-scrolling
+      const friction = 0.4;
+      const maxOffset = 150;
+      const dampedDiff = Math.max(-maxOffset, Math.min(maxOffset, diff * friction));
+      setPagesSwipeOffset(dampedDiff);
+    }
+  };
+
+  const onPagesTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    setIsPagesTransitioning(true);
+    
+    if (isLeftSwipe) {
+      // Swipe left: go to next page
+      if (pagesView === 'away-days') setPagesView('funnys');
+      else if (pagesView === 'funnys') setPagesView('footy-feed');
+    }
+    
+    if (isRightSwipe) {
+      // Swipe right: go to previous page
+      if (pagesView === 'footy-feed') setPagesView('funnys');
+      else if (pagesView === 'funnys') setPagesView('away-days');
+    }
+    
+    // Reset swipe offset with animation
+    setPagesSwipeOffset(0);
+    setTimeout(() => setIsPagesTransitioning(false), 300);
+  };
+
+  // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
@@ -1491,14 +1542,27 @@ export default function Home() {
             )}
           </div>
 
-          {/* Mobile: Single Column with Swipe */}
-          <div className="md:hidden flex-1 overflow-hidden">
+          {/* Mobile: Single Column with Smooth Swipe Animation */}
+          <div 
+            className="md:hidden flex-1 overflow-hidden relative"
+            onTouchStart={onPagesTouchStart}
+            onTouchMove={onPagesTouchMove}
+            onTouchEnd={onPagesTouchEnd}
+          >
             {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
-              <div className="h-full">
-                {managedPagesQuery.data.map((page: any, index: number) => (
+              <div 
+                className="h-full flex"
+                style={{
+                  transform: `translateX(calc(-${pagesView === 'away-days' ? 0 : pagesView === 'funnys' ? 100 : 200}% + ${pagesSwipeOffset}px))`,
+                  transition: isPagesTransitioning || pagesSwipeOffset === 0 ? 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none',
+                  width: `${managedPagesQuery.data.length * 100}%`
+                }}
+              >
+                {managedPagesQuery.data.map((page: any) => (
                   <div 
                     key={page.id}
-                    className={`h-full flex flex-col scrollbar-hide ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
+                    className="h-full flex-shrink-0"
+                    style={{ width: `${100 / managedPagesQuery.data.length}%` }}
                   >
                     <FacebookPageColumn 
                       pageId={page.id}
