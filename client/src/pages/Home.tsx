@@ -1354,7 +1354,7 @@ export default function Home() {
                   </div>
                 </button>
               );
-             )}
+            })}
           </div>
           
           {/* Blue divider line under page icons - Mobile only */}
