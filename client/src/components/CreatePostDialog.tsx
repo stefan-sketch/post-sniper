@@ -820,11 +820,22 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
           {/* Caption */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-300">Caption</label>
+            <div className="relative">
+              <Textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Write your caption..."
+                className="min-h-32 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 pt-8"
+                maxLength={2000}
+              />
+              {/* Caption label inside textarea */}
+              <div className="absolute top-2 left-3 text-xs font-medium text-gray-400 pointer-events-none">
+                Caption
+              </div>
+              {/* Regenerate button inside textarea */}
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={async () => {
                   if (!caption.trim()) {
@@ -849,32 +860,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   }
                 }}
                 disabled={isRegenerating || !caption.trim()}
-                className="text-xs gap-1 h-7 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                className="absolute top-1 right-1 text-xs gap-1 h-6 text-gray-400 hover:text-white"
               >
                 <RefreshCw className={`h-3 w-3 ${isRegenerating ? 'animate-spin' : ''}`} />
                 {isRegenerating ? "Regenerating..." : "Regenerate"}
               </Button>
-            </div>
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="relative"
-            >
-              <Textarea
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Write your caption... (or drag & drop an image here)"
-                className="min-h-24 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                maxLength={2000}
-              />
-              {!image && (
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="text-gray-600 text-sm flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    <span>Drag image here</span>
-                  </div>
-                </div>
-              )}
             </div>
             <p className="text-xs text-gray-500 text-right">{caption.length} / 2000</p>
           </div>
