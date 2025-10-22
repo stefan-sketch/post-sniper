@@ -16,8 +16,8 @@ export const twitterRouter = router({
         throw new Error("Twitter API key not configured");
       }
 
-      const url = new URL("https://api.twitterapi.io/twitter/list/tweet");
-      url.searchParams.append("list_id", TWITTER_LIST_ID);
+      const url = new URL("https://api.twitterapi.io/twitter/list/tweets");
+      url.searchParams.append("listId", TWITTER_LIST_ID);
       if (input.cursor) {
         url.searchParams.append("cursor", input.cursor);
       }
