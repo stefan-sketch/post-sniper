@@ -8,6 +8,7 @@ import SettingsDialog from "@/components/SettingsDialog";
 import PagesSettingsDialog from "@/components/PagesSettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
+import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { toast } from "sonner";
 
@@ -1431,46 +1432,49 @@ export default function Home() {
 
           {/* Desktop: Three Column Layout */}
           <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden">
-            {/* Football Away Days Column */}
-            <div className="flex flex-col h-full overflow-hidden">
-              <h2 className="text-lg font-semibold text-purple-400 mb-3 text-center">Football Away Days</h2>
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
+            {pagesQuery.data && pagesQuery.data.length > 0 ? (
+              pagesQuery.data.slice(0, 3).map((page: any) => (
+                <div key={page.id} className="flex flex-col h-full overflow-hidden">
+                  <h2 
+                    className="text-lg font-semibold mb-3 text-center"
+                    style={{ color: page.borderColor }}
+                  >
+                    {page.profileName}
+                  </h2>
+                  <FacebookPageColumn 
+                    pageId={page.id}
+                    pageName={page.profileName}
+                    borderColor={page.borderColor}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No pages configured. Click Settings to add pages.</p>
               </div>
-            </div>
-
-            {/* Football Funnys Column */}
-            <div className="flex flex-col h-full overflow-hidden">
-              <h2 className="text-lg font-semibold text-orange-400 mb-3 text-center">Football Funnys</h2>
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
-              </div>
-            </div>
-
-            {/* The Footy Feed Column */}
-            <div className="flex flex-col h-full overflow-hidden">
-              <h2 className="text-lg font-semibold text-cyan-400 mb-3 text-center">The Footy Feed</h2>
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Mobile: Single Column with Swipe */}
           <div className="md:hidden flex-1 overflow-hidden">
-            {pagesView === 'away-days' && (
-              <div className="h-full overflow-y-auto space-y-3">
-                <p className="text-gray-400 text-sm text-center">Loading Away Days posts...</p>
+            {pagesQuery.data && pagesQuery.data.length > 0 ? (
+              <div className="h-full">
+                {pagesQuery.data.map((page: any, index: number) => (
+                  <div 
+                    key={page.id}
+                    className={`h-full ${index === 0 && pagesView === 'away-days' ? 'block' : index === 1 && pagesView === 'funnys' ? 'block' : index === 2 && pagesView === 'footy-feed' ? 'block' : 'hidden'}`}
+                  >
+                    <FacebookPageColumn 
+                      pageId={page.id}
+                      pageName={page.profileName}
+                      borderColor={page.borderColor}
+                    />
+                  </div>
+                ))}
               </div>
-            )}
-            {pagesView === 'funnys' && (
-              <div className="h-full overflow-y-auto space-y-3">
-                <p className="text-gray-400 text-sm text-center">Loading Funnys posts...</p>
-              </div>
-            )}
-            {pagesView === 'footy-feed' && (
-              <div className="h-full overflow-y-auto space-y-3">
-                <p className="text-gray-400 text-sm text-center">Loading Footy Feed posts...</p>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-gray-400 text-sm">No pages configured. Click Settings to add pages.</p>
               </div>
             )}
           </div>

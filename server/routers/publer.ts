@@ -250,5 +250,40 @@ export const publerRouter = router({
         };
       }
     }),
+
+  // Delete post from Publer
+  deletePost: publicProcedure
+    .input(z.object({
+      postId: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const response = await fetch(`https://app.publer.com/api/v1/posts?post_ids[]=${input.postId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer-API ${PUBLER_API_KEY}`,
+            "Publer-Workspace-Id": PUBLER_WORKSPACE_ID,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Publer delete failed: ${errorText}`);
+        }
+
+        const data = await response.json();
+        
+        return {
+          success: true,
+          deletedIds: data.deleted_ids || [],
+        };
+      } catch (error: any) {
+        console.error("Publer delete error:", error);
+        return {
+          success: false,
+          error: error.message || "Failed to delete post",
+        };
+      }
+    }),
 });
 
