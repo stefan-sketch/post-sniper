@@ -366,8 +366,47 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: Drag-drop icon + SDL MEDIA + Create Post button */}
+          {/* Center: Settings + SDL MEDIA + Create Post button */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+              SDL MEDIA
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setDroppedImage(null);
+                setShowCreatePost(true);
+              }}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          </div>
+
+          {/* Right: Notifications + Drag-drop icon */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowAlerts(true)}
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Bell className="h-4 w-4 md:h-5 md:w-5" />
+              {(unreadCountQuery.data || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCountQuery.data}
+                </span>
+              )}
+            </Button>
             <div
               onDrop={async (e) => {
                 e.preventDefault();
@@ -408,45 +447,6 @@ export default function Home() {
             >
               <ImagePlus className="h-4 w-4 md:h-5 md:w-5 text-gray-500 group-hover:text-cyan-500 transition-colors" />
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
-              SDL MEDIA
-            </h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setDroppedImage(null);
-                setShowCreatePost(true);
-              }}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-            >
-              <Plus className="h-4 w-4 md:h-5 md:w-5" />
-            </Button>
-          </div>
-
-          {/* Right: Notifications + Settings */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowAlerts(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-            >
-              <Bell className="h-4 w-4 md:h-5 md:w-5" />
-              {(unreadCountQuery.data || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {unreadCountQuery.data}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowSettings(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-            >
-              <Settings className="h-4 w-4 md:h-5 md:w-5" />
-            </Button>
           </div>
         </div>
       </header>
