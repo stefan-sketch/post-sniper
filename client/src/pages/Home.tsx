@@ -435,19 +435,21 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: Settings + SDL MEDIA + Create Post button */}
+          {/* Center: SDL MEDIA title (mobile: just title, desktop: with buttons) */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            {/* Settings button - desktop only */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowSettings(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
             >
               <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
+            {/* Create post button - desktop only */}
             <Button
               variant="ghost"
               size="icon"
@@ -455,14 +457,23 @@ export default function Home() {
                 setDroppedImage(null);
                 setShowCreatePost(true);
               }}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
             >
               <Plus className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
           </div>
 
-          {/* Right: Notifications + Drag-drop icon */}
+          {/* Right: Settings (mobile only) + Notifications + Drag-drop icon (desktop only) */}
           <div className="flex items-center gap-1">
+            {/* Settings button - mobile only */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              className="md:hidden relative h-8 w-8 flex-shrink-0"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -476,6 +487,7 @@ export default function Home() {
                 </span>
               )}
             </Button>
+            {/* Drag-drop area - desktop only */}
             <div
               onDrop={async (e) => {
                 e.preventDefault();
@@ -511,7 +523,7 @@ export default function Home() {
                 }
               }}
               onDragOver={(e) => e.preventDefault()}
-              className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg hover:border-cyan-500 transition-colors cursor-pointer group"
+              className="hidden md:flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-2 border-dashed border-gray-600 rounded-lg hover:border-cyan-500 transition-colors cursor-pointer group"
               title="Drag & drop image here"
             >
               <ImagePlus className="h-4 w-4 md:h-5 md:w-5 text-gray-500 group-hover:text-cyan-500 transition-colors" />
