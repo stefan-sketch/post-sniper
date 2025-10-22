@@ -109,3 +109,26 @@ export const cachedPosts = pgTable("cached_posts", {
 export type CachedPost = typeof cachedPosts.$inferSelect;
 export type InsertCachedPost = typeof cachedPosts.$inferInsert;
 
+/**
+ * Twitter posts cache - stores tweets from monitored lists
+ */
+export const twitterPosts = pgTable("twitter_posts", {
+  id: varchar("id", { length: 64 }).primaryKey(), // tweet ID
+  text: text("text"),
+  image: text("image"),
+  authorName: varchar("authorName", { length: 255 }).notNull(),
+  authorUsername: varchar("authorUsername", { length: 255 }).notNull(),
+  authorAvatar: text("authorAvatar"),
+  likes: integer("likes").default(0),
+  retweets: integer("retweets").default(0),
+  replies: integer("replies").default(0),
+  views: integer("views").default(0),
+  url: text("url"),
+  createdAt: timestamp("createdAt").notNull(),
+  fetchedAt: timestamp("fetchedAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
+});
+
+export type TwitterPost = typeof twitterPosts.$inferSelect;
+export type InsertTwitterPost = typeof twitterPosts.$inferInsert;
+

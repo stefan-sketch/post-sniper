@@ -43,14 +43,36 @@ export default function Home() {
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
 
 
+  // Twitter: Fetch from database (always enabled)
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
-    { cursor: undefined }, 
+    { limit: 50 }, 
     { 
-      enabled: feedType === 'twitter' && twitterPlaying,
-      refetchInterval: (feedType === 'twitter' && twitterPlaying) ? 300000 : false, // Refresh every 5 minutes when playing
+      refetchInterval: 30000, // Refresh UI every 30 seconds from database
       staleTime: 0,
     }
   );
+  
+  // Twitter: Mutation to fetch from API and store in database
+  const twitterFetchMutation = trpc.twitter.fetchAndStoreListTweets.useMutation({
+    onSuccess: () => {
+      twitterQuery.refetch(); // Refresh UI after fetching new tweets
+    },
+  });
+  
+  // Twitter: Periodically fetch from API when playing
+  useEffect(() => {
+    if (!twitterPlaying) return;
+    
+    // Fetch immediately when starting
+    twitterFetchMutation.mutate();
+    
+    // Then fetch every 5 minutes
+    const interval = setInterval(() => {
+      twitterFetchMutation.mutate();
+    }, 300000); // 5 minutes
+    
+    return () => clearInterval(interval);
+  }, [twitterPlaying]);
   
   const handleManualFetch = async () => {
     await manualFetchMutation.mutateAsync();
