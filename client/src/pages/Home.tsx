@@ -748,7 +748,7 @@ export default function Home() {
                     <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                   </div>
                 )}
-                {twitterQuery.data?.tweets?.filter((tweet: any) => tweet.image).map((tweet: any) => {
+                {twitterQuery.data?.tweets?.map((tweet: any) => {
                   // Format timestamp using the same logic as PostCard
                   const getTimeAgo = (dateString: string): string => {
                     const date = new Date(dateString);
@@ -820,26 +820,28 @@ export default function Home() {
                       {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
                     </div>
                     
-                    {/* Tweet Image */}
-                    <div className="relative w-full overflow-hidden group">
-                      <img 
-                        src={tweet.image} 
-                        alt="Tweet image" 
-                        className="w-full h-auto object-contain"
-                        draggable="true"
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/uri-list', tweet.image);
-                          e.dataTransfer.effectAllowed = 'copy';
-                        }}
-                      />
-                      <button
-                        onClick={() => handleDownload(tweet.image)}
-                        className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Download image"
-                      >
-                        <Download className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {/* Tweet Image (if available) */}
+                    {tweet.image && (
+                      <div className="relative w-full overflow-hidden group">
+                        <img 
+                          src={tweet.image} 
+                          alt="Tweet image" 
+                          className="w-full h-auto object-contain"
+                          draggable="true"
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('text/uri-list', tweet.image);
+                            e.dataTransfer.effectAllowed = 'copy';
+                          }}
+                        />
+                        <button
+                          onClick={() => handleDownload(tweet.image)}
+                          className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Download image"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   );
                 })}
@@ -1052,7 +1054,7 @@ export default function Home() {
                   <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                 </div>
               )}
-              {twitterQuery.data?.tweets?.filter((tweet: any) => tweet.image).map((tweet: any) => {
+              {twitterQuery.data?.tweets?.map((tweet: any) => {
                 const getTimeAgo = (dateString: string): string => {
                   const date = new Date(dateString);
                   const now = new Date();
@@ -1123,26 +1125,28 @@ export default function Home() {
                     {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
                   </div>
                   
-                  {/* Tweet Image */}
-                  <div className="relative w-full overflow-hidden group">
-                    <img 
-                      src={tweet.image} 
-                      alt="Tweet image" 
-                      className="w-full h-auto object-contain"
-                      draggable="true"
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData('text/uri-list', tweet.image);
-                        e.dataTransfer.effectAllowed = 'copy';
-                      }}
-                    />
-                    <button
-                      onClick={() => handleDownload(tweet.image)}
-                      className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Download image"
-                    >
-                      <Download className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {/* Tweet Image (if available) */}
+                  {tweet.image && (
+                    <div className="relative w-full overflow-hidden group">
+                      <img 
+                        src={tweet.image} 
+                        alt="Tweet image" 
+                        className="w-full h-auto object-contain"
+                        draggable="true"
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/uri-list', tweet.image);
+                          e.dataTransfer.effectAllowed = 'copy';
+                        }}
+                      />
+                      <button
+                        onClick={() => handleDownload(tweet.image)}
+                        className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Download image"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 );
               })}

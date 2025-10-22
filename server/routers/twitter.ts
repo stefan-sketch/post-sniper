@@ -40,11 +40,14 @@ export const twitterRouter = router({
       
       if (data.tweets && data.tweets.length > 0) {
         for (const tweet of data.tweets as any[]) {
-          // Only store tweets with images
-          const image = tweet.extendedEntities?.media?.[0]?.media_url_https || 
-                       tweet.entities?.media?.[0]?.media_url_https;
+          // Skip replies (tweets starting with @)
+          if (tweet.text && tweet.text.trim().startsWith('@')) {
+            continue;
+          }
           
-          if (!image) continue;
+          // Get image if available (optional)
+          const image = tweet.extendedEntities?.media?.[0]?.media_url_https || 
+                       tweet.entities?.media?.[0]?.media_url_https || null;
 
           await db
             .insert(twitterPosts)
