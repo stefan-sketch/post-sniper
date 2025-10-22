@@ -1394,8 +1394,8 @@ export default function Home() {
       ) : (
         /* Pages View - 3 Facebook Pages */
         <>
-          {/* Mobile View Selector - Only visible on mobile */}
-          <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
+          {/* Mobile View Selector - Compact horizontal tabs */}
+          <div className="md:hidden mb-3 flex gap-2 flex-shrink-0 overflow-x-auto">
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
@@ -1406,20 +1406,19 @@ export default function Home() {
                 <button
                   key={page.id}
                   onClick={() => setPagesView(viewName as any)}
-                  className={`flex-1 py-3 px-3 rounded-lg transition-all flex items-center justify-center ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
                     isActive 
                       ? 'ring-2 ring-white/30' 
-                      : 'opacity-60 hover:opacity-80'
+                      : 'opacity-60 hover:opacity-80 glass-card'
                   }`}
                   style={{
-                    backgroundColor: isActive ? page.borderColor : 'transparent'
+                    backgroundColor: isActive ? page.borderColor : 'rgba(255,255,255,0.05)'
                   }}
                 >
                   <div 
-                    className="h-8 w-8 rounded-full overflow-hidden"
+                    className="h-6 w-6 rounded-full overflow-hidden flex-shrink-0"
                     style={{ 
-                      border: `2px solid ${page.borderColor}`,
-                      boxShadow: isActive ? `0 0 10px ${page.borderColor}80` : 'none'
+                      border: `2px solid ${page.borderColor}`
                     }}
                   >
                     {page.profilePicture ? (
@@ -1434,6 +1433,7 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+                  <span className="text-sm font-medium">{page.profileName}</span>
                 </button>
               );
             })}
