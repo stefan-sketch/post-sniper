@@ -500,29 +500,23 @@ export default function Home() {
         </button>
         <button
           onClick={() => setMobileView('popular')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all relative ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
             mobileView === 'popular' 
               ? 'bg-green-500 text-white' 
               : 'text-white/60 hover:text-white/80'
           }`}
         >
           📈 Popular
-          {mobileView === 'popular' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-400 animate-pulse"></span>
-          )}
         </button>
         <button
           onClick={() => setMobileView('twitter')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all relative ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
             mobileView === 'twitter' 
               ? 'bg-blue-500 text-white' 
               : 'text-white/60 hover:text-white/80'
           }`}
         >
-          𝕏 Twitter
-          {mobileView === 'twitter' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 animate-pulse"></span>
-          )}
+          𝕏
         </button>
       </div>
 
@@ -1054,7 +1048,7 @@ export default function Home() {
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
                 <h2 className="text-lg font-semibold text-blue-400">
-                  Twitter Feed
+                  X Football Feed
                 </h2>
                 <button
                   onClick={() => setTwitterPlaying(!twitterPlaying)}
