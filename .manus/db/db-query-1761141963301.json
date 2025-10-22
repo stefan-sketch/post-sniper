@@ -1,0 +1,58 @@
+{
+  "query": "SELECT id, profileName, userId, publerPageId FROM monitored_pages WHERE userId = 'public'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT id, profileName, userId, publerPageId FROM monitored_pages WHERE userId = 'public'",
+  "rows": [
+    {
+      "id": "_0yIxVqywyIr7B9XMxCyR",
+      "profileName": "Social Media Tips",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "2mggF-94IV92pofd6yTEq",
+      "profileName": "The Football Community",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "64wyJn8-4zkrltdtw6GFM",
+      "profileName": "Marketing Insights",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "84d8e099rUJ14x1sYtAn-",
+      "profileName": "Tech News Daily",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "emHNYwEladhXx0SsLzobQ",
+      "profileName": "The Football Community ",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "h5N4chKfzpe4Dwltx0wfm",
+      "profileName": "Football Planet",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "rsvDHidNf4Z8WM9M9Wscw",
+      "profileName": "Business Growth",
+      "userId": "public",
+      "publerPageId": "NULL"
+    },
+    {
+      "id": "xNgQPFWkLDgKLIhnu9i29",
+      "profileName": "Football Planet",
+      "userId": "public",
+      "publerPageId": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprofileName\tuserId\tpublerPageId\n_0yIxVqywyIr7B9XMxCyR\tSocial Media Tips\tpublic\tNULL\n2mggF-94IV92pofd6yTEq\tThe Football Community\tpublic\tNULL\n64wyJn8-4zkrltdtw6GFM\tMarketing Insights\tpublic\tNULL\n84d8e099rUJ14x1sYtAn-\tTech News Daily\tpublic\tNULL\nemHNYwEladhXx0SsLzobQ\tThe Football Community \tpublic\tNULL\nh5N4chKfzpe4Dwltx0wfm\tFootball Planet\tpublic\tNULL\nrsvDHidNf4Z8WM9M9Wscw\tBusiness Growth\tpublic\tNULL\nxNgQPFWkLDgKLIhnu9i29\tFootball Planet\tpublic\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 261
+}
