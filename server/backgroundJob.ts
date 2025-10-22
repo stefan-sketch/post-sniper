@@ -1,4 +1,4 @@
-import { getDb, getUserSettings, getMonitoredPages, createAlert } from "./db";
+import { getDb, getUserSettings, getMonitoredPages, getManagedPages, createAlert } from "./db";
 import { cachedPosts, InsertCachedPost } from "../drizzle/schema";
 import axios from "axios";
 import { eq } from "drizzle-orm";
@@ -135,11 +135,19 @@ export class BackgroundJobService {
         return;
       }
 
-      const pages = await getMonitoredPages(PUBLIC_USER_ID);
-      if (pages.length === 0) {
-        console.log("[BackgroundJob] No monitored pages configured");
+      // Fetch both monitored pages (Feed) and managed pages (Pages)
+      const monitoredPages = await getMonitoredPages(PUBLIC_USER_ID);
+      const managedPages = await getManagedPages(PUBLIC_USER_ID);
+      
+      // Combine both lists
+      const allPages = [...monitoredPages, ...managedPages];
+      
+      if (allPages.length === 0) {
+        console.log("[BackgroundJob] No pages configured (monitored or managed)");
         return;
       }
+      
+      console.log(`[BackgroundJob] Fetching posts for ${monitoredPages.length} monitored pages and ${managedPages.length} managed pages`);
 
       const db = await getDb();
       if (!db) {
@@ -150,8 +158,8 @@ export class BackgroundJobService {
       // Collect all fetched posts to calculate hash BEFORE caching
       const allFetchedPosts: any[] = [];
 
-      // Fetch posts for each page
-      for (const page of pages) {
+      // Fetch posts for each page (both monitored and managed)
+      for (const page of allPages) {
         try {
           const posts = await this.fetchPostsForPage(
             page.profileId,
@@ -176,8 +184,8 @@ export class BackgroundJobService {
               reactions: post.kpi?.page_posts_reactions?.value || 0,
               comments: post.kpi?.page_posts_comments_count?.value || 0,
               shares: post.kpi?.page_posts_shares_count?.value || 0,
-              alertThreshold: page.alertThreshold || null,
-              alertEnabled: page.alertEnabled || false,
+              alertThreshold: 'alertThreshold' in page ? (page.alertThreshold as number) : null,
+              alertEnabled: 'alertEnabled' in page ? (page.alertEnabled as boolean) : false,
               updatedAt: new Date(),
             };
 
@@ -205,11 +213,13 @@ export class BackgroundJobService {
                 },
               });
 
-            // Check if alert should be triggered
+            // Check if alert should be triggered (only for monitored pages)
             if (
+              'alertEnabled' in page &&
               page.alertEnabled &&
               cachedPost.reactions &&
-              cachedPost.reactions >= (page.alertThreshold || 100)
+              'alertThreshold' in page &&
+              cachedPost.reactions >= ((page.alertThreshold as number) || 100)
             ) {
               const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
               if (cachedPost.postDate >= tenMinutesAgo) {
@@ -224,7 +234,7 @@ export class BackgroundJobService {
                   postMessage: post.message || null,
                   postImage: post.image || null,
                   reactionCount: cachedPost.reactions,
-                  threshold: page.alertThreshold || 100,
+                  threshold: 'alertThreshold' in page ? ((page.alertThreshold as number) || 100) : 100,
                   postDate: cachedPost.postDate,
                 });
               }
