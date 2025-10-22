@@ -459,20 +459,18 @@ export default function Home() {
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
-            {/* Create post button - desktop only, only show in feed view */}
-            {currentView === 'feed' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setDroppedImage(null);
-                  setShowCreatePost(true);
-                }}
-                className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-              >
-                <Plus className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
-            )}
+            {/* Create post button - desktop only */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setDroppedImage(null);
+                setShowCreatePost(true);
+              }}
+              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
           </div>
 
           {/* Right: Settings (mobile only) + Online Status + Notifications + Drag-drop icon (desktop only) */}
