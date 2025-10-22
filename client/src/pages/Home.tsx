@@ -449,7 +449,7 @@ export default function Home() {
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
-    <div className="w-full md:w-[770px] md:mx-auto px-4 md:px-6 flex flex-col overflow-hidden max-w-full" style={{ height: '100vh', paddingTop: 'max(1rem, env(safe-area-inset-top))', touchAction: 'none', overscrollBehavior: 'none' }}>
+    <div className="w-full md:w-[770px] md:mx-auto px-4 md:px-6 flex flex-col overflow-hidden max-w-full" style={{ height: '100dvh', paddingTop: 'max(1rem, env(safe-area-inset-top))', touchAction: 'none', overscrollBehavior: 'none' }}>
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
