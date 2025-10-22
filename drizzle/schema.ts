@@ -29,6 +29,7 @@ export const monitoredPages = pgTable("monitored_pages", {
   profilePicture: text("profilePicture"),
   borderColor: varchar("borderColor", { length: 7 }).notNull(), // hex color
   network: varchar("network", { length: 32 }).default("facebook").notNull(),
+  publerPageId: varchar("publerPageId", { length: 128 }), // Publer page ID for deletion
   alertThreshold: integer("alertThreshold").default(100), // reactions threshold for alerts
   alertEnabled: boolean("alertEnabled").default(true),
   createdAt: timestamp("createdAt").defaultNow(),

@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2 } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
+import PagesSettingsDialog from "@/components/PagesSettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
@@ -16,6 +17,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
+  const [showPagesSettings, setShowPagesSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
@@ -25,6 +27,7 @@ export default function Home() {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
+  const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
 
   // Minimum swipe distance (in px) to trigger a view change
   const minSwipeDistance = 50;
@@ -451,7 +454,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowSettings(true)}
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
               className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
             >
               <Settings className="h-4 w-4 md:h-5 md:w-5" />
@@ -479,7 +482,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setShowSettings(true)}
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
               className="md:hidden relative h-8 w-8 flex-shrink-0"
             >
               <Settings className="h-4 w-4" />
@@ -1375,6 +1378,10 @@ export default function Home() {
         onManualFetch={handleManualFetch}
         isFetching={manualFetchMutation.isPending}
       />
+      <PagesSettingsDialog 
+        open={showPagesSettings} 
+        onOpenChange={setShowPagesSettings}
+      />
       <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
       <CreatePostDialog 
         open={showCreatePost} 
@@ -1386,13 +1393,88 @@ export default function Home() {
       />
         </>
       ) : (
-        /* Pages View - Placeholder */
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Pages</h2>
-            <p className="text-gray-400">Coming soon...</p>
+        /* Pages View - 3 Facebook Pages */
+        <>
+          {/* Mobile View Selector - Only visible on mobile */}
+          <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
+            <button
+              onClick={() => setPagesView('away-days')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                pagesView === 'away-days' 
+                  ? 'bg-purple-500 text-white' 
+                  : 'text-white/60 hover:text-white/80'
+              }`}
+            >
+              Away Days
+            </button>
+            <button
+              onClick={() => setPagesView('funnys')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                pagesView === 'funnys' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'text-white/60 hover:text-white/80'
+              }`}
+            >
+              Funnys
+            </button>
+            <button
+              onClick={() => setPagesView('footy-feed')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+                pagesView === 'footy-feed' 
+                  ? 'bg-cyan-500 text-white' 
+                  : 'text-white/60 hover:text-white/80'
+              }`}
+            >
+              Footy Feed
+            </button>
           </div>
-        </div>
+
+          {/* Desktop: Three Column Layout */}
+          <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden">
+            {/* Football Away Days Column */}
+            <div className="flex flex-col h-full overflow-hidden">
+              <h2 className="text-lg font-semibold text-purple-400 mb-3 text-center">Football Away Days</h2>
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
+              </div>
+            </div>
+
+            {/* Football Funnys Column */}
+            <div className="flex flex-col h-full overflow-hidden">
+              <h2 className="text-lg font-semibold text-orange-400 mb-3 text-center">Football Funnys</h2>
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
+              </div>
+            </div>
+
+            {/* The Footy Feed Column */}
+            <div className="flex flex-col h-full overflow-hidden">
+              <h2 className="text-lg font-semibold text-cyan-400 mb-3 text-center">The Footy Feed</h2>
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                <p className="text-gray-400 text-sm text-center">Loading posts...</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile: Single Column with Swipe */}
+          <div className="md:hidden flex-1 overflow-hidden">
+            {pagesView === 'away-days' && (
+              <div className="h-full overflow-y-auto space-y-3">
+                <p className="text-gray-400 text-sm text-center">Loading Away Days posts...</p>
+              </div>
+            )}
+            {pagesView === 'funnys' && (
+              <div className="h-full overflow-y-auto space-y-3">
+                <p className="text-gray-400 text-sm text-center">Loading Funnys posts...</p>
+              </div>
+            )}
+            {pagesView === 'footy-feed' && (
+              <div className="h-full overflow-y-auto space-y-3">
+                <p className="text-gray-400 text-sm text-center">Loading Footy Feed posts...</p>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
