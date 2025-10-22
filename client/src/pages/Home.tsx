@@ -33,6 +33,7 @@ export default function Home() {
   const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
   const [showLiveScrollTop, setShowLiveScrollTop] = useState(false);
   const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
+  const [isInQuietHours, setIsInQuietHours] = useState(false);
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -40,11 +41,30 @@ export default function Home() {
   const pagesQuery = trpc.pages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
+  // Check if current time is in quiet hours (12am-8am)
+  const isQuietHours = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= 0 && hour < 8; // 12am (0) to 8am
+  };
+
+  // Monitor quiet hours and update state every minute to trigger query re-evaluation
+  useEffect(() => {
+    const checkQuietHours = () => {
+      setIsInQuietHours(isQuietHours());
+    };
+    
+    checkQuietHours(); // Initial check
+    const interval = setInterval(checkQuietHours, 60000); // Check every minute
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
     { cursor: undefined }, 
     { 
-      enabled: feedType === 'twitter',
-      refetchInterval: feedType === 'twitter' ? 10000 : false, // Refresh every 10 seconds when viewing Twitter
+      enabled: feedType === 'twitter' && !isInQuietHours,
+      refetchInterval: (feedType === 'twitter' && !isInQuietHours) ? 300000 : false, // Refresh every 5 minutes (300000ms) when viewing Twitter, not during quiet hours (12am-8am)
       staleTime: 0,
     }
   );
@@ -679,6 +699,11 @@ export default function Home() {
               </>
             ) : (
               <>
+                {isInQuietHours && (
+                  <div className="glass-card p-4 rounded-xl text-center border border-yellow-500/30 bg-yellow-500/5 mb-3">
+                    <p className="text-yellow-400 text-sm">🌙 Quiet Hours (12am-8am) - Twitter updates paused</p>
+                  </div>
+                )}
                 {twitterQuery.isLoading && (
                   <div className="glass-card p-6 rounded-xl text-center">
                     <p className="text-muted-foreground">Loading tweets...</p>
@@ -686,7 +711,7 @@ export default function Home() {
                 )}
                 {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                   <div className="glass-card p-6 rounded-xl text-center">
-                    <p className="text-muted-foreground">No tweets found in your list.</p>
+                    <p className="text-muted-foreground">{isInQuietHours ? 'Twitter updates will resume at 8am' : 'No tweets found in your list.'}</p>
                   </div>
                 )}
                 {twitterQuery.data?.tweets?.map((tweet: any) => {
