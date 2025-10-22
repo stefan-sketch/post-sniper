@@ -40,7 +40,14 @@ export default function Home() {
   const pagesQuery = trpc.pages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
-  const twitterQuery = trpc.twitter.getListTweets.useQuery({ cursor: undefined }, { enabled: feedType === 'twitter' });
+  const twitterQuery = trpc.twitter.getListTweets.useQuery(
+    { cursor: undefined }, 
+    { 
+      enabled: feedType === 'twitter',
+      refetchInterval: feedType === 'twitter' ? 10000 : false, // Refresh every 10 seconds when viewing Twitter
+      staleTime: 0,
+    }
+  );
   
   const handleManualFetch = async () => {
     await manualFetchMutation.mutateAsync();
