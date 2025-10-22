@@ -187,15 +187,52 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       
       const textX = (textPosition.x / 100) * canvas.width;
       const textY = (textPosition.y / 100) * canvas.height;
+      const maxWidth = canvas.width * 0.9;
+      const lineHeight = fontSize * 1.2;
       
-      // Add black stroke for outline effect
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = fontSize * 0.1;
-      ctx.strokeText(overlayText, textX, textY);
+      // Split text by manual line breaks
+      const paragraphs = overlayText.split('\n');
+      const lines: string[] = [];
       
-      // Add white fill
-      ctx.fillStyle = 'white';
-      ctx.fillText(overlayText, textX, textY);
+      // Word wrap each paragraph
+      paragraphs.forEach(paragraph => {
+        const words = paragraph.split(' ');
+        let currentLine = '';
+        
+        words.forEach((word, i) => {
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+          
+          if (i === words.length - 1) {
+            lines.push(currentLine);
+          }
+        });
+      });
+      
+      // Calculate starting Y position to center all lines
+      const totalHeight = lines.length * lineHeight;
+      let currentY = textY - (totalHeight / 2) + (lineHeight / 2);
+      
+      // Render each line
+      lines.forEach(line => {
+        // Add black stroke for outline effect
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = fontSize * 0.1;
+        ctx.strokeText(line, textX, currentY);
+        
+        // Add white fill
+        ctx.fillStyle = 'white';
+        ctx.fillText(line, textX, currentY);
+        
+        currentY += lineHeight;
+      });
     }
 
     return canvas.toDataURL("image/png");
@@ -346,8 +383,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   ref={containerRef}
                   className="relative flex justify-center"
                   onMouseMove={(e) => {
-                    if (!containerRef.current) return;
-                    const rect = containerRef.current.getBoundingClientRect();
+                    if (!containerRef.current || !imgRef.current) return;
+                    const rect = imgRef.current.getBoundingClientRect();
                     const x = ((e.clientX - rect.left) / rect.width) * 100;
                     const y = ((e.clientY - rect.top) / rect.height) * 100;
                     
@@ -397,7 +434,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         transform: 'translate(-50%, -50%)',
                         width: imgRef.current.clientWidth,
                         height: imgRef.current.clientHeight,
-                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 67%, rgba(0,0,0,0.7) 100%)',
+                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%)',
                       }}
                     />
                   )}
@@ -405,7 +442,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   {/* Text Overlay Preview */}
                   {overlayText && imgRef.current && (
                     <div
-                      className="absolute cursor-move select-none"
+                      className="absolute cursor-move select-none text-center"
                       style={{
                         left: `calc(50% + ${(textPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
                         top: `calc(50% + ${(textPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
@@ -420,7 +457,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           -${fontSize * 0.05}px ${fontSize * 0.05}px 0 black,
                           ${fontSize * 0.05}px ${fontSize * 0.05}px 0 black
                         `,
-                        whiteSpace: 'nowrap',
+                        whiteSpace: 'pre-wrap',
+                        maxWidth: `${imgRef.current.clientWidth * 0.9}px`,
+                        lineHeight: 1.2,
                       }}
                       onMouseDown={() => setIsDraggingText(true)}
                     >
@@ -493,13 +532,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           {image && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">Text Overlay</label>
-              <input
-                type="text"
+              <textarea
                 value={overlayText}
                 onChange={(e) => setOverlayText(e.target.value)}
-                placeholder="Add text to image..."
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                maxLength={100}
+                placeholder="Add text to image... (Press Enter for new line)"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
+                maxLength={200}
+                rows={3}
               />
               {overlayText && (
                 <div className="space-y-1">
