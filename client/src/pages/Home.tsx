@@ -397,37 +397,19 @@ export default function Home() {
       {/* Header */}
       <header className="mb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: Feed/Pages Toggle - Compact Icons */}
-          <div className="flex items-center gap-1 bg-gray-800/80 rounded-xl p-1 backdrop-blur-sm">
-            <button
-              onClick={() => setCurrentView('feed')}
-              className={`p-2 rounded-lg transition-all duration-200 ${
-                currentView === 'feed'
-                  ? 'bg-cyan-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-gray-300'
-              }`}
-              title="Feed"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentView('pages')}
-              className={`p-2 rounded-lg transition-all duration-200 ${
-                currentView === 'pages'
-                  ? 'bg-cyan-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-gray-300'
-              }`}
-              title="Pages"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-            </button>
-          </div>
+          {/* Left: View Toggle - Single Switch Icon */}
+          <button
+            onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
+            className="p-2 rounded-lg bg-gray-800/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-200"
+            title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="17 1 21 5 17 9"/>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <polyline points="7 23 3 19 7 15"/>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </button>
 
           {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
