@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { cachedPostsRouter } from "./routers/cachedPosts";
 import { manualFetchRouter } from "./routers/manualFetch";
 import { publerRouter } from "./routers/publer";
+import { twitterRouter } from "./routers/twitter";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -17,6 +18,7 @@ export const appRouter = router({
   cachedPosts: cachedPostsRouter,
   manualFetch: manualFetchRouter,
   publer: publerRouter,
+  twitter: twitterRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

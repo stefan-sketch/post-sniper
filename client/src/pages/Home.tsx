@@ -21,6 +21,7 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<'live' | 'popular'>('live'); // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
+  const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [livePageFilter, setLivePageFilter] = useState<string>('all'); // 'all' or pageId
   const [showPageFilter, setShowPageFilter] = useState(false);
@@ -39,6 +40,7 @@ export default function Home() {
   const pagesQuery = trpc.pages.list.useQuery();
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
+  const twitterQuery = trpc.twitter.getListTweets.useQuery({ cursor: undefined }, { enabled: feedType === 'twitter' });
   
   const handleManualFetch = async () => {
     await manualFetchMutation.mutateAsync();
@@ -577,9 +579,28 @@ export default function Home() {
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
             <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-            <h2 className="text-lg font-semibold text-green-400">
-              Popular Posts
-            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setFeedType('popular')}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                  feedType === 'popular'
+                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/50'
+                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                }`}
+              >
+                Popular Posts
+              </button>
+              <button
+                onClick={() => setFeedType('twitter')}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                  feedType === 'twitter'
+                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/50'
+                    : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                }`}
+              >
+                Twitter List
+              </button>
+            </div>
             <div className="relative">
               <button
                 onClick={() => setShowTimeFilter(!showTimeFilter)}
@@ -615,33 +636,81 @@ export default function Home() {
           <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
           
           <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative">
-            {postsQuery.isLoading && (
-              <div className="glass-card p-6 rounded-xl text-center">
-                <p className="text-muted-foreground">Loading posts...</p>
-              </div>
+            {feedType === 'popular' ? (
+              <>
+                {postsQuery.isLoading && (
+                  <div className="glass-card p-6 rounded-xl text-center">
+                    <p className="text-muted-foreground">Loading posts...</p>
+                  </div>
+                )}
+                {!postsQuery.isLoading && popularPosts.length === 0 && (
+                  <div className="glass-card p-6 rounded-xl text-center">
+                    <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
+                  </div>
+                )}
+                {popularPosts.map((post, index) => {
+                  const currentRank = index + 1;
+                  const previousRank = previousPopularRankings.get(post.id);
+                  const rankingChange = previousRank ? previousRank - currentRank : undefined;
+                  const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
+                    ? post.reactions - post.previousReactions 
+                    : undefined;
+                  const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
+                  
+                  return (
+                    <PostCard 
+                      key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
+                      post={post} 
+                      reactionIncrease={reactionIncrease}
+                    />
+                  );
+                })}
+              </>
+            ) : (
+              <>
+                {twitterQuery.isLoading && (
+                  <div className="glass-card p-6 rounded-xl text-center">
+                    <p className="text-muted-foreground">Loading tweets...</p>
+                  </div>
+                )}
+                {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
+                  <div className="glass-card p-6 rounded-xl text-center">
+                    <p className="text-muted-foreground">No tweets found in your list.</p>
+                  </div>
+                )}
+                {twitterQuery.data?.tweets?.map((tweet: any) => (
+                  <div key={tweet.id} className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
+                    <div className="flex items-start gap-3 mb-3">
+                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-white">{tweet.author.name}</span>
+                          <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
+                        </div>
+                        <p className="text-white/90 mt-2">{tweet.text}</p>
+                      </div>
+                    </div>
+                    {tweet.image && (
+                      <img 
+                        src={tweet.image} 
+                        alt="Tweet image" 
+                        className="w-full rounded-lg mb-3"
+                        draggable="true"
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/uri-list', tweet.image);
+                        }}
+                      />
+                    )}
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
+                      <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
+                      <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
+                      {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                    </div>
+                  </div>
+                ))}
+              </>
             )}
-            {!postsQuery.isLoading && popularPosts.length === 0 && (
-              <div className="glass-card p-6 rounded-xl text-center">
-                <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
-              </div>
-            )}
-            {popularPosts.map((post, index) => {
-              const currentRank = index + 1;
-              const previousRank = previousPopularRankings.get(post.id);
-              const rankingChange = previousRank ? previousRank - currentRank : undefined;
-              const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
-                ? post.reactions - post.previousReactions 
-                : undefined;
-              const indicatorAge = indicatorTimestamps.get(post.id) ? Date.now() - indicatorTimestamps.get(post.id)! : 0;
-              
-              return (
-                <PostCard 
-                  key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-popular`} 
-                  post={post} 
-                  reactionIncrease={reactionIncrease}
-                />
-              );
-            })}
             {showPopularScrollTop && (
               <button
                 onClick={() => scrollToTop(popularScrollRef)}
