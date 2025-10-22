@@ -435,25 +435,17 @@ export default function Home() {
       {/* Header */}
       <header className="mb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: API Status */}
-          <div className="flex items-center gap-1.5 text-xs">
-            {settingsQuery.data?.lastAPIStatus === "success" ? (
-              <>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <span className="text-green-400 font-medium">Online</span>
-              </>
-            ) : (
-              <>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                <span className="text-red-400 font-medium">Offline</span>
-              </>
-            )}
-          </div>
+          {/* Left: Pages/Feed Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
+            className="h-8 px-3 text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+          >
+            {currentView === 'feed' ? 'Pages' : 'Feed'}
+          </Button>
 
-          {/* Center: SDL MEDIA title + View Toggle */}
+          {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
             {/* Settings button - desktop only */}
             <Button
@@ -467,15 +459,6 @@ export default function Home() {
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
-            {/* View Toggle Button - Shows opposite view */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
-              className="h-8 px-3 text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-            >
-              {currentView === 'feed' ? 'Pages' : 'Feed'}
-            </Button>
             {/* Create post button - desktop only, only show in feed view */}
             {currentView === 'feed' && (
               <Button
@@ -492,7 +475,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right: Settings (mobile only) + Notifications + Drag-drop icon (desktop only) */}
+          {/* Right: Settings (mobile only) + Online Status + Notifications + Drag-drop icon (desktop only) */}
           <div className="flex items-center gap-1">
             {/* Settings button - mobile only */}
             <Button
@@ -503,6 +486,23 @@ export default function Home() {
             >
               <Settings className="h-4 w-4" />
             </Button>
+            {/* Online Status */}
+            <div className="flex items-center gap-1.5 text-xs mr-1">
+              {settingsQuery.data?.lastAPIStatus === "success" ? (
+                <>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-green-400 font-medium hidden md:inline">Online</span>
+                </>
+              ) : (
+                <>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  <span className="text-red-400 font-medium hidden md:inline">Offline</span>
+                </>
+              )}
+            </div>
             <Button
               variant="ghost"
               size="icon"
