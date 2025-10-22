@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, Image as ImageIcon } from "lucide-react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -72,13 +72,35 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
     e.stopPropagation();
     if (post.image) {
       try {
+        // Fetch the image
         const response = await fetch(post.image);
         const blob = await response.blob();
         
-        // Copy image to clipboard
+        // Convert to PNG using canvas (better clipboard support)
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = URL.createObjectURL(blob);
+        });
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        
+        // Convert to PNG blob
+        const pngBlob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob((blob) => resolve(blob!), 'image/png');
+        });
+        
+        // Copy PNG to clipboard
         await navigator.clipboard.write([
           new ClipboardItem({
-            [blob.type]: blob
+            'image/png': pngBlob
           })
         ]);
         
@@ -193,7 +215,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
               onClick={handleCopyImage}
               title="Copy image to clipboard"
             >
-              <Copy className="h-4 w-4" />
+              <ImageIcon className="h-4 w-4" />
             </Button>
           )}
           {!hideActions && post.message && (
