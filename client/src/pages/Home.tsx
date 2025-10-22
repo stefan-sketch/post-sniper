@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
+import { toast } from "sonner";
 
 export default function Home() {
   // No authentication required - public access
@@ -813,16 +814,54 @@ export default function Home() {
                     )}
                     
                     {/* Engagement Stats */}
-                    <div className="px-4 pb-3 flex items-center gap-4 text-sm text-gray-500">
-                      <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
-                      <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
-                      <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
-                      {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                    <div className="px-4 pb-3 flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-2">
+                          <Heart className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.likes.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Repeat2 className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.retweets.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {tweet.image && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                            onClick={() => handleDownload(tweet.image)}
+                            title="Download image"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {tweet.text && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                            onClick={() => {
+                              const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                              navigator.clipboard.writeText(cleanText);
+                              toast.success('Tweet copied to clipboard');
+                            }}
+                            title="Copy tweet"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     
                     {/* Tweet Image (if available) */}
                     {tweet.image && (
-                      <div className="relative w-full overflow-hidden group">
+                      <div className="w-full overflow-hidden">
                         <img 
                           src={tweet.image} 
                           alt="Tweet image" 
@@ -833,13 +872,6 @@ export default function Home() {
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
                         />
-                        <button
-                          onClick={() => handleDownload(tweet.image)}
-                          className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Download image"
-                        >
-                          <Download className="h-4 w-4" />
-                        </button>
                       </div>
                     )}
                   </div>
@@ -1118,16 +1150,54 @@ export default function Home() {
                   )}
                   
                   {/* Engagement Stats */}
-                  <div className="px-4 pb-3 flex items-center gap-4 text-sm text-gray-500">
-                    <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
-                    <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
-                    <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
-                    {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                  <div className="px-4 pb-3 flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                        <span className="text-gray-300 font-medium">{tweet.engagement.likes.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Repeat2 className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                        <span className="text-gray-300 font-medium">{tweet.engagement.retweets.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                        <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {tweet.image && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                          onClick={() => handleDownload(tweet.image)}
+                          title="Download image"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {tweet.text && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                          onClick={() => {
+                            const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                            navigator.clipboard.writeText(cleanText);
+                            toast.success('Tweet copied to clipboard');
+                          }}
+                          title="Copy tweet"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Tweet Image (if available) */}
                   {tweet.image && (
-                    <div className="relative w-full overflow-hidden group">
+                    <div className="w-full overflow-hidden">
                       <img 
                         src={tweet.image} 
                         alt="Tweet image" 
@@ -1138,13 +1208,6 @@ export default function Home() {
                           e.dataTransfer.effectAllowed = 'copy';
                         }}
                       />
-                      <button
-                        onClick={() => handleDownload(tweet.image)}
-                        className="absolute top-2 right-2 p-2 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Download image"
-                      >
-                        <Download className="h-4 w-4" />
-                      </button>
                     </div>
                   )}
                 </div>
