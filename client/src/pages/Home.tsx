@@ -1036,13 +1036,7 @@ export default function Home() {
             </div>
           </div>
         ) : mobileView === 'popular' ? (
-          <div 
-            className="flex flex-col h-full overflow-hidden"
-            style={{
-              transform: `translateX(${swipeOffset}px)`,
-              transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-            }}
-          >
+          <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />

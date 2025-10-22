@@ -46,7 +46,7 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
   }
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 pr-2 scrollbar-hide max-w-full" style={{ touchAction: 'pan-y' }}>
+    <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 scrollbar-hide max-w-full" style={{ touchAction: 'pan-y' }}>
       {posts.map((post: any) => (
         <PostCard
           key={post.id}
