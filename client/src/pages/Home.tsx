@@ -32,7 +32,7 @@ export default function Home() {
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
-  const [livePageFilter, setLivePageFilter] = useState<string>('all'); // 'all' or pageId
+  const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
@@ -245,9 +245,9 @@ export default function Home() {
     // Sort all posts by date (newest first) for live posts
     let live = [...allPosts].sort((a, b) => b.postDate.getTime() - a.postDate.getTime());
     
-    // Filter by page if a specific page is selected
-    if (livePageFilter !== 'all') {
-      live = live.filter(post => post.pageId === livePageFilter);
+    // Filter by selected pages (if any pages are selected)
+    if (selectedPageFilters.size > 0) {
+      live = live.filter(post => selectedPageFilters.has(post.pageId));
     }
 
     // Get dismissed post IDs
@@ -261,7 +261,7 @@ export default function Home() {
       .sort((a, b) => b.reactions - a.reactions);
 
     return { livePosts: live, popularPosts: popular };
-  }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter, livePageFilter]);
+  }, [postsQuery.data, settingsQuery.data?.dismissedPosts, popularTimeFilter, selectedPageFilters]);
 
   // Get available pages from monitored pages instead of posts
   const availablePages = useMemo(() => {
@@ -596,61 +596,51 @@ export default function Home() {
       <div className="hidden md:grid grid-cols-2 gap-6 flex-1 overflow-hidden">
         {/* Live Posts Column */}
         <div className="flex flex-col h-full overflow-hidden">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
                 LIVE
               </h2>
-              {showLiveScrollTop && (
-                <button
-                  onClick={() => scrollToTop(liveScrollRef)}
-                  className="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all"
-                  aria-label="Scroll to top"
-                  title="Back to top"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowPageFilter(!showPageFilter)}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-lg shadow-[#1877F2]/50 flex items-center gap-1"
-              >
-                {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showPageFilter && (
-                <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[180px] max-h-[300px] overflow-y-auto">
+              {/* Page filter pills */}
+              {availablePages.map((page) => {
+                const isSelected = selectedPageFilters.has(page.id);
+                return (
                   <button
+                    key={page.id}
                     onClick={() => {
-                      setLivePageFilter('all');
-                      setShowPageFilter(false);
+                      const newFilters = new Set(selectedPageFilters);
+                      if (isSelected) {
+                        newFilters.delete(page.id);
+                      } else {
+                        newFilters.add(page.id);
+                      }
+                      setSelectedPageFilters(newFilters);
                     }}
-                    className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg ${livePageFilter === 'all' ? 'text-primary' : 'text-white/60'}`}
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition-all ${
+                      isSelected
+                        ? 'bg-[#1877F2] text-white shadow-sm'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }`}
+                    title={page.name}
                   >
-                    All
+                    {page.name}
                   </button>
-                  {availablePages.map((page) => (
-                    <button
-                      key={page.id}
-                      onClick={() => {
-                        setLivePageFilter(page.id);
-                        setShowPageFilter(false);
-                      }}
-                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors last:rounded-b-lg ${livePageFilter === page.id ? 'text-primary' : 'text-white/60'}`}
-                    >
-                      {page.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+                );
+              })}
             </div>
+            {showLiveScrollTop && (
+              <button
+                onClick={() => scrollToTop(liveScrollRef)}
+                className="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all"
+                aria-label="Scroll to top"
+                title="Back to top"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </button>
+            )}
           </div>
           {/* Printer line - thin red line where new posts emerge from */}
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
@@ -996,48 +986,40 @@ export default function Home() {
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                LIVE
-              </h2>
-              <div className="relative">
-                <button
-                  onClick={() => setShowPageFilter(!showPageFilter)}
-                  className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-lg shadow-[#1877F2]/50 flex items-center gap-1"
-                >
-                  {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <div className="flex flex-col gap-2 mb-2">
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
-                </button>
-                {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[180px] max-h-[300px] overflow-y-auto">
+                  LIVE
+                </h2>
+                {/* Page filter pills */}
+                {availablePages.map((page) => {
+                  const isSelected = selectedPageFilters.has(page.id);
+                  return (
                     <button
+                      key={page.id}
                       onClick={() => {
-                        setLivePageFilter('all');
-                        setShowPageFilter(false);
+                        const newFilters = new Set(selectedPageFilters);
+                        if (isSelected) {
+                          newFilters.delete(page.id);
+                        } else {
+                          newFilters.add(page.id);
+                        }
+                        setSelectedPageFilters(newFilters);
                       }}
-                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg ${livePageFilter === 'all' ? 'text-primary' : 'text-white/60'}`}
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-[#1877F2] text-white shadow-sm'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                      }`}
+                      title={page.name}
                     >
-                      All
+                      {page.name}
                     </button>
-                    {availablePages.map((page) => (
-                      <button
-                        key={page.id}
-                        onClick={() => {
-                          setLivePageFilter(page.id);
-                          setShowPageFilter(false);
-                        }}
-                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors last:rounded-b-lg ${livePageFilter === page.id ? 'text-primary' : 'text-white/60'}`}
-                      >
-                        {page.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </div>
             {/* Printer line - thin red line where new posts emerge from */}
