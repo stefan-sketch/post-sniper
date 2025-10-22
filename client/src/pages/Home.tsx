@@ -1208,8 +1208,47 @@ export default function Home() {
                     </div>
                   )}
                   
+                  {/* Tweet Image (if available) */}
+                  {tweet.image && (
+                    <div 
+                      className="w-full overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        // Deep link to X app on mobile, fallback to web on desktop
+                        const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
+                        const xAppUrl = `twitter://status?id=${tweet.id}`;
+                        
+                        // Detect if mobile
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        
+                        if (isMobile) {
+                          // Try to open X app, fallback to web after timeout
+                          window.location.href = xAppUrl;
+                          setTimeout(() => {
+                            window.open(tweetUrl, '_blank');
+                          }, 500);
+                        } else {
+                          // Desktop: open in new tab
+                          window.open(tweetUrl, '_blank');
+                        }
+                      }}
+                    >
+                      <img 
+                        src={tweet.image} 
+                        alt="Tweet image"
+                        loading="lazy"
+                        decoding="async" 
+                        className="w-full h-auto object-contain"
+                        draggable="true"
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData('text/uri-list', tweet.image);
+                          e.dataTransfer.effectAllowed = 'copy';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   {/* Engagement Stats */}
-                  <div className="px-4 pb-3 flex items-center justify-between text-sm">
+                  <div className="px-4 py-3 flex items-center justify-between text-sm">
                     <div className="flex items-center gap-5">
                       <div className="flex items-center gap-2">
                         <Heart className="h-4 w-4 text-gray-400" strokeWidth={2} />
@@ -1253,45 +1292,6 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                  
-                  {/* Tweet Image (if available) */}
-                  {tweet.image && (
-                    <div 
-                      className="w-full overflow-hidden cursor-pointer"
-                      onClick={() => {
-                        // Deep link to X app on mobile, fallback to web on desktop
-                        const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
-                        const xAppUrl = `twitter://status?id=${tweet.id}`;
-                        
-                        // Detect if mobile
-                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                        
-                        if (isMobile) {
-                          // Try to open X app, fallback to web after timeout
-                          window.location.href = xAppUrl;
-                          setTimeout(() => {
-                            window.open(tweetUrl, '_blank');
-                          }, 500);
-                        } else {
-                          // Desktop: open in new tab
-                          window.open(tweetUrl, '_blank');
-                        }
-                      }}
-                    >
-                      <img 
-                        src={tweet.image} 
-                        alt="Tweet image"
-                        loading="lazy"
-                        decoding="async" 
-                        className="w-full h-auto object-contain"
-                        draggable="true"
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('text/uri-list', tweet.image);
-                          e.dataTransfer.effectAllowed = 'copy';
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
                 );
               })}
