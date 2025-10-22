@@ -785,10 +785,18 @@ export default function Home() {
                     
                     {/* Tweet Text */}
                     {cleanText && (
-                      <div className="px-4 pb-3">
+                      <div className="px-4 pb-2">
                         <p className="text-sm text-white/90">{cleanText}</p>
                       </div>
                     )}
+                    
+                    {/* Engagement Stats */}
+                    <div className="px-4 pb-3 flex items-center gap-4 text-sm text-gray-500">
+                      <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
+                      <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
+                      <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
+                      {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                    </div>
                     
                     {/* Tweet Image */}
                     <div className="relative w-full overflow-hidden group">
@@ -809,14 +817,6 @@ export default function Home() {
                       >
                         <Download className="h-4 w-4" />
                       </button>
-                    </div>
-                    
-                    {/* Engagement Stats */}
-                    <div className="px-4 py-3 flex items-center gap-4 text-sm text-gray-500">
-                      <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
-                      <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
-                      <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
-                      {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
                     </div>
                   </div>
                   );
@@ -1088,10 +1088,18 @@ export default function Home() {
                   
                   {/* Tweet Text */}
                   {cleanText && (
-                    <div className="px-4 pb-3">
+                    <div className="px-4 pb-2">
                       <p className="text-sm text-white/90">{cleanText}</p>
                     </div>
                   )}
+                  
+                  {/* Engagement Stats */}
+                  <div className="px-4 pb-3 flex items-center gap-4 text-sm text-gray-500">
+                    <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
+                    <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
+                    <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
+                    {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
+                  </div>
                   
                   {/* Tweet Image */}
                   <div className="relative w-full overflow-hidden group">
@@ -1112,14 +1120,6 @@ export default function Home() {
                     >
                       <Download className="h-4 w-4" />
                     </button>
-                  </div>
-                  
-                  {/* Engagement Stats */}
-                  <div className="px-4 py-3 flex items-center gap-4 text-sm text-gray-500">
-                    <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
-                    <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
-                    <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
-                    {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
                   </div>
                 </div>
                 );
