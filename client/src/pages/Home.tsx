@@ -23,59 +23,9 @@ export default function Home() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live');
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
-
-  // Minimum swipe distance (in px) to trigger a view change
-  const minSwipeDistance = 100; // Increased to prevent accidental swipes
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    const currentTouch = e.targetTouches[0].clientX;
-    setTouchEnd(currentTouch);
-    
-    // Calculate swipe offset for visual feedback
-    if (touchStart !== null && !isTransitioning) {
-      const diff = currentTouch - touchStart;
-      // Limit the swipe distance to prevent over-scrolling
-      const limitedDiff = Math.max(-100, Math.min(100, diff * 0.5));
-      setSwipeOffset(limitedDiff);
-    }
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    setIsTransitioning(true);
-    
-    if (isLeftSwipe) {
-      // Swipe left: go to next view
-      if (mobileView === 'live') setMobileView('popular');
-      else if (mobileView === 'popular') setMobileView('twitter');
-    }
-    
-    if (isRightSwipe) {
-      // Swipe right: go to previous view
-      if (mobileView === 'twitter') setMobileView('popular');
-      else if (mobileView === 'popular') setMobileView('live');
-    }
-    
-    // Reset swipe offset with animation
-    setSwipeOffset(0);
-    setTimeout(() => setIsTransitioning(false), 300);
-  };
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -1020,20 +970,9 @@ export default function Home() {
       </div>
 
       {/* Mobile: Single Column with Switchable View */}
-      <div 
-        className="md:hidden flex flex-col flex-1 overflow-hidden"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+      <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
-          <div 
-            className="flex flex-col h-full overflow-hidden"
-            style={{
-              transform: `translateX(${swipeOffset}px)`,
-              transition: isTransitioning ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-            }}
-          >
+          <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-3 mb-3">
               <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <span className="relative flex h-3 w-3">
