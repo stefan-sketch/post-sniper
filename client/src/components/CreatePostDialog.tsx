@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { X, Upload, RefreshCw } from "lucide-react";
+import { Upload, RefreshCw } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -445,18 +445,16 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             </div>
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="text-gray-400 hover:text-white flex-shrink-0"
+              onClick={handlePost}
+              disabled={isUploading || !image || !caption.trim() || selectedPages.length === 0}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 flex-shrink-0"
             >
-              <X className="h-5 w-5" />
+              {isUploading ? "Posting..." : "Post"}
             </Button>
           </div>
 
           {/* Image Upload/Crop */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Image</label>
             {!image ? (
               <div
                 onDrop={handleDrop}
@@ -836,24 +834,31 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 {isRegenerating ? "Regenerating..." : "Regenerate"}
               </Button>
             </div>
-            <Textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Write your caption..."
-              className="min-h-24 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-              maxLength={2000}
-            />
+            <div
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              className="relative"
+            >
+              <Textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Write your caption... (or drag & drop an image here)"
+                className="min-h-24 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                maxLength={2000}
+              />
+              {!image && (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  <div className="text-gray-600 text-sm flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    <span>Drag image here</span>
+                  </div>
+                </div>
+              )}
+            </div>
             <p className="text-xs text-gray-500 text-right">{caption.length} / 2000</p>
           </div>
 
-          {/* Post Button */}
-          <Button
-            onClick={handlePost}
-            disabled={isUploading || !image || !caption.trim() || selectedPages.length === 0}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
-          >
-            {isUploading ? "Posting..." : "Post"}
-          </Button>
+
         </div>
       </DialogContent>
 
