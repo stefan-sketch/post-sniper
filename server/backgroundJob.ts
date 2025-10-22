@@ -166,6 +166,17 @@ export class BackgroundJobService {
             apiToken
           );
 
+          // Log sample post data to debug stale data issue
+          if (posts.length > 0) {
+            const samplePost = posts[0];
+            console.log(`[BackgroundJob] Sample post from ${page.profileName}:`, {
+              id: samplePost.id,
+              message: samplePost.message?.substring(0, 50),
+              reactions: samplePost.kpi?.page_posts_reactions?.value || samplePost.reactions,
+              timestamp: new Date().toISOString()
+            });
+          }
+
           // Store posts for hash calculation
           allFetchedPosts.push(...posts);
 

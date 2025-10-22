@@ -1,4 +1,4 @@
-const CACHE_NAME = 'post-sniper-v1';
+const CACHE_NAME = 'post-sniper-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -37,18 +37,31 @@ self.addEventListener('activate', (event) => {
 
 // Fetch strategy: Network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Skip caching for:
+  // 1. Non-GET requests (POST, PUT, DELETE, etc.)
+  // 2. API calls (tRPC endpoints)
+  const url = new URL(event.request.url);
+  const isApiCall = url.pathname.startsWith('/trpc') || url.pathname.startsWith('/api');
+  const isGetRequest = event.request.method === 'GET';
+  
+  // Don't cache API calls or non-GET requests
+  if (!isGetRequest || isApiCall) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
+  // For static assets: Network first, fallback to cache
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone the response
-        const responseToCache = response.clone();
-        
-        // Cache the fetched response for future use
-        caches.open(CACHE_NAME)
-          .then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        
+        // Only cache successful GET responses for static assets
+        if (response.ok) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+        }
         return response;
       })
       .catch(() => {
