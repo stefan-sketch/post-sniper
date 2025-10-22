@@ -54,13 +54,14 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [overlayText, setOverlayText] = useState("");
   const [useGradient, setUseGradient] = useState(false);
   const [textBoxPosition, setTextBoxPosition] = useState({ x: 50, y: 50 }); // percentage from top-left
-  const [textBoxSize, setTextBoxSize] = useState({ width: 60, height: 20 }); // percentage of image
+  const [textBoxWidth, setTextBoxWidth] = useState(60); // percentage of image width
+  const [fontSize, setFontSize] = useState(48); // base font size in pixels
   const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
   const [isDraggingTextBox, setIsDraggingTextBox] = useState(false);
   const [isResizingTextBox, setIsResizingTextBox] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
-  const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -232,19 +233,17 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
         // Add text overlay if provided
         if (overlayText.trim()) {
-          // Calculate font size based on text box height
-          // textBoxSize.height is percentage of image, convert to pixels then to font size
-          const boxHeightPx = (textBoxSize.height / 100) * canvas.height;
-          const fontSize = boxHeightPx * 0.8; // Font size is 80% of box height
+          // Scale font size proportionally to canvas width
+          const scaledFontSize = (fontSize / 800) * canvas.width;
           
-          ctx.font = `${fontSize}px Impact, 'Arial Black', sans-serif`;
+          ctx.font = `${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
           const textX = (textBoxPosition.x / 100) * canvas.width;
           const textY = (textBoxPosition.y / 100) * canvas.height;
-          const maxWidth = (textBoxSize.width / 100) * canvas.width;
-          const lineHeight = fontSize * 1.2;
+          const maxWidth = (textBoxWidth / 100) * canvas.width;
+          const lineHeight = scaledFontSize * 1.2;
           
           // Split text by manual line breaks
           const paragraphs = overlayText.split('\n');
@@ -292,7 +291,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxSize]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -377,7 +376,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       setOverlayText("");
       setUseGradient(false);
       setTextBoxPosition({ x: 50, y: 50 });
-      setTextBoxSize({ width: 60, height: 20 });
+      setTextBoxWidth(60);
+      setFontSize(48);
       setWatermarkPosition({ x: 85, y: 10 });
       
       // Close dialog after short delay to show success message
@@ -413,7 +413,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setOverlayText("");
     setUseGradient(false);
     setTextBoxPosition({ x: 50, y: 50 });
-    setTextBoxSize({ width: 60, height: 20 });
+    setTextBoxWidth(60);
+    setFontSize(48);
     setCropMode(true);
     setCroppedImage(null);
     // Close dialog
@@ -436,9 +437,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       // Calculate new size based on drag distance
       const deltaX = x - resizeStartState.x;
       const deltaY = y - resizeStartState.y;
-      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
-      const newHeight = Math.max(10, Math.min(50, resizeStartState.height + deltaY));
-      setTextBoxSize({ width: newWidth, height: newHeight });
+      // Use diagonal distance to scale both fontSize and width proportionally
+      const delta = (deltaX + deltaY) / 2;
+      const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
+      const newWidth = Math.max(30, Math.min(100, resizeStartState.width + deltaX));
+      setFontSize(newFontSize);
+      setTextBoxWidth(newWidth);
     } else if (isDraggingWatermark) {
       setWatermarkPosition({ 
         x: Math.max(0, Math.min(100, x)), 
@@ -464,9 +468,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       e.preventDefault();
       const deltaX = x - resizeStartState.x;
       const deltaY = y - resizeStartState.y;
-      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
-      const newHeight = Math.max(10, Math.min(50, resizeStartState.height + deltaY));
-      setTextBoxSize({ width: newWidth, height: newHeight });
+      // Use diagonal distance to scale both fontSize and width proportionally
+      const delta = (deltaX + deltaY) / 2;
+      const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
+      const newWidth = Math.max(30, Math.min(100, resizeStartState.width + deltaX));
+      setFontSize(newFontSize);
+      setTextBoxWidth(newWidth);
     } else if (isDraggingWatermark) {
       e.preventDefault();
       setWatermarkPosition({ 
@@ -499,20 +506,20 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       key={page.id}
                       onClick={() => selectPage(page.id)}
                       className={`
-                        flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium
-                        transition-all duration-200 hover:scale-[1.02]
+                        flex items-center justify-center p-1 rounded-full
+                        transition-all duration-200 hover:scale-[1.1]
                         ${isSelected 
-                          ? 'bg-[#1877F2] text-white shadow-lg shadow-blue-500/30' 
-                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                          ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
+                          : 'opacity-60 hover:opacity-100'
                         }
                       `}
+                      title={page.shortName}
                     >
                       <img 
                         src={page.profilePicture} 
                         alt={page.shortName}
-                        className="w-5 h-5 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover"
                       />
-                      <span>{page.shortName}</span>
                     </button>
                   );
                 })}
@@ -626,45 +633,79 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   )}
 
                   {/* Text Box Overlay - Draggable and Resizable */}
-                  {overlayText && imgRef.current && (
-                    <div
-                      className="absolute border-2 border-cyan-500 bg-cyan-500/10 cursor-move select-none"
-                      style={{
-                        pointerEvents: 'auto',
-                        zIndex: 10,
-                        left: `calc(50% + ${(textBoxPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
-                        top: `calc(50% + ${(textBoxPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
-                        transform: 'translate(-50%, -50%)',
-                        width: `${(textBoxSize.width / 100) * imgRef.current.clientWidth}px`,
-                        height: `${(textBoxSize.height / 100) * imgRef.current.clientHeight}px`,
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingTextBox(true);
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingTextBox(true);
-                      }}
-                    >
-                      {/* Text Preview */}
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center text-center pointer-events-none"
-                        style={{
-                          fontSize: `${(textBoxSize.height / 100) * imgRef.current.clientHeight * 0.6}px`,
-                          fontFamily: 'Impact, "Arial Black", sans-serif',
-                          fontWeight: 'bold',
-                          color: 'white',
-                          textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                          whiteSpace: 'pre-wrap',
-                          overflow: 'hidden',
-                          padding: '4px',
-                        }}
-                      >
-                        {overlayText}
-                      </div>
+                  {overlayText && imgRef.current && (() => {
+                    // Calculate preview font size
+                    const previewFontSize = (fontSize / 800) * imgRef.current.clientWidth;
+                    const boxWidth = (textBoxWidth / 100) * imgRef.current.clientWidth;
+                    
+                    // Create temporary canvas to measure text height
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                      ctx.font = `${previewFontSize}px Impact, 'Arial Black', sans-serif`;
+                      const lineHeight = previewFontSize * 1.2;
+                      
+                      // Calculate wrapped lines
+                      const paragraphs = overlayText.split('\n');
+                      let lineCount = 0;
+                      paragraphs.forEach(paragraph => {
+                        const words = paragraph.split(' ');
+                        let currentLine = '';
+                        words.forEach((word) => {
+                          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                          const metrics = ctx.measureText(testLine);
+                          if (metrics.width > boxWidth && currentLine) {
+                            lineCount++;
+                            currentLine = word;
+                          } else {
+                            currentLine = testLine;
+                          }
+                        });
+                        if (currentLine) lineCount++;
+                      });
+                      
+                      const boxHeight = Math.max(lineHeight * 1.5, lineCount * lineHeight + previewFontSize * 0.4);
+                      
+                      return (
+                        <div
+                          className="absolute border-2 border-cyan-500 bg-cyan-500/10 cursor-move select-none"
+                          style={{
+                            pointerEvents: 'auto',
+                            zIndex: 10,
+                            left: `calc(50% + ${(textBoxPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                            top: `calc(50% + ${(textBoxPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                            transform: 'translate(-50%, -50%)',
+                            width: `${boxWidth}px`,
+                            height: `${boxHeight}px`,
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDraggingTextBox(true);
+                          }}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDraggingTextBox(true);
+                          }}
+                        >
+                          {/* Text Preview */}
+                          <div 
+                            className="absolute inset-0 flex items-center justify-center text-center pointer-events-none"
+                            style={{
+                              fontSize: `${previewFontSize}px`,
+                              fontFamily: 'Impact, "Arial Black", sans-serif',
+                              fontWeight: 'bold',
+                              color: 'white',
+                              textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                              whiteSpace: 'pre-wrap',
+                              overflow: 'hidden',
+                              padding: '8px',
+                              wordWrap: 'break-word',
+                            }}
+                          >
+                            {overlayText}
+                          </div>
                       
                       {/* Resize Handle - Bottom Right Corner */}
                       <div
@@ -679,8 +720,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           setResizeStartState({ 
                             x, 
                             y, 
-                            width: textBoxSize.width, 
-                            height: textBoxSize.height 
+                            fontSize: fontSize, 
+                            width: textBoxWidth 
                           });
                           setIsResizingTextBox(true);
                         }}
@@ -694,14 +735,17 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           setResizeStartState({ 
                             x, 
                             y, 
-                            width: textBoxSize.width, 
-                            height: textBoxSize.height 
+                            fontSize: fontSize, 
+                            width: textBoxWidth 
                           });
                           setIsResizingTextBox(true);
                         }}
                       />
-                    </div>
-                  )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
 
                   {/* Watermark Preview */}
                   {useWatermark && selectedPage && imgRef.current && (
