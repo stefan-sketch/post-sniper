@@ -434,9 +434,16 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               <div className="flex gap-2 flex-wrap">
                 {PAGES.map((page) => {
                   // Find matching managed page for profile picture
-                  const managedPage = managedPagesQuery.data?.find((mp: any) => 
-                    page.name === mp.profileName || page.shortName === mp.profileName
-                  );
+                  const managedPage = managedPagesQuery.data?.find((mp: any) => {
+                    const mpName = mp.profileName?.toLowerCase() || '';
+                    const pageName = page.name.toLowerCase();
+                    const pageShort = page.shortName.toLowerCase();
+                    // Match by full name or if managed page name contains the short name
+                    return mpName === pageName || mpName === pageShort || 
+                           mpName.includes('footy') && page.id === 'footy-feed' ||
+                           mpName.includes('funny') && page.id === 'football-funnys' ||
+                           mpName.includes('away') && page.id === 'football-away-days';
+                  });
                   const isSelected = selectedPages.includes(page.id);
                   
                   return (
