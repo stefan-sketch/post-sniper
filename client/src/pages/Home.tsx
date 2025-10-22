@@ -1424,10 +1424,10 @@ export default function Home() {
           </div>
 
           {/* Desktop: Three Column Layout */}
-          <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden">
+          <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden overflow-x-hidden max-w-full">
             {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
               managedPagesQuery.data.slice(0, 3).map((page: any) => (
-                <div key={page.id} className="flex flex-col h-full overflow-hidden">
+                <div key={page.id} className="flex flex-col h-full overflow-hidden overflow-x-hidden max-w-full min-w-0">
                   {/* Page Header with Icon */}
                   <div className="flex items-center gap-3 mb-3 px-2">
                     <div 

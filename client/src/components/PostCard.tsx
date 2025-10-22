@@ -99,7 +99,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
 
   return (
     <div 
-      className="glass-card rounded-xl overflow-hidden transition-all mb-4"
+      className="glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full"
     >
       {/* Profile Header */}
       {!hidePageHeader && (
