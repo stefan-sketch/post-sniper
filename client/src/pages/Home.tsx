@@ -24,6 +24,7 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
 
   // Minimum swipe distance (in px) to trigger a view change
   const minSwipeDistance = 50;
@@ -452,7 +453,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: SDL MEDIA title (mobile: just title, desktop: with buttons) */}
+          {/* Center: SDL MEDIA title + View Toggle */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
             {/* Settings button - desktop only */}
             <Button
@@ -466,18 +467,29 @@ export default function Home() {
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
-            {/* Create post button - desktop only */}
+            {/* View Toggle Button - Shows opposite view */}
             <Button
               variant="ghost"
-              size="icon"
-              onClick={() => {
-                setDroppedImage(null);
-                setShowCreatePost(true);
-              }}
-              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              size="sm"
+              onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
+              className="h-8 px-3 text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
             >
-              <Plus className="h-4 w-4 md:h-5 md:w-5" />
+              {currentView === 'feed' ? 'Pages' : 'Feed'}
             </Button>
+            {/* Create post button - desktop only, only show in feed view */}
+            {currentView === 'feed' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setDroppedImage(null);
+                  setShowCreatePost(true);
+                }}
+                className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              >
+                <Plus className="h-4 w-4 md:h-5 md:w-5" />
+              </Button>
+            )}
           </div>
 
           {/* Right: Settings (mobile only) + Notifications + Drag-drop icon (desktop only) */}
@@ -549,6 +561,9 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Conditional Content Based on View */}
+      {currentView === 'feed' ? (
+        <>
       {/* Mobile View Selector - Only visible on mobile */}
       <div className="md:hidden mb-4 glass-card p-1 rounded-xl flex gap-1 flex-shrink-0">
         <button
@@ -1371,6 +1386,16 @@ export default function Home() {
         }}
         initialImage={droppedImage}
       />
+        </>
+      ) : (
+        /* Pages View - Placeholder */
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-2">Pages</h2>
+            <p className="text-gray-400">Coming soon...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
