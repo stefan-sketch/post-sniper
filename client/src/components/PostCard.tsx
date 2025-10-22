@@ -26,9 +26,10 @@ interface PostCardProps {
   showDismiss?: boolean;
   onDismiss?: () => void;
   reactionIncrease?: number; // Number of reactions gained since last update
+  hideActions?: boolean; // Hide download and copy buttons
 }
 
-export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease }: PostCardProps) {
+export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions }: PostCardProps) {
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   
@@ -173,7 +174,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {post.image && (
+          {!hideActions && post.image && (
             <Button
               size="sm"
               variant="ghost"
@@ -184,7 +185,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
               <Download className="h-4 w-4" />
             </Button>
           )}
-          {post.message && (
+          {!hideActions && post.message && (
             <Button
               size="sm"
               variant="ghost"
