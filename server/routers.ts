@@ -43,6 +43,7 @@ export const appRouter = router({
         profilePicture: z.string().optional(),
         borderColor: z.string(),
         network: z.string().default("facebook"),
+        publerPageId: z.string().optional(),
         alertThreshold: z.number().default(100),
         alertEnabled: z.boolean().default(true),
       }))
@@ -61,6 +62,7 @@ export const appRouter = router({
         profileName: z.string().optional(),
         profilePicture: z.string().optional(),
         borderColor: z.string().optional(),
+        publerPageId: z.string().optional(),
         alertThreshold: z.number().optional(),
         alertEnabled: z.boolean().optional(),
       }))
