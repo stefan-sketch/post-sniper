@@ -41,7 +41,7 @@ export const twitterRouter = router({
         id: tweet.id,
         platform: "twitter" as const,
         text: tweet.text,
-        image: tweet.entities?.media?.[0]?.media_url_https || null,
+        image: tweet.extendedEntities?.media?.[0]?.media_url_https || tweet.entities?.media?.[0]?.media_url_https || null,
         author: {
           name: tweet.author?.name || "Unknown",
           username: tweet.author?.userName || "",

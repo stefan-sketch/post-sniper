@@ -596,17 +596,15 @@ export default function Home() {
                   feedType === 'twitter' ? 'translate-x-[60px]' : 'translate-x-0.5'
                 }`}
               />
-              <span className="absolute left-2 flex items-center gap-1 text-xs font-medium text-white pointer-events-none">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <span className="absolute left-3 flex items-center text-white pointer-events-none">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
-                FB
               </span>
-              <span className="absolute right-2 flex items-center gap-1 text-xs font-medium text-white pointer-events-none">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <span className="absolute right-3 flex items-center text-white pointer-events-none">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
-                X
               </span>
             </button>
             <div className="relative">
@@ -691,7 +689,31 @@ export default function Home() {
                     <p className="text-muted-foreground">No tweets found in your list.</p>
                   </div>
                 )}
-                {twitterQuery.data?.tweets?.map((tweet: any) => (
+                {twitterQuery.data?.tweets?.map((tweet: any) => {
+                  // Format timestamp using the same logic as PostCard
+                  const getTimeAgo = (dateString: string): string => {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffMs = now.getTime() - date.getTime();
+                    const diffMins = Math.floor(diffMs / 60000);
+                    
+                    if (diffMins < 1) return 'just now';
+                    if (diffMins < 60) return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+                    
+                    const diffHours = diffMins / 60;
+                    const roundedHours = Math.round(diffHours);
+                    
+                    if (roundedHours < 24) {
+                      return `${roundedHours} hour${roundedHours === 1 ? '' : 's'} ago`;
+                    }
+                    
+                    const diffDays = Math.round(diffHours / 24);
+                    return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+                  };
+                  
+                  const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
+                  
+                  return (
                   <div key={tweet.id} className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
                     <div className="flex items-start gap-3 mb-3">
                       <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full" />
@@ -700,6 +722,7 @@ export default function Home() {
                           <span className="font-semibold text-white">{tweet.author.name}</span>
                           <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
                         </div>
+                        {timeAgo && <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>}
                         <p className="text-white/90 mt-2">{tweet.text}</p>
                       </div>
                     </div>
@@ -721,7 +744,8 @@ export default function Home() {
                       {tweet.engagement.views > 0 && <span>👁️ {tweet.engagement.views.toLocaleString()}</span>}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </>
             )}
             {showPopularScrollTop && (
