@@ -11,10 +11,10 @@ import { toast } from "sonner";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
-const PAGES: { id: PageId; name: string; watermark: string; shortName: string }[] = [
-  { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png", shortName: "Footy Feed" },
-  { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png", shortName: "Funnys" },
-  { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png", shortName: "Away Days" },
+const PAGES: { id: PageId; name: string; watermark: string; shortName: string; profilePicture: string }[] = [
+  { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png", shortName: "Footy Feed", profilePicture: "/page-icons/footy-feed.jpg" },
+  { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png", shortName: "Funnys", profilePicture: "/page-icons/football-funnys.jpg" },
+  { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png", shortName: "Away Days", profilePicture: "/page-icons/football-away-days.jpg" },
 ];
 
 interface CreatePostDialogProps {
@@ -24,9 +24,6 @@ interface CreatePostDialogProps {
 }
 
 export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePostDialogProps) {
-  // Fetch managed pages for profile pictures
-  const managedPagesQuery = trpc.managedPages.getAll.useQuery();
-  
   const [image, setImage] = useState<string | null>(null);
   const [cropMode, setCropMode] = useState(true); // Start in crop mode
   const [croppedImage, setCroppedImage] = useState<string | null>(null); // Store the cropped result
@@ -433,17 +430,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
               <div className="flex gap-2 flex-wrap">
                 {PAGES.map((page) => {
-                  // Find matching managed page for profile picture
-                  const managedPage = managedPagesQuery.data?.find((mp: any) => {
-                    const mpName = mp.profileName?.toLowerCase() || '';
-                    const pageName = page.name.toLowerCase();
-                    const pageShort = page.shortName.toLowerCase();
-                    // Match by full name or if managed page name contains the short name
-                    return mpName === pageName || mpName === pageShort || 
-                           mpName.includes('footy') && page.id === 'footy-feed' ||
-                           mpName.includes('funny') && page.id === 'football-funnys' ||
-                           mpName.includes('away') && page.id === 'football-away-days';
-                  });
                   const isSelected = selectedPages.includes(page.id);
                   
                   return (
@@ -463,17 +449,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           border: isSelected ? '2px solid #06b6d4' : '2px solid rgba(255,255,255,0.2)'
                         }}
                       >
-                        {managedPage?.profilePicture ? (
-                          <img 
-                            src={managedPage.profilePicture} 
-                            alt={page.shortName}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-gray-800 flex items-center justify-center text-sm font-bold">
-                            {page.shortName.charAt(0)}
-                          </div>
-                        )}
+                        <img 
+                          src={page.profilePicture} 
+                          alt={page.shortName}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                     </button>
                   );
