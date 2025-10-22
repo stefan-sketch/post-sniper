@@ -99,7 +99,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
 
   return (
     <div 
-      className="glass-card rounded-xl overflow-hidden transition-all"
+      className="glass-card rounded-xl overflow-hidden transition-all mb-4"
     >
       {/* Profile Header */}
       {!hidePageHeader && (
@@ -150,7 +150,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
 
       {/* Post Message */}
       {post.message && (
-        <div className="px-4 pb-3">
+        <div className="px-4 pt-3 pb-3">
           <p className="text-sm line-clamp-3">{post.message}</p>
         </div>
       )}

@@ -1450,8 +1450,13 @@ export default function Home() {
                       )}
                     </div>
                     <h2 
-                      className="text-lg font-semibold"
-                      style={{ color: page.borderColor }}
+                      className="text-sm font-semibold"
+                      style={{ 
+                        color: page.profileName === 'Football Funnys' ? '#FCD34D' : 
+                               page.profileName === 'The Footy Feed' ? '#FFFFFF' : 
+                               page.profileName === 'Football Away Days' ? '#EF4444' : 
+                               page.borderColor 
+                      }}
                     >
                       {page.profileName}
                     </h2>
@@ -1501,8 +1506,13 @@ export default function Home() {
                         )}
                       </div>
                       <h2 
-                        className="text-lg font-semibold"
-                        style={{ color: page.borderColor }}
+                        className="text-sm font-semibold"
+                        style={{ 
+                          color: page.profileName === 'Football Funnys' ? '#FCD34D' : 
+                                 page.profileName === 'The Footy Feed' ? '#FFFFFF' : 
+                                 page.profileName === 'Football Away Days' ? '#EF4444' : 
+                                 page.borderColor 
+                        }}
                       >
                         {page.profileName}
                       </h2>
