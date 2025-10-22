@@ -96,7 +96,12 @@ export default function Home() {
   
   const settingsQuery = trpc.settings.get.useQuery();
   const pagesQuery = trpc.pages.list.useQuery();
-  const managedPagesQuery = trpc.managedPages.list.useQuery();
+  const managedPagesQuery = trpc.managedPages.list.useQuery(undefined, {
+    refetchInterval: 10000, // Poll every 10 seconds to sync with background job
+    staleTime: 5000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
   const setPlayingMutation = trpc.settings.setPlaying.useMutation();
   const manualFetchMutation = trpc.manualFetch.triggerFetch.useMutation();
 

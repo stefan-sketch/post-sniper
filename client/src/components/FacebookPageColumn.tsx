@@ -8,7 +8,15 @@ interface FacebookPageColumnProps {
 }
 
 export default function FacebookPageColumn({ pageId, pageName, borderColor }: FacebookPageColumnProps) {
-  const postsQuery = trpc.cachedPosts.getByPage.useQuery({ pageId, limit: 20 });
+  const postsQuery = trpc.cachedPosts.getByPage.useQuery(
+    { pageId, limit: 20 },
+    {
+      refetchInterval: 10000, // Poll every 10 seconds to sync with background job
+      staleTime: 5000,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+    }
+  );
 
   if (postsQuery.isLoading) {
     return (
