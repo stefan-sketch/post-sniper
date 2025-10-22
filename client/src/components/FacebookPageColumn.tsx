@@ -21,22 +21,6 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
     }
   );
 
-  if (postsQuery.isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Loading posts...</p>
-      </div>
-    );
-  }
-
-  if (postsQuery.isError) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-red-400 text-sm">Error loading posts</p>
-      </div>
-    );
-  }
-
   const posts = postsQuery.data?.posts || [];
   const pageConfig = postsQuery.data?.pageConfig;
 
@@ -64,6 +48,22 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
       setPreviousPostIds(currentPostIds);
     }
   }, [posts]);
+
+  if (postsQuery.isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Loading posts...</p>
+      </div>
+    );
+  }
+
+  if (postsQuery.isError) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-red-400 text-sm">Error loading posts</p>
+      </div>
+    );
+  }
 
   if (posts.length === 0) {
     return (
