@@ -1,0 +1,74 @@
+{
+  "query": "SELECT id, profileId, profileName, userId, network, alertEnabled FROM monitored_pages ORDER BY createdAt",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3qGZfzoRr5uFuWS.a7e80ebd91e3 --database Wgf4yEQFm45DVwnyv4dDqk --execute SELECT id, profileId, profileName, userId, network, alertEnabled FROM monitored_pages ORDER BY createdAt",
+  "rows": [
+    {
+      "id": "_0yIxVqywyIr7B9XMxCyR",
+      "profileId": "social-media-tips",
+      "profileName": "Social Media Tips",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "64wyJn8-4zkrltdtw6GFM",
+      "profileId": "marketing-insights",
+      "profileName": "Marketing Insights",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "84d8e099rUJ14x1sYtAn-",
+      "profileId": "tech-news-daily",
+      "profileName": "Tech News Daily",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "rsvDHidNf4Z8WM9M9Wscw",
+      "profileId": "business-growth",
+      "profileName": "Business Growth",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "2mggF-94IV92pofd6yTEq",
+      "profileId": "639087909492017",
+      "profileName": "The Football Community",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "xNgQPFWkLDgKLIhnu9i29",
+      "profileId": "182667071748100",
+      "profileName": "Football Planet",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "emHNYwEladhXx0SsLzobQ",
+      "profileId": "639087909492017",
+      "profileName": "The Football Community ",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    },
+    {
+      "id": "h5N4chKfzpe4Dwltx0wfm",
+      "profileId": "182667071748100",
+      "profileName": "Football Planet",
+      "userId": "public",
+      "network": "facebook",
+      "alertEnabled": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprofileId\tprofileName\tuserId\tnetwork\talertEnabled\n_0yIxVqywyIr7B9XMxCyR\tsocial-media-tips\tSocial Media Tips\tpublic\tfacebook\t1\n64wyJn8-4zkrltdtw6GFM\tmarketing-insights\tMarketing Insights\tpublic\tfacebook\t1\n84d8e099rUJ14x1sYtAn-\ttech-news-daily\tTech News Daily\tpublic\tfacebook\t1\nrsvDHidNf4Z8WM9M9Wscw\tbusiness-growth\tBusiness Growth\tpublic\tfacebook\t1\n2mggF-94IV92pofd6yTEq\t639087909492017\tThe Football Community\tpublic\tfacebook\t1\nxNgQPFWkLDgKLIhnu9i29\t182667071748100\tFootball Planet\tpublic\tfacebook\t1\nemHNYwEladhXx0SsLzobQ\t639087909492017\tThe Football Community \tpublic\tfacebook\t1\nh5N4chKfzpe4Dwltx0wfm\t182667071748100\tFootball Planet\tpublic\tfacebook\t1\n",
+  "stderr": "",
+  "execution_time_ms": 576
+}

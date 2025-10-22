@@ -439,15 +439,29 @@ export default function Home() {
       {/* Header */}
       <header className="mb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: Pages/Feed Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
-            className="h-8 px-3 text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-          >
-            {currentView === 'feed' ? 'Pages' : 'Feed'}
-          </Button>
+          {/* Left: Feed/Pages Toggle */}
+          <div className="flex items-center gap-1 bg-gray-800/50 rounded-lg p-1">
+            <button
+              onClick={() => setCurrentView('feed')}
+              className={`px-3 py-1 text-sm font-medium rounded transition-all ${
+                currentView === 'feed'
+                  ? 'bg-cyan-500 text-white'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Feed
+            </button>
+            <button
+              onClick={() => setCurrentView('pages')}
+              className={`px-3 py-1 text-sm font-medium rounded transition-all ${
+                currentView === 'pages'
+                  ? 'bg-cyan-500 text-white'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Pages
+            </button>
+          </div>
 
           {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
@@ -554,7 +568,7 @@ export default function Home() {
                 }
               }}
               onDragOver={(e) => e.preventDefault()}
-              className="hidden md:flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-2 border-dashed border-gray-600 rounded-lg hover:border-cyan-500 transition-colors cursor-pointer group"
+              className="hidden h-8 w-8 md:h-10 md:w-10 items-center justify-center border-2 border-dashed border-gray-600 rounded-lg hover:border-cyan-500 transition-colors cursor-pointer group"
               title="Drag & drop image here"
             >
               <ImagePlus className="h-4 w-4 md:h-5 md:w-5 text-gray-500 group-hover:text-cyan-500 transition-colors" />
