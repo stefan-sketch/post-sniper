@@ -1320,7 +1320,7 @@ export default function Home() {
         /* Pages View - 3 Facebook Pages */
         <>
           {/* Mobile View Selector - Icons only */}
-          <div className="md:hidden mb-3 flex gap-2 justify-center flex-shrink-0">
+          <div className="md:hidden mb-3 flex gap-2 justify-center items-center flex-shrink-0">
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
@@ -1360,8 +1360,11 @@ export default function Home() {
                   </div>
                 </button>
               );
-            })}
+             )}
           </div>
+          
+          {/* Blue divider line under page icons - Mobile only */}
+          <div className="md:hidden h-[2px] bg-gradient-to-r from-transparent via-[#1877F2] to-transparent mb-3 flex-shrink-0"></div>
 
           {/* Desktop: Three Column Layout */}
           <div className="hidden md:grid grid-cols-3 gap-4 flex-1 overflow-hidden overflow-x-hidden max-w-full">
@@ -1416,9 +1419,9 @@ export default function Home() {
           </div>
 
           {/* Mobile: Single Column - Button Navigation Only */}
-          <div className="md:hidden flex-1 overflow-hidden">
+          <div className="md:hidden flex-1 overflow-hidden flex flex-col">
             {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
-              <div className="h-full">
+              <div className="flex-1 flex flex-col overflow-hidden">
                 {managedPagesQuery.data.map((page: any, index: number) => (
                   <div 
                     key={page.id}
