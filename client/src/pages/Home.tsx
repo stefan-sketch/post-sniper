@@ -1425,9 +1425,6 @@ export default function Home() {
         >
           <ImagePlus className="h-6 w-6" />
         </button>
-      </div>
-
-        </>
         
         {/* Bottom Navigation Bar - Mobile Only */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10 pb-safe z-50">
@@ -1467,6 +1464,9 @@ export default function Home() {
             </button>
           </div>
         </div>
+      </div>
+
+        </>
       ) : (
         /* Pages View - 3 Facebook Pages */
         <>
