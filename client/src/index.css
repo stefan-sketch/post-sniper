@@ -374,3 +374,16 @@
 
 
 
+
+
+/* Force mobile bottom navigation to absolute bottom */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+}
+
