@@ -724,7 +724,7 @@ export default function Home() {
                     <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                   </div>
                 )}
-                {twitterQuery.data?.tweets?.map((tweet: any) => {
+                {twitterQuery.data?.tweets?.filter((tweet: any) => tweet.image).map((tweet: any) => {
                   // Format timestamp using the same logic as PostCard
                   const getTimeAgo = (dateString: string): string => {
                     const date = new Date(dateString);
@@ -749,30 +749,42 @@ export default function Home() {
                   const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
                   
                   return (
-                  <div key={tweet.id} className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                    <div className="flex items-start gap-3 mb-3">
-                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full" />
-                      <div className="flex-1">
+                  <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
+                    {/* Profile Header */}
+                    <div className="p-4 flex items-center gap-3">
+                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white">{tweet.author.name}</span>
                           <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
                         </div>
-                        {timeAgo && <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>}
-                        <p className="text-white/90 mt-2">{tweet.text}</p>
+                        {timeAgo && <p className="text-xs text-gray-500">{timeAgo}</p>}
                       </div>
                     </div>
-                    {tweet.image && (
+                    
+                    {/* Tweet Text */}
+                    {tweet.text && (
+                      <div className="px-4 pb-3">
+                        <p className="text-sm text-white/90">{tweet.text}</p>
+                      </div>
+                    )}
+                    
+                    {/* Tweet Image */}
+                    <div className="relative w-full overflow-hidden">
                       <img 
                         src={tweet.image} 
                         alt="Tweet image" 
-                        className="w-full rounded-lg mb-3"
+                        className="w-full h-auto object-contain"
                         draggable="true"
                         onDragStart={(e) => {
                           e.dataTransfer.setData('text/uri-list', tweet.image);
+                          e.dataTransfer.effectAllowed = 'copy';
                         }}
                       />
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    </div>
+                    
+                    {/* Engagement Stats */}
+                    <div className="px-4 py-3 flex items-center gap-4 text-sm text-gray-500">
                       <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
                       <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
                       <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
@@ -990,7 +1002,7 @@ export default function Home() {
                   <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                 </div>
               )}
-              {twitterQuery.data?.tweets?.map((tweet: any) => {
+              {twitterQuery.data?.tweets?.filter((tweet: any) => tweet.image).map((tweet: any) => {
                 const getTimeAgo = (dateString: string): string => {
                   const date = new Date(dateString);
                   const now = new Date();
@@ -1014,30 +1026,42 @@ export default function Home() {
                 const timeAgo = tweet.createdAt ? getTimeAgo(tweet.createdAt) : '';
                 
                 return (
-                <div key={tweet.id} className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                  <div className="flex items-start gap-3 mb-3">
-                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full" />
-                    <div className="flex-1">
+                <div key={tweet.id} className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
+                  {/* Profile Header */}
+                  <div className="p-4 flex items-center gap-3">
+                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-white">{tweet.author.name}</span>
                         <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
                       </div>
-                      {timeAgo && <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>}
-                      <p className="text-white/90 mt-2">{tweet.text}</p>
+                      {timeAgo && <p className="text-xs text-gray-500">{timeAgo}</p>}
                     </div>
                   </div>
-                  {tweet.image && (
+                  
+                  {/* Tweet Text */}
+                  {tweet.text && (
+                    <div className="px-4 pb-3">
+                      <p className="text-sm text-white/90">{tweet.text}</p>
+                    </div>
+                  )}
+                  
+                  {/* Tweet Image */}
+                  <div className="relative w-full overflow-hidden">
                     <img 
                       src={tweet.image} 
                       alt="Tweet image" 
-                      className="w-full rounded-lg mb-3"
+                      className="w-full h-auto object-contain"
                       draggable="true"
                       onDragStart={(e) => {
                         e.dataTransfer.setData('text/uri-list', tweet.image);
+                        e.dataTransfer.effectAllowed = 'copy';
                       }}
                     />
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  </div>
+                  
+                  {/* Engagement Stats */}
+                  <div className="px-4 py-3 flex items-center gap-4 text-sm text-gray-500">
                     <span>❤️ {tweet.engagement.likes.toLocaleString()}</span>
                     <span>🔁 {tweet.engagement.retweets.toLocaleString()}</span>
                     <span>💬 {tweet.engagement.replies.toLocaleString()}</span>
