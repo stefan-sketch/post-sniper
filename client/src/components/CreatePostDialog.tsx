@@ -58,14 +58,26 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
-  const [isEditingText, setIsEditingText] = useState(false);
-  const [tempText, setTempText] = useState("");
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
   const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
+
+  // Auto-focus text when it's added
+  useEffect(() => {
+    if (overlayText && textRef.current) {
+      textRef.current.focus();
+      // Select all text
+      const range = document.createRange();
+      range.selectNodeContents(textRef.current);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+  }, [overlayText]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -601,10 +613,23 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
 
-                  {/* Text Overlay Preview */}
+                  {/* Text Overlay - Inline Editable */}
                   {overlayText && imgRef.current && (
                     <div
-                      className="absolute cursor-move select-none text-center"
+                      ref={textRef}
+                      contentEditable
+                      suppressContentEditableWarning
+                      onInput={(e) => {
+                        const text = e.currentTarget.textContent || '';
+                        setOverlayText(text);
+                      }}
+                      onBlur={(e) => {
+                        const text = e.currentTarget.textContent || '';
+                        if (!text.trim()) {
+                          setOverlayText('');
+                        }
+                      }}
+                      className="absolute cursor-text select-text text-center outline-none"
                       style={{
                         pointerEvents: 'auto',
                         zIndex: 10,
@@ -624,24 +649,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         whiteSpace: 'pre-wrap',
                         maxWidth: `${imgRef.current.clientWidth * 0.9}px`,
                         lineHeight: 1.2,
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingText(true);
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingText(true);
-                      }}
-                      onClick={(e) => {
-                        if (!isDraggingText) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setTempText(overlayText);
-                          setIsEditingText(true);
-                        }
+                        minWidth: '50px',
                       }}
                     >
                       {overlayText}
@@ -839,55 +847,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         </div>
       </DialogContent>
 
-      {/* Text Editing Modal */}
-      {isEditingText && (
-        <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100]"
-          onClick={() => {
-            setIsEditingText(false);
-            setTempText("");
-          }}
-        >
-          <div 
-            className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-semibold text-white mb-4">Edit Text Overlay</h3>
-            <textarea
-              value={tempText}
-              onChange={(e) => setTempText(e.target.value)}
-              placeholder="Enter your text..."
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-              maxLength={200}
-              rows={4}
-              autoFocus
-            />
-            <p className="text-xs text-gray-500 mt-1">{tempText.length} / 200</p>
-            <div className="flex gap-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEditingText(false);
-                  setTempText("");
-                }}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  setOverlayText(tempText);
-                  setIsEditingText(false);
-                  setTempText("");
-                }}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-              >
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </Dialog>
   );
 }
