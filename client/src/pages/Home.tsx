@@ -436,7 +436,7 @@ export default function Home() {
   const apiStatus = postsQuery.isError ? "error" : postsQuery.isSuccess ? "success" : "unknown";
 
   return (
-    <div className="w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4 flex flex-col overflow-hidden overflow-x-hidden max-w-full" style={{ height: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))', touchAction: 'pan-y pinch-zoom', overscrollBehaviorX: 'none' }}>
+    <div className="w-full md:w-[770px] md:mx-auto px-4 md:px-6 py-4 flex flex-col overflow-hidden max-w-full" style={{ height: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))', touchAction: 'none', overscrollBehavior: 'none' }}>
       {/* Header */}
       <header className="mb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -668,7 +668,7 @@ export default function Home() {
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div ref={liveScrollRef} className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar">
+          <div ref={liveScrollRef} className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -795,7 +795,7 @@ export default function Home() {
           {/* Green separator line */}
           <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
           
-          <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative">
+          <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative" style={{ touchAction: 'pan-y' }}>
             {feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
@@ -1068,7 +1068,7 @@ export default function Home() {
             <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
             </div>
-            <div className="space-y-3 relative overflow-y-auto flex-1 hide-scrollbar">
+            <div className="space-y-3 relative overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading posts...</p>
@@ -1146,7 +1146,7 @@ export default function Home() {
               {/* Green pulsing underline */}
               <div className="w-full h-0.5 bg-green-500 animate-pulse"></div>
             </div>
-            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar">
+            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {postsQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading posts...</p>
@@ -1210,7 +1210,7 @@ export default function Home() {
               {/* Blue pulsing underline */}
               <div className="w-full h-0.5 bg-blue-500 animate-pulse"></div>
             </div>
-            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar">
+            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {twitterQuery.isLoading && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">Loading tweets...</p>

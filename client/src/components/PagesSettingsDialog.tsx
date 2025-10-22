@@ -101,6 +101,8 @@ export default function PagesSettingsDialog({ open, onOpenChange, onManualFetch,
     "#ef4444", // red
     "#3b82f6", // blue
     "#f97316", // orange
+    "#fcd34d", // yellow
+    "#ffffff", // white
   ];
 
   return (

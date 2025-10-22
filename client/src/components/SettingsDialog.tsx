@@ -121,6 +121,8 @@ export default function SettingsDialog({ open, onOpenChange, isPlaying, onToggle
     "#ef4444", // red
     "#3b82f6", // blue
     "#f97316", // orange
+    "#fcd34d", // yellow
+    "#ffffff", // white
   ];
 
   return (
