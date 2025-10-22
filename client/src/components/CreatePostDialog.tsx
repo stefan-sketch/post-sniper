@@ -455,7 +455,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     crop={crop}
                     onChange={(c) => setCrop(c)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    className="max-h-[600px]"
+                    className="max-h-[600px] touch-crop"
                     style={{
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
@@ -464,10 +464,15 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       ref={imgRef} 
                       src={image} 
                       alt="Upload" 
-                      className="max-w-full"
+                      className="max-w-full select-none"
                       style={{
                         transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        WebkitUserSelect: 'none',
+                        WebkitTouchCallout: 'none',
+                        pointerEvents: 'none',
                       }}
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
                     />
                   </ReactCrop>
 

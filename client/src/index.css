@@ -254,13 +254,22 @@
 }
 
 .ReactCrop__drag-handle {
-  width: 12px !important;
-  height: 12px !important;
+  width: 20px !important;
+  height: 20px !important;
   background-color: #06b6d4 !important;
-  border: 2px solid white !important;
+  border: 3px solid white !important;
   border-radius: 50% !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Make crop handles even larger on mobile/touch devices */
+@media (max-width: 768px) {
+  .ReactCrop__drag-handle {
+    width: 28px !important;
+    height: 28px !important;
+    border: 4px solid white !important;
+  }
 }
 
 .ReactCrop__drag-handle:hover {

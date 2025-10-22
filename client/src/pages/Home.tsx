@@ -901,7 +901,28 @@ export default function Home() {
                     
                     {/* Tweet Image (if available) */}
                     {tweet.image && (
-                      <div className="w-full overflow-hidden">
+                      <div 
+                        className="w-full overflow-hidden cursor-pointer"
+                        onClick={() => {
+                          // Deep link to X app on mobile, fallback to web on desktop
+                          const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
+                          const xAppUrl = `twitter://status?id=${tweet.id}`;
+                          
+                          // Detect if mobile
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          
+                          if (isMobile) {
+                            // Try to open X app, fallback to web after timeout
+                            window.location.href = xAppUrl;
+                            setTimeout(() => {
+                              window.open(tweetUrl, '_blank');
+                            }, 500);
+                          } else {
+                            // Desktop: open in new tab
+                            window.open(tweetUrl, '_blank');
+                          }
+                        }}
+                      >
                         <img 
                           src={tweet.image}
                           loading="lazy"
@@ -1244,7 +1265,28 @@ export default function Home() {
                   
                   {/* Tweet Image (if available) */}
                   {tweet.image && (
-                    <div className="w-full overflow-hidden">
+                    <div 
+                      className="w-full overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        // Deep link to X app on mobile, fallback to web on desktop
+                        const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
+                        const xAppUrl = `twitter://status?id=${tweet.id}`;
+                        
+                        // Detect if mobile
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        
+                        if (isMobile) {
+                          // Try to open X app, fallback to web after timeout
+                          window.location.href = xAppUrl;
+                          setTimeout(() => {
+                            window.open(tweetUrl, '_blank');
+                          }, 500);
+                        } else {
+                          // Desktop: open in new tab
+                          window.open(tweetUrl, '_blank');
+                        }
+                      }}
+                    >
                       <img 
                         src={tweet.image} 
                         alt="Tweet image"
