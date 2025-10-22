@@ -1040,7 +1040,7 @@ export default function Home() {
       </div>
 
       {/* Mobile: Single Column with Switchable View */}
-      <div className="md:hidden flex flex-col flex-1 overflow-hidden pb-20">
+      <div className="md:hidden flex flex-col flex-1 overflow-hidden" style={{ paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -1427,8 +1427,8 @@ export default function Home() {
         </button>
         
         {/* Bottom Navigation Bar - Mobile Only */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10 pb-safe z-50">
-          <div className="flex items-center justify-around px-4 py-3">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}>
+          <div className="flex items-center justify-around px-4 pt-2 pb-1">
             <button
               onClick={() => setMobileView('live')}
               className={`flex flex-col items-center gap-1 transition-all ${
