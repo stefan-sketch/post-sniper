@@ -477,7 +477,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         maxWidth: `${imgRef.current.clientWidth * 0.9}px`,
                         lineHeight: 1.2,
                       }}
-                      onMouseDown={() => setIsDraggingText(true)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingText(true);
+                      }}
                     >
                       {overlayText}
                     </div>
@@ -489,6 +493,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       src={PAGES.find(p => p.id === selectedPages[0])?.watermark}
                       alt="Watermark"
                       className="absolute cursor-move select-none"
+                      draggable={false}
                       style={{
                         pointerEvents: 'auto',
                         zIndex: 10,
@@ -498,7 +503,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         width: imgRef.current.clientWidth * 0.15,
                         height: 'auto',
                       }}
-                      onMouseDown={() => setIsDraggingWatermark(true)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingWatermark(true);
+                      }}
                     />
                   )}
                 </div>

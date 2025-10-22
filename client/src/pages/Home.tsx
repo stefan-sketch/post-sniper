@@ -516,7 +516,7 @@ export default function Home() {
               : 'text-white/60 hover:text-white/80'
           }`}
         >
-          𝕏
+          X.com
         </button>
       </div>
 
