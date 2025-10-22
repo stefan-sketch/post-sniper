@@ -9,7 +9,6 @@ import { cachedPostsRouter } from "./routers/cachedPosts";
 import { manualFetchRouter } from "./routers/manualFetch";
 import { publerRouter } from "./routers/publer";
 import { twitterRouter } from "./routers/twitter";
-import { facebookRouter } from "./routers/facebook";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -20,7 +19,6 @@ export const appRouter = router({
   manualFetch: manualFetchRouter,
   publer: publerRouter,
   twitter: twitterRouter,
-  facebook: facebookRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

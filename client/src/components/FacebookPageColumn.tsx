@@ -14,10 +14,10 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
   const utils = trpc.useUtils();
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   
-  const postsQuery = trpc.facebook.getPagePosts.useQuery({ pageId, limit: 20 });
+  const postsQuery = trpc.cachedPosts.getByPage.useQuery({ pageId, limit: 20 });
   const deletePostMutation = trpc.publer.deletePost.useMutation({
     onSuccess: () => {
-      utils.facebook.getPagePosts.invalidate({ pageId });
+      utils.cachedPosts.getByPage.invalidate({ pageId });
       toast.success("Post deleted successfully");
       setDeletingPostId(null);
     },
