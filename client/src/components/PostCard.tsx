@@ -148,9 +148,16 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
       </div>
       )}
 
+      {/* Timestamp when header is hidden */}
+      {hidePageHeader && (
+        <div className="px-4 pt-3">
+          <p className="text-xs text-muted-foreground">{timeAgo}</p>
+        </div>
+      )}
+
       {/* Post Message */}
       {post.message && (
-        <div className="px-4 pt-3 pb-3">
+        <div className={`px-4 pb-3 ${hidePageHeader ? 'pt-1' : 'pt-3'}`}>
           <p className="text-sm line-clamp-3">{post.message}</p>
         </div>
       )}
