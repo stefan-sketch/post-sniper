@@ -555,6 +555,7 @@ export default function Home() {
       </header>
 
       {/* Conditional Content Based on View */}
+      <div className="flex-1 flex flex-col overflow-hidden">
       {currentView === 'feed' ? (
         <>
       {/* Mobile View Selector - Only visible on mobile */}
@@ -1476,6 +1477,7 @@ export default function Home() {
           </div>
         </>
       )}
+      </div>
 
       {/* Dialogs - Rendered outside view conditionals to appear as overlays */}
       <SettingsDialog 
