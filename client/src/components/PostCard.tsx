@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, Download } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy } from "lucide-react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -68,23 +68,24 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
     }
   };
 
-  const handleDownloadImage = async (e: React.MouseEvent) => {
+  const handleCopyImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (post.image) {
       try {
         const response = await fetch(post.image);
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `post-${post.id}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        toast.success("Image downloaded!");
+        
+        // Copy image to clipboard
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob
+          })
+        ]);
+        
+        toast.success("Image copied to clipboard!");
       } catch (error) {
-        toast.error("Failed to download image");
+        console.error('Copy failed:', error);
+        toast.error("Failed to copy image");
       }
     }
   };
@@ -189,10 +190,10 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
               size="sm"
               variant="ghost"
               className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-              onClick={handleDownloadImage}
-              title="Download image"
+              onClick={handleCopyImage}
+              title="Copy image to clipboard"
             >
-              <Download className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </Button>
           )}
           {!hideActions && post.message && (

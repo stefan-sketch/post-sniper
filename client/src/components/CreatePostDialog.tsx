@@ -69,6 +69,39 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const createPostMutation = trpc.publer.createPost.useMutation();
   const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
 
+  const handlePasteFromClipboard = async () => {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      for (const item of clipboardItems) {
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            const blob = await item.getType(type);
+            const reader = new FileReader();
+            reader.onload = () => {
+              setImage(reader.result as string);
+              setCropMode(true);
+              setCroppedImage(null);
+              setCrop({
+                unit: '%',
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 100,
+              });
+              toast.success("Image pasted from clipboard!");
+            };
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+      }
+      toast.error("No image found in clipboard");
+    } catch (error) {
+      console.error('Paste failed:', error);
+      toast.error("Failed to paste from clipboard");
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -537,21 +570,30 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           {/* Image Upload/Preview */}
           <div className="space-y-2">
             {!image ? (
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer"
-                onClick={() => document.getElementById("image-upload")?.click()}
-              >
-                <Upload className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-                <p className="text-gray-400 mb-2">Drop an image here or click to upload</p>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+              <div className="space-y-3">
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer"
+                  onClick={() => document.getElementById("image-upload")?.click()}
+                >
+                  <Upload className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                  <p className="text-gray-400 mb-2">Drop an image here or click to upload</p>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handlePasteFromClipboard}
+                  className="w-full"
+                >
+                  Paste from Clipboard
+                </Button>
               </div>
             ) : cropMode ? (
               <div className="space-y-2">
