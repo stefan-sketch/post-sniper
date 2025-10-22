@@ -618,7 +618,7 @@ export default function Home() {
             <div className="relative">
               <button
                 onClick={() => setShowPageFilter(!showPageFilter)}
-                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-primary hover:bg-primary/80 text-black shadow-lg shadow-primary/50 flex items-center gap-1"
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-lg shadow-[#1877F2]/50 flex items-center gap-1"
               >
                 {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -626,7 +626,7 @@ export default function Home() {
                 </svg>
               </button>
               {showPageFilter && (
-                <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[120px]">
+                <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[180px] max-h-[300px] overflow-y-auto">
                   <button
                     onClick={() => {
                       setLivePageFilter('all');
@@ -1006,7 +1006,7 @@ export default function Home() {
               <div className="relative">
                 <button
                   onClick={() => setShowPageFilter(!showPageFilter)}
-                  className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-primary hover:bg-primary/80 text-black shadow-lg shadow-primary/50 flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-lg shadow-[#1877F2]/50 flex items-center gap-1"
                 >
                   {livePageFilter === 'all' ? 'All' : availablePages.find(p => p.id === livePageFilter)?.name || 'All'}
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1014,7 +1014,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[120px]">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[180px] max-h-[300px] overflow-y-auto">
                     <button
                       onClick={() => {
                         setLivePageFilter('all');

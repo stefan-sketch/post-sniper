@@ -52,36 +52,21 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [isUploading, setIsUploading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [overlayText, setOverlayText] = useState("");
-  const [fontSize, setFontSize] = useState(48);
   const [useGradient, setUseGradient] = useState(false);
-  const [textPosition, setTextPosition] = useState({ x: 50, y: 85 }); // percentage from top-left
+  const [textBoxPosition, setTextBoxPosition] = useState({ x: 50, y: 50 }); // percentage from top-left
+  const [textBoxSize, setTextBoxSize] = useState({ width: 60, height: 20 }); // percentage of image
   const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
-  const [isDraggingText, setIsDraggingText] = useState(false);
+  const [isDraggingTextBox, setIsDraggingTextBox] = useState(false);
+  const [isResizingTextBox, setIsResizingTextBox] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
   const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
-
-  // Auto-focus text when it's first added
-  useEffect(() => {
-    if (overlayText === 'Text' && textRef.current) {
-      setTimeout(() => {
-        if (textRef.current) {
-          textRef.current.focus();
-          // Select all text
-          const range = document.createRange();
-          range.selectNodeContents(textRef.current);
-          const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-        }
-      }, 0);
-    }
-  }, [overlayText === 'Text']);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -247,16 +232,19 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
         // Add text overlay if provided
         if (overlayText.trim()) {
-          // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
-          const scaledFontSize = (fontSize / 800) * canvas.width;
-          ctx.font = `${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
+          // Calculate font size based on text box height
+          // textBoxSize.height is percentage of image, convert to pixels then to font size
+          const boxHeightPx = (textBoxSize.height / 100) * canvas.height;
+          const fontSize = boxHeightPx * 0.8; // Font size is 80% of box height
+          
+          ctx.font = `${fontSize}px Impact, 'Arial Black', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
-          const textX = (textPosition.x / 100) * canvas.width;
-          const textY = (textPosition.y / 100) * canvas.height;
-          const maxWidth = canvas.width * 0.9;
-          const lineHeight = scaledFontSize * 1.2;
+          const textX = (textBoxPosition.x / 100) * canvas.width;
+          const textY = (textBoxPosition.y / 100) * canvas.height;
+          const maxWidth = (textBoxSize.width / 100) * canvas.width;
+          const lineHeight = fontSize * 1.2;
           
           // Split text by manual line breaks
           const paragraphs = overlayText.split('\n');
@@ -304,7 +292,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, fontSize, textPosition]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxSize]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -387,9 +375,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       setSelectedPage(null);
       setUseWatermark(true);
       setOverlayText("");
-      setFontSize(48);
       setUseGradient(false);
-      setTextPosition({ x: 50, y: 85 });
+      setTextBoxPosition({ x: 50, y: 50 });
+      setTextBoxSize({ width: 60, height: 20 });
       setWatermarkPosition({ x: 85, y: 10 });
       
       // Close dialog after short delay to show success message
@@ -423,20 +411,82 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setSelectedPage(null);
     setUseWatermark(false);
     setOverlayText("");
-    setFontSize(48);
     setUseGradient(false);
-    setTextPosition({ x: 50, y: 85 });
+    setTextBoxPosition({ x: 50, y: 50 });
+    setTextBoxSize({ width: 60, height: 20 });
     setCropMode(true);
     setCroppedImage(null);
     // Close dialog
     onOpenChange(false);
   };
 
+  // Handle mouse/touch events for dragging and resizing
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current || !imgRef.current) return;
+    const rect = imgRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    if (isDraggingTextBox) {
+      setTextBoxPosition({ 
+        x: Math.max(0, Math.min(100, x)), 
+        y: Math.max(0, Math.min(100, y)) 
+      });
+    } else if (isResizingTextBox) {
+      // Calculate new size based on drag distance
+      const deltaX = x - resizeStartState.x;
+      const deltaY = y - resizeStartState.y;
+      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
+      const newHeight = Math.max(10, Math.min(50, resizeStartState.height + deltaY));
+      setTextBoxSize({ width: newWidth, height: newHeight });
+    } else if (isDraggingWatermark) {
+      setWatermarkPosition({ 
+        x: Math.max(0, Math.min(100, x)), 
+        y: Math.max(0, Math.min(100, y)) 
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
+    const rect = imgRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+    
+    if (isDraggingTextBox) {
+      e.preventDefault();
+      setTextBoxPosition({ 
+        x: Math.max(0, Math.min(100, x)), 
+        y: Math.max(0, Math.min(100, y)) 
+      });
+    } else if (isResizingTextBox) {
+      e.preventDefault();
+      const deltaX = x - resizeStartState.x;
+      const deltaY = y - resizeStartState.y;
+      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
+      const newHeight = Math.max(10, Math.min(50, resizeStartState.height + deltaY));
+      setTextBoxSize({ width: newWidth, height: newHeight });
+    } else if (isDraggingWatermark) {
+      e.preventDefault();
+      setWatermarkPosition({ 
+        x: Math.max(0, Math.min(100, x)), 
+        y: Math.max(0, Math.min(100, y)) 
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDraggingTextBox(false);
+    setIsResizingTextBox(false);
+    setIsDraggingWatermark(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
         <div className="space-y-4">
-          {/* Header with Page Pills and Close Button */}
+          {/* Header with Page Pills and Post Button */}
           <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-1">
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
@@ -448,61 +498,46 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     <button
                       key={page.id}
                       onClick={() => selectPage(page.id)}
-                      className={`p-1 rounded-full transition-all ${
-                        isSelected
-                          ? "ring-2 ring-cyan-500 scale-110"
-                          : "opacity-60 hover:opacity-100 hover:scale-105"
-                      }`}
-                      title={page.shortName}
+                      className={`
+                        flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium
+                        transition-all duration-200 hover:scale-[1.02]
+                        ${isSelected 
+                          ? 'bg-[#1877F2] text-white shadow-lg shadow-blue-500/30' 
+                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                        }
+                      `}
                     >
-                      <div 
-                        className="h-10 w-10 rounded-full overflow-hidden"
-                        style={{ 
-                          border: isSelected ? '2px solid #06b6d4' : '2px solid rgba(255,255,255,0.2)'
-                        }}
-                      >
-                        <img 
-                          src={page.profilePicture} 
-                          alt={page.shortName}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
+                      <img 
+                        src={page.profilePicture} 
+                        alt={page.shortName}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                      <span>{page.shortName}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-            {/* Close Button */}
-            <button
-              onClick={handleClose}
-              className="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors border border-gray-700"
-              aria-label="Close"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
             <Button
               onClick={handlePost}
-              disabled={isUploading || !image || !caption.trim() || !selectedPage}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 flex-shrink-0"
+              disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+              className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? "Posting..." : "Post"}
             </Button>
           </div>
 
-          {/* Image Upload/Crop */}
+          {/* Image Upload/Preview */}
           <div className="space-y-2">
             {!image ? (
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-cyan-500 rounded-lg p-8 text-center cursor-pointer"
+                className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer"
                 onClick={() => document.getElementById("image-upload")?.click()}
               >
-                <Upload className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                <p className="text-gray-300 mb-1">Drag & drop an image here</p>
-                <p className="text-sm text-gray-400">or click to browse</p>
+                <Upload className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-2">Drop an image here or click to upload</p>
                 <input
                   id="image-upload"
                   type="file"
@@ -513,38 +548,19 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             ) : cropMode ? (
               <div className="space-y-2">
-                {/* Crop container with padding for visible handles */}
-                <div 
-                  ref={containerRef}
-                  className="relative flex justify-center p-8 bg-gray-900/50 rounded-lg"
-                  style={{
-                    minHeight: '300px',
-                  }}
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={undefined}
                 >
-                  <ReactCrop
-                    crop={crop}
-                    onChange={(c) => setCrop(c)}
-                    onComplete={(c) => setCompletedCrop(c)}
-                    className="max-h-[600px]"
-                    ruleOfThirds
-                  >
-                    <img 
-                      ref={imgRef} 
-                      src={image} 
-                      alt="Upload" 
-                      className="max-w-full select-none"
-                      style={{
-                        maxHeight: '500px',
-                        objectFit: 'contain',
-                        WebkitUserSelect: 'none',
-                        WebkitTouchCallout: 'none',
-                        pointerEvents: 'none',
-                      }}
-                      draggable={false}
-                      onContextMenu={(e) => e.preventDefault()}
-                    />
-                  </ReactCrop>
-                </div>
+                  <img 
+                    ref={imgRef} 
+                    src={image} 
+                    alt="Upload" 
+                    className="max-w-full max-h-[600px]"
+                  />
+                </ReactCrop>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -574,47 +590,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 <div 
                   ref={containerRef}
                   className="relative flex justify-center"
-                  onMouseMove={(e) => {
-                    if (!containerRef.current || !imgRef.current) return;
-                    const rect = imgRef.current.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    
-                    if (isDraggingText) {
-                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                    if (isDraggingWatermark) {
-                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                  }}
-                  onTouchMove={(e) => {
-                    if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
-                    const rect = imgRef.current.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const x = ((touch.clientX - rect.left) / rect.width) * 100;
-                    const y = ((touch.clientY - rect.top) / rect.height) * 100;
-                    
-                    if (isDraggingText) {
-                      e.preventDefault();
-                      setTextPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                    if (isDraggingWatermark) {
-                      e.preventDefault();
-                      setWatermarkPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-                    }
-                  }}
-                  onMouseUp={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
-                  }}
-                  onTouchEnd={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
-                  }}
-                  onMouseLeave={() => {
-                    setIsDraggingText(false);
-                    setIsDraggingWatermark(false);
-                  }}
+                  onMouseMove={handleMouseMove}
+                  onTouchMove={handleTouchMove}
+                  onMouseUp={handleMouseUp}
+                  onTouchEnd={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
                 >
                   {/* Show the cropped image */}
                   <img 
@@ -645,53 +625,81 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
 
-                  {/* Text Overlay - Inline Editable */}
+                  {/* Text Box Overlay - Draggable and Resizable */}
                   {overlayText && imgRef.current && (
                     <div
-                      ref={textRef}
-                      contentEditable
-                      suppressContentEditableWarning
-                      onInput={(e) => {
-                        const text = e.currentTarget.textContent || '';
-                        setOverlayText(text);
-                      }}
-                      onBlur={(e) => {
-                        const text = e.currentTarget.textContent || '';
-                        if (!text.trim()) {
-                          setOverlayText('');
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        // Prevent default behavior that might interfere
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          document.execCommand('insertLineBreak');
-                        }
-                      }}
-                      className="absolute cursor-text select-text text-center outline-none"
+                      className="absolute border-2 border-cyan-500 bg-cyan-500/10 cursor-move select-none"
                       style={{
                         pointerEvents: 'auto',
                         zIndex: 10,
-                        left: `calc(50% + ${(textPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
-                        top: `calc(50% + ${(textPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                        left: `calc(50% + ${(textBoxPosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                        top: `calc(50% + ${(textBoxPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
                         transform: 'translate(-50%, -50%)',
-                        fontSize: `${fontSize * (imgRef.current.clientWidth / imgRef.current.naturalWidth)}px`,
-                        fontFamily: 'Impact, "Arial Black", sans-serif',
-                        fontWeight: 'bold',
-                        color: 'white',
-                        textShadow: `
-                          -${fontSize * 0.05}px -${fontSize * 0.05}px 0 black,
-                          ${fontSize * 0.05}px -${fontSize * 0.05}px 0 black,
-                          -${fontSize * 0.05}px ${fontSize * 0.05}px 0 black,
-                          ${fontSize * 0.05}px ${fontSize * 0.05}px 0 black
-                        `,
-                        whiteSpace: 'pre-wrap',
-                        maxWidth: `${imgRef.current.clientWidth * 0.9}px`,
-                        lineHeight: 1.2,
-                        minWidth: '50px',
+                        width: `${(textBoxSize.width / 100) * imgRef.current.clientWidth}px`,
+                        height: `${(textBoxSize.height / 100) * imgRef.current.clientHeight}px`,
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingTextBox(true);
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingTextBox(true);
                       }}
                     >
-                      {overlayText}
+                      {/* Text Preview */}
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center text-center pointer-events-none"
+                        style={{
+                          fontSize: `${(textBoxSize.height / 100) * imgRef.current.clientHeight * 0.6}px`,
+                          fontFamily: 'Impact, "Arial Black", sans-serif',
+                          fontWeight: 'bold',
+                          color: 'white',
+                          textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                          whiteSpace: 'pre-wrap',
+                          overflow: 'hidden',
+                          padding: '4px',
+                        }}
+                      >
+                        {overlayText}
+                      </div>
+                      
+                      {/* Resize Handle - Bottom Right Corner */}
+                      <div
+                        className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 cursor-nwse-resize"
+                        style={{ transform: 'translate(50%, 50%)' }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const rect = imgRef.current!.getBoundingClientRect();
+                          const x = ((e.clientX - rect.left) / rect.width) * 100;
+                          const y = ((e.clientY - rect.top) / rect.height) * 100;
+                          setResizeStartState({ 
+                            x, 
+                            y, 
+                            width: textBoxSize.width, 
+                            height: textBoxSize.height 
+                          });
+                          setIsResizingTextBox(true);
+                        }}
+                        onTouchStart={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const rect = imgRef.current!.getBoundingClientRect();
+                          const touch = e.touches[0];
+                          const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                          const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                          setResizeStartState({ 
+                            x, 
+                            y, 
+                            width: textBoxSize.width, 
+                            height: textBoxSize.height 
+                          });
+                          setIsResizingTextBox(true);
+                        }}
+                      />
                     </div>
                   )}
 
@@ -764,7 +772,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   size="sm"
                   onClick={() => {
                     if (!overlayText) {
-                      setOverlayText("Text");
+                      setOverlayText("Your Text Here");
                     } else {
                       setOverlayText("");
                     }
@@ -811,18 +819,18 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 </Button>
               </div>
               
-              {/* Font Size Slider - Only show when text is active */}
+              {/* Text Input - Only show when text is active */}
               {overlayText && (
                 <div className="space-y-1">
-                  <label className="text-xs text-gray-400">Font Size: {fontSize}px</label>
-                  <input
-                    type="range"
-                    min="24"
-                    max="120"
-                    value={fontSize}
-                    onChange={(e) => setFontSize(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  <label className="text-xs text-gray-400">Text Content</label>
+                  <Textarea
+                    value={overlayText}
+                    onChange={(e) => setOverlayText(e.target.value)}
+                    placeholder="Enter your text..."
+                    className="min-h-20 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                    maxLength={200}
                   />
+                  <p className="text-xs text-gray-500">Drag the box on the image to position. Drag the corner to resize.</p>
                 </div>
               )}
             </div>
@@ -837,6 +845,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 placeholder="Write your caption..."
                 className="min-h-32 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 pt-8"
                 maxLength={2000}
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
               />
               {/* Caption label inside textarea */}
               <div className="absolute top-2 left-3 text-xs font-medium text-gray-400 pointer-events-none">
@@ -887,4 +897,3 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     </Dialog>
   );
 }
-
