@@ -24,6 +24,9 @@ interface CreatePostDialogProps {
 }
 
 export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePostDialogProps) {
+  // Fetch managed pages for profile pictures
+  const managedPagesQuery = trpc.managedPages.getAll.useQuery();
+  
   const [image, setImage] = useState<string | null>(null);
   const [cropMode, setCropMode] = useState(true); // Start in crop mode
   const [croppedImage, setCroppedImage] = useState<string | null>(null); // Store the cropped result
@@ -429,19 +432,45 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             <div className="flex items-center gap-3 flex-1">
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
               <div className="flex gap-2 flex-wrap">
-                {PAGES.map((page) => (
-                  <button
-                    key={page.id}
-                    onClick={() => togglePage(page.id)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      selectedPages.includes(page.id)
-                        ? "bg-cyan-500 text-white"
-                        : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-                    }`}
-                  >
-                    {page.shortName}
-                  </button>
-                ))}
+                {PAGES.map((page) => {
+                  // Find matching managed page for profile picture
+                  const managedPage = managedPagesQuery.data?.find((mp: any) => 
+                    page.name === mp.profileName || page.shortName === mp.profileName
+                  );
+                  const isSelected = selectedPages.includes(page.id);
+                  
+                  return (
+                    <button
+                      key={page.id}
+                      onClick={() => togglePage(page.id)}
+                      className={`p-1 rounded-full transition-all ${
+                        isSelected
+                          ? "ring-2 ring-cyan-500 scale-110"
+                          : "opacity-60 hover:opacity-100 hover:scale-105"
+                      }`}
+                      title={page.shortName}
+                    >
+                      <div 
+                        className="h-10 w-10 rounded-full overflow-hidden"
+                        style={{ 
+                          border: isSelected ? '2px solid #06b6d4' : '2px solid rgba(255,255,255,0.2)'
+                        }}
+                      >
+                        {managedPage?.profilePicture ? (
+                          <img 
+                            src={managedPage.profilePicture} 
+                            alt={page.shortName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gray-800 flex items-center justify-center text-sm font-bold">
+                            {page.shortName.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <Button
@@ -475,10 +504,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             ) : cropMode ? (
               <div className="space-y-2">
-                {/* Step 1: Crop Mode */}
-                <div className="mb-2 p-2 bg-cyan-500/20 border border-cyan-500 rounded-lg">
-                  <p className="text-sm text-cyan-300">📐 Step 1: Crop your image</p>
-                </div>
                 {/* Crop container with padding for visible handles */}
                 <div 
                   ref={containerRef}
@@ -537,10 +562,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Step 2: Overlay Mode */}
-                <div className="mb-2 p-2 bg-green-500/20 border border-green-500 rounded-lg">
-                  <p className="text-sm text-green-300">✨ Step 2: Add overlays and watermark</p>
-                </div>
                 <div 
                   ref={containerRef}
                   className="relative flex justify-center"

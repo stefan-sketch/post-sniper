@@ -29,8 +29,6 @@ export default function Home() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
-  const [pagesSwipeOffset, setPagesSwipeOffset] = useState(0);
-  const [isPagesTransitioning, setIsPagesTransitioning] = useState(false);
 
   // Minimum swipe distance (in px) to trigger a view change
   const minSwipeDistance = 100; // Increased to prevent accidental swipes
@@ -77,53 +75,6 @@ export default function Home() {
     // Reset swipe offset with animation
     setSwipeOffset(0);
     setTimeout(() => setIsTransitioning(false), 300);
-  };
-
-  // Pages tab swipe handlers
-  const onPagesTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onPagesTouchMove = (e: React.TouchEvent) => {
-    const currentTouch = e.targetTouches[0].clientX;
-    setTouchEnd(currentTouch);
-    
-    if (touchStart !== null && !isPagesTransitioning) {
-      const diff = currentTouch - touchStart;
-      // Add friction (0.4) to make swipe feel more deliberate
-      // Also limit max offset to prevent over-scrolling
-      const friction = 0.4;
-      const maxOffset = 150;
-      const dampedDiff = Math.max(-maxOffset, Math.min(maxOffset, diff * friction));
-      setPagesSwipeOffset(dampedDiff);
-    }
-  };
-
-  const onPagesTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    setIsPagesTransitioning(true);
-    
-    if (isLeftSwipe) {
-      // Swipe left: go to next page
-      if (pagesView === 'away-days') setPagesView('funnys');
-      else if (pagesView === 'funnys') setPagesView('footy-feed');
-    }
-    
-    if (isRightSwipe) {
-      // Swipe right: go to previous page
-      if (pagesView === 'footy-feed') setPagesView('funnys');
-      else if (pagesView === 'funnys') setPagesView('away-days');
-    }
-    
-    // Reset swipe offset with animation
-    setPagesSwipeOffset(0);
-    setTimeout(() => setIsPagesTransitioning(false), 300);
   };
 
   // For mobile dropdown
@@ -496,24 +447,24 @@ export default function Home() {
       {/* Header */}
       <header className="mb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: Feed/Pages Toggle */}
-          <div className="flex items-center gap-1 bg-gray-800/50 rounded-lg p-1">
+          {/* Left: Feed/Pages Toggle - iOS Style */}
+          <div className="flex items-center gap-0 bg-gray-800/80 rounded-xl p-1 backdrop-blur-sm">
             <button
               onClick={() => setCurrentView('feed')}
-              className={`px-3 py-1 text-sm font-medium rounded transition-all ${
+              className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
                 currentView === 'feed'
-                  ? 'bg-cyan-500 text-white'
-                  : 'text-gray-400 hover:text-gray-300'
+                  ? 'bg-cyan-500 text-white shadow-lg'
+                  : 'text-gray-400'
               }`}
             >
               Feed
             </button>
             <button
               onClick={() => setCurrentView('pages')}
-              className={`px-3 py-1 text-sm font-medium rounded transition-all ${
+              className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
                 currentView === 'pages'
-                  ? 'bg-cyan-500 text-white'
-                  : 'text-gray-400 hover:text-gray-300'
+                  ? 'bg-cyan-500 text-white shadow-lg'
+                  : 'text-gray-400'
               }`}
             >
               Pages
@@ -1445,8 +1396,8 @@ export default function Home() {
       ) : (
         /* Pages View - 3 Facebook Pages */
         <>
-          {/* Mobile View Selector - Compact horizontal tabs */}
-          <div className="md:hidden mb-3 flex gap-2 flex-shrink-0 overflow-x-auto">
+          {/* Mobile View Selector - Icons only */}
+          <div className="md:hidden mb-3 flex gap-2 justify-center flex-shrink-0">
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
@@ -1457,17 +1408,17 @@ export default function Home() {
                 <button
                   key={page.id}
                   onClick={() => setPagesView(viewName as any)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
+                  className={`p-1 rounded-full transition-all ${
                     isActive 
-                      ? 'ring-2 ring-white/30' 
-                      : 'opacity-60 hover:opacity-80 glass-card'
+                      ? 'ring-2 ring-white/30 scale-110' 
+                      : 'opacity-60 hover:opacity-80'
                   }`}
                   style={{
-                    backgroundColor: isActive ? page.borderColor : 'rgba(255,255,255,0.05)'
+                    backgroundColor: isActive ? page.borderColor : 'transparent'
                   }}
                 >
                   <div 
-                    className="h-6 w-6 rounded-full overflow-hidden flex-shrink-0"
+                    className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
                     style={{ 
                       border: `2px solid ${page.borderColor}`
                     }}
@@ -1484,7 +1435,6 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-medium">{page.profileName}</span>
                 </button>
               );
             })}
@@ -1542,27 +1492,14 @@ export default function Home() {
             )}
           </div>
 
-          {/* Mobile: Single Column with Smooth Swipe Animation */}
-          <div 
-            className="md:hidden flex-1 overflow-hidden relative"
-            onTouchStart={onPagesTouchStart}
-            onTouchMove={onPagesTouchMove}
-            onTouchEnd={onPagesTouchEnd}
-          >
+          {/* Mobile: Single Column - Button Navigation Only */}
+          <div className="md:hidden flex-1 overflow-hidden">
             {managedPagesQuery.data && managedPagesQuery.data.length > 0 ? (
-              <div 
-                className="h-full flex"
-                style={{
-                  transform: `translateX(calc(-${pagesView === 'away-days' ? 0 : pagesView === 'funnys' ? 100 : 200}% + ${pagesSwipeOffset}px))`,
-                  transition: isPagesTransitioning || pagesSwipeOffset === 0 ? 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none',
-                  width: `${managedPagesQuery.data.length * 100}%`
-                }}
-              >
-                {managedPagesQuery.data.map((page: any) => (
+              <div className="h-full">
+                {managedPagesQuery.data.map((page: any, index: number) => (
                   <div 
                     key={page.id}
-                    className="h-full flex-shrink-0"
-                    style={{ width: `${100 / managedPagesQuery.data.length}%` }}
+                    className={`h-full flex flex-col scrollbar-hide ${index === 0 && pagesView === 'away-days' ? 'flex' : index === 1 && pagesView === 'funnys' ? 'flex' : index === 2 && pagesView === 'footy-feed' ? 'flex' : 'hidden'}`}
                   >
                     <FacebookPageColumn 
                       pageId={page.id}
