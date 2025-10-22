@@ -47,7 +47,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [caption, setCaption] = useState("");
-  const [selectedPages, setSelectedPages] = useState<PageId[]>([]);
+  const [selectedPage, setSelectedPage] = useState<PageId | null>(null);
   const [useWatermark, setUseWatermark] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -249,7 +249,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         if (overlayText.trim()) {
           // Scale font size proportionally to canvas width (fontSize is based on 800px reference width)
           const scaledFontSize = (fontSize / 800) * canvas.width;
-          ctx.font = `bold ${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
+          ctx.font = `${scaledFontSize}px Norwester, Impact, 'Arial Black', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
@@ -290,12 +290,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           
           // Render each line
           lines.forEach(line => {
-            // Add black stroke for outline effect
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = scaledFontSize * 0.1;
-            ctx.strokeText(line, textX, currentY);
-            
-            // Add white fill
+            // Add white fill (no outline)
             ctx.fillStyle = 'white';
             ctx.fillText(line, textX, currentY);
             
@@ -338,8 +333,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       return;
     }
 
-    if (selectedPages.length === 0) {
-      toast.error("Please select at least one page");
+    if (!selectedPage) {
+      toast.error("Please select a page");
       return;
     }
 
@@ -352,11 +347,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       // Apply overlays (gradient and text)
       processedImage = await applyOverlays(processedImage) || processedImage;
 
-      // Apply watermark if enabled and only one page selected
-      if (useWatermark && selectedPages.length === 1) {
-        const selectedPage = PAGES.find((p) => p.id === selectedPages[0]);
-        if (selectedPage) {
-          processedImage = await applyWatermark(processedImage, selectedPage.watermark);
+      // Apply watermark if enabled
+      if (useWatermark && selectedPage) {
+        const pageConfig = PAGES.find((p) => p.id === selectedPage);
+        if (pageConfig) {
+          processedImage = await applyWatermark(processedImage, pageConfig.watermark);
         }
       }
 
@@ -374,21 +369,22 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const postResult = await createPostMutation.mutateAsync({
         mediaId: uploadResult.mediaId,
         caption,
-        pages: selectedPages,
+        pages: [selectedPage],
       });
 
       if (!postResult.success) {
         throw new Error(postResult.error || "Failed to create post");
       }
 
-      toast.success(`Success! Posted to ${selectedPages.length} page${selectedPages.length > 1 ? "s" : ""}`);
+      const pageName = PAGES.find(p => p.id === selectedPage)?.shortName || 'page';
+      toast.success(`Success! Posted to ${pageName}`);
 
       // Reset form completely
       setImage(null);
       setCrop(undefined);
       setCompletedCrop(undefined);
       setCaption("");
-      setSelectedPages([]);
+      setSelectedPage(null);
       setUseWatermark(true);
       setOverlayText("");
       setFontSize(48);
@@ -407,35 +403,51 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     }
   };
 
-  const togglePage = (pageId: PageId) => {
-    setSelectedPages((prev) =>
-      prev.includes(pageId) ? prev.filter((id) => id !== pageId) : [...prev, pageId]
-    );
+  const selectPage = (pageId: PageId) => {
+    setSelectedPage(pageId);
   };
 
   // Get watermark preview for selected page
   const getWatermarkPreview = () => {
-    if (!useWatermark || selectedPages.length !== 1) return null;
-    const selectedPage = PAGES.find((p) => p.id === selectedPages[0]);
-    return selectedPage?.watermark;
+    if (!useWatermark || !selectedPage) return null;
+    const pageConfig = PAGES.find((p) => p.id === selectedPage);
+    return pageConfig?.watermark;
+  };
+
+  const handleClose = () => {
+    // Reset all form state
+    setImage(null);
+    setCrop(undefined);
+    setCompletedCrop(undefined);
+    setCaption("");
+    setSelectedPage(null);
+    setUseWatermark(false);
+    setOverlayText("");
+    setFontSize(48);
+    setUseGradient(false);
+    setTextPosition({ x: 50, y: 85 });
+    setCropMode(true);
+    setCroppedImage(null);
+    // Close dialog
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
         <div className="space-y-4">
-          {/* Header with Page Pills */}
-          <div className="flex items-center justify-between gap-4">
+          {/* Header with Page Pills and Close Button */}
+          <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-1">
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
               <div className="flex gap-2 flex-wrap">
                 {PAGES.map((page) => {
-                  const isSelected = selectedPages.includes(page.id);
+                  const isSelected = selectedPage === page.id;
                   
                   return (
                     <button
                       key={page.id}
-                      onClick={() => togglePage(page.id)}
+                      onClick={() => selectPage(page.id)}
                       className={`p-1 rounded-full transition-all ${
                         isSelected
                           ? "ring-2 ring-cyan-500 scale-110"
@@ -460,9 +472,19 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 })}
               </div>
             </div>
+            {/* Close Button */}
+            <button
+              onClick={handleClose}
+              className="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors border border-gray-700"
+              aria-label="Close"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             <Button
               onClick={handlePost}
-              disabled={isUploading || !image || !caption.trim() || selectedPages.length === 0}
+              disabled={isUploading || !image || !caption.trim() || !selectedPage}
               className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 flex-shrink-0"
             >
               {isUploading ? "Posting..." : "Post"}
@@ -668,14 +690,15 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         lineHeight: 1.2,
                         minWidth: '50px',
                       }}
-                      dangerouslySetInnerHTML={{ __html: overlayText.replace(/\n/g, '<br>') }}
-                    />
+                    >
+                      {overlayText}
+                    </div>
                   )}
 
                   {/* Watermark Preview */}
-                  {useWatermark && selectedPages.length === 1 && imgRef.current && (
+                  {useWatermark && selectedPage && imgRef.current && (
                     <img
-                      src={PAGES.find(p => p.id === selectedPages[0])?.watermark}
+                      src={PAGES.find(p => p.id === selectedPage)?.watermark}
                       alt="Watermark"
                       className="absolute cursor-move select-none"
                       draggable={false}
@@ -761,13 +784,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   variant={useWatermark ? "default" : "outline"}
                   size="sm"
                   onClick={() => setUseWatermark(!useWatermark)}
-                  disabled={selectedPages.length !== 1}
+                  disabled={!selectedPage}
                   className={`flex-1 transition-all duration-200 ${
                     useWatermark
                       ? "bg-cyan-500 hover:bg-cyan-600 text-white"
                       : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                   }`}
-                  title={selectedPages.length > 1 ? "Only works with one page" : ""}
+                  title={!selectedPage ? "Select a page first" : ""}
                 >
                   {useWatermark ? "✓ Watermark" : "Watermark"}
                 </Button>

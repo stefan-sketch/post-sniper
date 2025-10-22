@@ -597,13 +597,24 @@ export default function Home() {
         {/* Live Posts Column */}
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-              </span>
-              Live Posts
-            </h2>
+            <div className="flex items-center gap-2 flex-1">
+              <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                LIVE
+              </h2>
+              {showLiveScrollTop && (
+                <button
+                  onClick={() => scrollToTop(liveScrollRef)}
+                  className="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all"
+                  aria-label="Scroll to top"
+                  title="Back to top"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             <div className="relative">
               <button
                 onClick={() => setShowPageFilter(!showPageFilter)}
@@ -675,24 +686,31 @@ export default function Home() {
                 </div>
               );
             })}
-            {showLiveScrollTop && (
-              <button
-                onClick={() => scrollToTop(liveScrollRef)}
-                className="fixed bottom-6 left-1/4 p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/50 transition-all z-50"
-                aria-label="Scroll to top"
-              >
-                <ArrowUp className="h-5 w-5" />
-              </button>
-            )}
           </div>
         </div>
 
         {/* Popular Posts Column */}
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-center gap-3 mb-3">
-            <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
-              feedType === 'popular' ? 'text-[#1877F2]' : 'text-green-400'
-            }`} />
+            <div className="flex items-center gap-2">
+              <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
+                feedType === 'popular' ? 'text-[#1877F2]' : 'text-white'
+              }`} />
+              {showPopularScrollTop && (
+                <button
+                  onClick={() => scrollToTop(popularScrollRef)}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    feedType === 'popular' 
+                      ? 'bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] hover:text-[#1664D8]'
+                      : 'bg-white/20 hover:bg-white/30 text-white hover:text-gray-200'
+                  }`}
+                  aria-label="Scroll to top"
+                  title="Back to top"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+              )}
+            </div>
             {/* Toggle Switch - Smaller */}
             <button
               onClick={() => setFeedType(feedType === 'popular' ? 'twitter' : 'popular')}
@@ -769,8 +787,10 @@ export default function Home() {
             )}
           </div>
           
-          {/* Green separator line */}
-          <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
+          {/* Separator line - changes color based on feed type */}
+          <div className={`h-[2px] bg-gradient-to-r from-transparent mb-3 flex-shrink-0 transition-colors ${
+            feedType === 'twitter' ? 'via-white to-transparent' : 'via-[#1877F2] to-transparent'
+          }`}></div>
           
           <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative" style={{ touchAction: 'pan-y' }}>
             {feedType === 'popular' ? (
@@ -968,15 +988,6 @@ export default function Home() {
                 })}
               </>
             )}
-            {showPopularScrollTop && (
-              <button
-                onClick={() => scrollToTop(popularScrollRef)}
-                className="fixed bottom-6 right-6 p-3 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 transition-all z-50"
-                aria-label="Scroll to top"
-              >
-                <ArrowUp className="h-5 w-5" />
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -986,12 +997,11 @@ export default function Home() {
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                </span>
-                Live Posts
+              <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                LIVE
               </h2>
               <div className="relative">
                 <button
