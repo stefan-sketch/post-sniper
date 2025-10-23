@@ -167,13 +167,13 @@ export default function LiveFootballHub() {
     return () => clearInterval(interval);
   }, []);
 
-  // Clear justScored flag after animation
+  // Clear justScored flag after 5 seconds
   useEffect(() => {
     const timeout = setTimeout(() => {
       setMatches(prev => prev.map(match => 
         match.justScored ? { ...match, justScored: false } : match
       ));
-    }, 2000);
+    }, 5000); // Changed from 2000 to 5000
 
     return () => clearTimeout(timeout);
   }, [matches]);
@@ -190,6 +190,13 @@ export default function LiveFootballHub() {
     if (!a.isFavorite && b.isFavorite) return 1;
     return competitionPriority[a.competition] - competitionPriority[b.competition];
   });
+
+  // Helper function to get goal scorers for a team
+  const getTeamScorers = (match: Match, team: 'home' | 'away') => {
+    const scorers = match.goalScorers.filter(s => s.team === team);
+    if (scorers.length === 0) return null;
+    return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
+  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -210,96 +217,127 @@ export default function LiveFootballHub() {
 
       {/* Matches */}
       <div className="space-y-2 overflow-y-auto flex-1 pr-2 hide-scrollbar">
-        {sortedMatches.map((match) => (
-          <div
-            key={match.id}
-            className={`bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 border transition-all relative ${
-              match.justScored 
-                ? 'border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] animate-pulse' 
-                : match.isFavorite
-                ? 'border-yellow-500/50'
-                : 'border-white/10 hover:border-green-500/30'
-            }`}
-          >
-            {/* Goal Animation Overlay */}
-            {match.justScored && (
-              <div className="absolute inset-0 bg-yellow-400/20 rounded-lg animate-ping pointer-events-none" />
-            )}
+        {sortedMatches.map((match) => {
+          const homeScorers = getTeamScorers(match, 'home');
+          const awayScorers = getTeamScorers(match, 'away');
+          
+          return (
+            <div
+              key={match.id}
+              className={`bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 border transition-all relative ${
+                match.justScored 
+                  ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
+                  : match.isFavorite
+                  ? 'border-yellow-500/50'
+                  : 'border-white/10 hover:border-green-500/30'
+              }`}
+              style={{
+                animation: match.justScored ? 'shake-red 5s ease-in-out' : 'none'
+              }}
+            >
+              {/* Goal Animation Overlay */}
+              {match.justScored && (
+                <div className="absolute inset-0 bg-red-500/10 rounded-lg pointer-events-none animate-pulse-red" 
+                     style={{ animation: 'pulse-red 5s ease-in-out' }} />
+              )}
 
-            {/* Status, Time, and Star */}
-            <div className="flex items-center justify-between mb-2 relative z-10">
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                  match.status === 'live' 
-                    ? 'bg-red-500 text-white animate-pulse' 
-                    : match.status === 'ht'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-600 text-gray-300'
-                }`}>
-                  {match.status === 'live' ? `${match.minute}'` : match.status === 'ht' ? 'HT' : 'FT'}
-                </span>
-                <span className={`text-xs font-semibold ${competitionColors[match.competition]}`}>
-                  {match.competition}
-                </span>
-              </div>
-              <button
-                onClick={() => toggleFavorite(match.id)}
-                className="p-1 hover:bg-white/10 rounded transition-colors"
-                title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
-              >
-                <Star 
-                  className={`w-4 h-4 transition-colors ${
-                    match.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Teams and Scores */}
-            <div className="space-y-2 relative z-10">
-              {/* Home Team */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-white truncate flex-1">
-                  {match.homeTeam}
-                </span>
-                <span className={`text-lg font-bold ml-2 min-w-[24px] text-right ${
-                  match.justScored ? 'text-yellow-400 animate-bounce' : 'text-white'
-                }`}>
-                  {match.homeScore}
-                </span>
-              </div>
-
-              {/* Away Team */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400 truncate flex-1">
-                  {match.awayTeam}
-                </span>
-                <span className={`text-lg font-bold ml-2 min-w-[24px] text-right ${
-                  match.justScored ? 'text-yellow-400 animate-bounce' : 'text-gray-400'
-                }`}>
-                  {match.awayScore}
-                </span>
-              </div>
-            </div>
-
-            {/* Goal Scorers */}
-            {match.goalScorers.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-white/5 space-y-0.5 relative z-10">
-                {match.goalScorers.map((scorer, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`text-[10px] ${
-                      scorer.team === 'home' ? 'text-gray-300' : 'text-gray-500'
+              {/* Status, Time, and Star */}
+              <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                    match.status === 'live' 
+                      ? 'bg-red-500 text-white animate-pulse' 
+                      : match.status === 'ht'
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-gray-600 text-gray-300'
+                  }`}>
+                    {match.status === 'live' ? `${match.minute}'` : match.status === 'ht' ? 'HT' : 'FT'}
+                  </span>
+                  <span className={`text-xs font-semibold ${competitionColors[match.competition]}`}>
+                    {match.competition}
+                  </span>
+                </div>
+                <button
+                  onClick={() => toggleFavorite(match.id)}
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Star 
+                    className={`w-4 h-4 transition-colors ${
+                      match.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
                     }`}
-                  >
-                    ⚽ {scorer.player} {scorer.minute}'
-                  </div>
-                ))}
+                  />
+                </button>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Teams and Scores */}
+              <div className="space-y-2 relative z-10">
+                {/* Home Team */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-white truncate flex-1">
+                      {match.homeTeam}
+                    </span>
+                    <span className={`text-lg font-bold ml-2 min-w-[24px] text-right ${
+                      match.justScored ? 'text-red-400' : 'text-white'
+                    }`}>
+                      {match.homeScore}
+                    </span>
+                  </div>
+                  {homeScorers && (
+                    <div className="text-[9px] text-gray-400 mt-0.5 truncate">
+                      ⚽ {homeScorers}
+                    </div>
+                  )}
+                </div>
+
+                {/* Away Team */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-400 truncate flex-1">
+                      {match.awayTeam}
+                    </span>
+                    <span className={`text-lg font-bold ml-2 min-w-[24px] text-right ${
+                      match.justScored ? 'text-red-400' : 'text-gray-400'
+                    }`}>
+                      {match.awayScore}
+                    </span>
+                  </div>
+                  {awayScorers && (
+                    <div className="text-[9px] text-gray-500 mt-0.5 truncate">
+                      ⚽ {awayScorers}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
+
+      <style>{`
+        @keyframes shake-red {
+          0%, 100% { transform: translateX(0); }
+          2%, 6%, 10%, 14%, 18% { transform: translateX(-8px); }
+          4%, 8%, 12%, 16%, 20% { transform: translateX(8px); }
+          22% { transform: translateX(0); }
+        }
+        
+        @keyframes pulse-red {
+          0%, 100% { opacity: 0; }
+          5%, 15% { opacity: 0.15; }
+          10% { opacity: 0.25; }
+          20% { opacity: 0; }
+        }
+        
+        .animate-shake-red {
+          animation: shake-red 5s ease-in-out;
+        }
+        
+        .animate-pulse-red {
+          animation: pulse-red 5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
