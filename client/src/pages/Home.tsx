@@ -656,7 +656,7 @@ export default function Home() {
 
       {/* Desktop: Two/Three Column Layout with smooth transition */}
       <div 
-        className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 || isAnimatingOut ? 'gap-4' : 'gap-6'}`}
+        className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 || isAnimatingOut ? 'gap-2' : 'gap-6'}`}
         style={{
           gridTemplateColumns: feedColumns === 3 || isAnimatingOut ? '1fr 1fr 1fr' : '1fr 1fr',
           transition: 'grid-template-columns 0.5s ease-in-out, gap 0.5s ease-in-out'
