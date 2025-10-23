@@ -207,11 +207,11 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Live Badge */}
+        {/* Live Badge with Minute */}
         {isLive && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded z-10">
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded z-10">
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-            LIVE
+            {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
           </div>
         )}
 
@@ -220,7 +220,7 @@ export default function LiveFootballHub() {
           {/* Home Team */}
           <div>
             <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 pr-2`}>
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 ${isLive ? 'pr-16' : 'pr-2'}`}>
                 {match.homeTeam}
               </span>
               {isUpcoming ? (
@@ -348,13 +348,13 @@ export default function LiveFootballHub() {
             <div key={competition} className="space-y-2">
               {/* League Header */}
               <div 
-                className="bg-gray-800/70 backdrop-blur-sm rounded-lg p-3 border border-white/20 cursor-pointer hover:border-white/40 transition-all"
+                className="bg-gray-800/70 backdrop-blur-sm rounded-lg p-2 border border-white/20 cursor-pointer hover:border-white/40 transition-all"
                 onClick={() => toggleLeague(competition)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {/* Status Badge */}
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                       leagueStatus.status === 'live' 
                         ? 'bg-red-500 text-white animate-pulse' 
                         : leagueStatus.status === 'ht'
