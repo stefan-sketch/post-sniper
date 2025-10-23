@@ -1711,24 +1711,7 @@ export default function Home() {
       {/* Floating Action Buttons - Feed View */}
       {currentView === 'feed' && createPortal(
         <>
-          {/* Create Post Button - Floating */}
-          <button
-            onClick={() => {
-              setDroppedImage(null);
-              setShowCreatePost(true);
-            }}
-            className="md:hidden fixed flex items-center justify-center p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
-            style={{ 
-              bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 10000
-            }}
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-          
-          {/* Switch Button - Floating */}
+          {/* Switch Button - Floating on bottom left */}
           <button
             onClick={() => {
               setIsViewSwitching(true);
@@ -1744,7 +1727,7 @@ export default function Home() {
             className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
             style={{ 
               bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-              right: '20px',
+              left: '20px',
               zIndex: 10000
             }}
             title="Switch to Pages"
@@ -1816,24 +1799,7 @@ export default function Home() {
         
         return createPortal(
           <>
-            {/* Create Post Button - Floating */}
-            <button
-              onClick={() => {
-                setDroppedImage(null);
-                setShowCreatePost(true);
-              }}
-              className="md:hidden fixed flex items-center justify-center p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
-              style={{ 
-                bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 10000
-              }}
-            >
-              <Plus className="w-6 h-6" />
-            </button>
-            
-            {/* Switch Button - Floating */}
+            {/* Switch Button - Floating on bottom left */}
             <button
               onClick={() => {
                 setIsViewSwitching(true);
@@ -1849,7 +1815,7 @@ export default function Home() {
               className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
               style={{ 
                 bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-                right: '20px',
+                left: '20px',
                 zIndex: 10000
               }}
               title="Switch to Feed"
