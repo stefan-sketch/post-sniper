@@ -678,7 +678,7 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
           style={{
-            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
+            transform: feedColumns === 3 || isAnimatingOut ? 'translateX(0) scale(0.98)' : 'translateX(0) scale(1)',
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
@@ -1082,7 +1082,7 @@ export default function Home() {
                     {/* Tweet Image (if available) */}
                     {tweet.image && (
                       <div 
-                        className="w-full overflow-hidden cursor-pointer"
+                        className={`w-full overflow-hidden cursor-pointer relative group ${feedColumns === 3 || isAnimatingOut ? '' : 'mt-2'}`}
                         onClick={() => {
                           // Deep link to X app on mobile, fallback to web on desktop
                           const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
@@ -1108,13 +1108,50 @@ export default function Home() {
                           loading="lazy"
                           decoding="async" 
                           alt="Tweet image" 
-                          className="w-full h-auto object-contain"
+                          className={`w-full h-auto ${feedColumns === 3 || isAnimatingOut ? 'object-cover' : 'object-contain'}`}
+                          style={{
+                            maxHeight: feedColumns === 3 || isAnimatingOut ? '400px' : 'none',
+                            minHeight: feedColumns === 3 || isAnimatingOut ? '200px' : 'auto'
+                          }}
                           draggable="true"
                           onDragStart={(e) => {
                             e.dataTransfer.setData('text/uri-list', tweet.image);
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
                         />
+                        {/* Overlay buttons in 3-column mode */}
+                        {(feedColumns === 3 || isAnimatingOut) && (
+                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(tweet.image);
+                              }}
+                              title="Download image"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            {tweet.text && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                                  navigator.clipboard.writeText(cleanText);
+                                  toast.success('Tweet copied to clipboard');
+                                }}
+                                title="Copy tweet"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                     </div>
