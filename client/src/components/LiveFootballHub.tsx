@@ -226,16 +226,22 @@ export default function LiveFootballHub() {
     
     if (diff <= 0) return null;
     
-    const minutes = Math.floor(diff / 1000 / 60);
-    const hours = Math.floor(minutes / 60);
+    const totalMinutes = Math.floor(diff / 1000 / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
     
-    if (hours > 0) {
+    // Show minute countdown when less than 1 hour
+    if (totalMinutes < 60) {
+      if (totalMinutes > 0) {
+        return { text: `Starts in ${totalMinutes}m`, urgent: totalMinutes <= 15 };
+      } else {
+        return { text: 'Starting now', urgent: true };
+      }
+    } else if (hours > 0) {
       return { text: `Starts in ${hours} hour${hours > 1 ? 's' : ''}`, urgent: false };
-    } else if (minutes > 0) {
-      return { text: `Starts in ${minutes} minute${minutes > 1 ? 's' : ''}`, urgent: minutes <= 15 };
-    } else {
-      return { text: 'Starting now', urgent: true };
     }
+    
+    return null;
   };
 
   // Render match card
