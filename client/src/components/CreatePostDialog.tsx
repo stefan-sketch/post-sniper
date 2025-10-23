@@ -64,6 +64,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
@@ -644,6 +645,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 onClick={() => {
                   if (!overlayText) {
                     setOverlayText("Your Text Here");
+                    // Focus and select text after state updates
+                    setTimeout(() => {
+                      if (textareaRef.current) {
+                        textareaRef.current.focus();
+                        textareaRef.current.select();
+                      }
+                    }, 50);
                   } else {
                     setOverlayText("");
                   }
@@ -841,6 +849,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         >
                           {/* Editable Text - Click to edit */}
                           <textarea
+                            ref={textareaRef}
                             value={overlayText}
                             onChange={(e) => setOverlayText(e.target.value)}
                             onClick={(e) => {
