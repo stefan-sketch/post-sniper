@@ -263,12 +263,9 @@ export default function LiveFootballHub() {
           match.justScored 
             ? 'shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
             : ''
-        } ${
-          isCelebrating ? 'opacity-0' : 'opacity-100'
         }`}
         style={{
-          animation: match.justScored ? 'shake-red 30s ease-in-out' : 'none',
-          transition: isCelebrating ? 'opacity 0.3s ease-out' : 'opacity 0.3s ease-in 3s'
+          animation: match.justScored ? 'shake-red 30s ease-in-out' : 'none'
         }}
       >
         {/* Goal Celebration Overlay */}
