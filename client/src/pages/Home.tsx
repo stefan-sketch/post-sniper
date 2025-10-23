@@ -1737,6 +1737,16 @@ export default function Home() {
               </div>
             )}
           </div>
+          
+          {/* Floating Create Post Button - Mobile Only */}
+          <button
+            onClick={() => setShowCreatePost(true)}
+            className="md:hidden fixed right-6 p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/50 transition-all z-50"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}
+            aria-label="Create post"
+          >
+            <ImagePlus className="h-6 w-6" />
+          </button>
         </>
       )}
       </div>

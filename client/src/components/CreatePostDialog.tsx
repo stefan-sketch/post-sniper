@@ -101,7 +101,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setCropMode(true);
+        setCropMode(false); // Keep crop mode off by default
         setCroppedImage(null);
         // Start with full image selected
         setCrop({
@@ -124,7 +124,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const reader = new FileReader();
       reader.onload = () => {
         setImage(reader.result as string);
-        setCropMode(true);
+        setCropMode(false); // Keep crop mode off by default
         setCroppedImage(null);
         // Start with full image selected
         setCrop({
