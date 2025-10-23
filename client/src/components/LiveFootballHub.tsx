@@ -407,11 +407,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
-            </svg>
+          <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
         </div>
@@ -434,11 +430,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
-            </svg>
+          <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
           {/* Status filter dropdown */}

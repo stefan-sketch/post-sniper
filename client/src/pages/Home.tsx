@@ -527,34 +527,29 @@ export default function Home() {
                     setFeedColumns(3);
                   }
                 }}
-                className="hidden md:block group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
+                className="hidden md:block group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-white hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/20 active:scale-95"
                 title={feedColumns === 2 ? 'Show Live Football Hub' : 'Hide Live Football Hub'}
               >
                 {/* Animated glow ring */}
                 <div className={`absolute inset-0 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 ${
                   feedColumns === 3 || isAnimatingOut
-                    ? 'from-green-500/50 via-green-500/80 to-green-500/50 opacity-100 animate-pulse'
-                    : 'from-green-500/0 via-green-500/50 to-green-500/0 group-hover:opacity-100'
+                    ? 'from-white/50 via-white/80 to-white/50 opacity-100 animate-pulse'
+                    : 'from-white/0 via-white/50 to-white/0 group-hover:opacity-100'
                 }`}></div>
                 
-                {/* M Icon */}
+                {/* Football Icon */}
                 <svg 
-                  className={`relative z-10 transition-all duration-300 ${
-                    feedColumns === 3 || isAnimatingOut
-                      ? 'text-green-400'
-                      : 'text-gray-400 group-hover:text-green-400'
-                  }`}
+                  className="relative z-10 text-white transition-all duration-300"
                   width="20" 
                   height="20" 
                   viewBox="0 0 24 24" 
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                 >
-                  {/* Circle */}
+                  {/* Football/Soccer ball */}
                   <circle cx="12" cy="12" r="10" />
-                  {/* M Letter */}
-                  <path d="M7 15V9l2.5 4L12 9l2.5 4L17 9v6" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
                 </svg>
               </button>
             )}
