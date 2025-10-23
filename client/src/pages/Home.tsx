@@ -658,7 +658,7 @@ export default function Home() {
       <div 
         className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 || isAnimatingOut ? 'gap-1' : 'gap-6'}`}
         style={{
-          gridTemplateColumns: feedColumns === 3 || isAnimatingOut ? '1fr 1fr 1fr' : '1fr 1fr',
+          gridTemplateColumns: feedColumns === 3 || isAnimatingOut ? '0.9fr 1fr 1fr' : '1fr 1fr',
           transition: 'grid-template-columns 0.5s ease-in-out, gap 0.5s ease-in-out'
         }}
       >

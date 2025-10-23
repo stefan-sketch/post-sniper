@@ -66,8 +66,8 @@ export default function LiveFootballHub() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-center mb-3">
-        <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2 flex-1 justify-center">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" className="animate-pulse" />
           </svg>
@@ -83,7 +83,7 @@ export default function LiveFootballHub() {
         {matches.map((match) => (
           <div
             key={match.id}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 border border-white/10 hover:border-green-500/30 transition-all"
+            className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-2 border border-white/10 hover:border-green-500/30 transition-all"
           >
             {/* Status and Time */}
             <div className="flex items-center justify-between mb-2">
