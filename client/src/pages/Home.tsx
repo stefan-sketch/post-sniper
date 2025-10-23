@@ -1731,8 +1731,8 @@ export default function Home() {
 
       {/* Bottom Navigation Bar - Rendered via Portal directly into body to bypass all container constraints */}
       {currentView === 'feed' && createPortal(
-        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
-          <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <div className="flex items-center justify-around px-4" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
             <button
               onClick={() => setMobileView('live')}
               className={`flex flex-col items-center gap-1 transition-all ${
@@ -1773,8 +1773,8 @@ export default function Home() {
 
       {/* Pages View Footer - Mobile only */}
       {currentView === 'pages' && createPortal(
-        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
-          <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <div className="flex items-center justify-around px-4" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
