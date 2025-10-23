@@ -68,6 +68,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [strokeWidth, setStrokeWidth] = useState(4); // Default stroke width
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
+  const [overlayImage, setOverlayImage] = useState<string | null>(null);
+  const [overlayImagePosition, setOverlayImagePosition] = useState({ x: 50, y: 50 }); // percentage
+  const [overlayImageSize, setOverlayImageSize] = useState(30); // percentage of main image width
+  const [overlayImageBorderRadius, setOverlayImageBorderRadius] = useState(8); // pixels
+  const [isDraggingOverlayImage, setIsDraggingOverlayImage] = useState(false);
+  const overlayImageInputRef = useRef<HTMLInputElement>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
@@ -77,6 +83,18 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const uploadMediaMutation = trpc.publer.uploadMedia.useMutation();
   const createPostMutation = trpc.publer.createPost.useMutation();
   const regenerateCaptionMutation = trpc.publer.regenerateCaption.useMutation();
+
+  const handleOverlayImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setOverlayImage(reader.result as string);
+        toast.success("Overlay image added!");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handlePasteFromClipboard = async () => {
     try {
@@ -322,6 +340,44 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           });
         }
 
+        // Add overlay image if present (will be drawn synchronously after it loads)
+        if (overlayImage && imgRef.current) {
+          const overlayImg = new Image();
+          overlayImg.crossOrigin = 'anonymous';
+          overlayImg.src = overlayImage;
+          
+          // Draw overlay image synchronously if already loaded
+          if (overlayImg.complete) {
+            const imgWidth = imgRef.current.clientWidth;
+            const overlayWidth = (overlayImageSize / 100) * canvas.width;
+            const overlayHeight = (overlayImg.height / overlayImg.width) * overlayWidth;
+            
+            const x = (overlayImagePosition.x / 100) * canvas.width - overlayWidth / 2;
+            const y = (overlayImagePosition.y / 100) * canvas.height - overlayHeight / 2;
+            
+            // Scale border radius proportionally
+            const scaledRadius = (overlayImageBorderRadius / imgWidth) * canvas.width;
+            
+            // Draw rounded rectangle clipping path
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x + scaledRadius, y);
+            ctx.lineTo(x + overlayWidth - scaledRadius, y);
+            ctx.quadraticCurveTo(x + overlayWidth, y, x + overlayWidth, y + scaledRadius);
+            ctx.lineTo(x + overlayWidth, y + overlayHeight - scaledRadius);
+            ctx.quadraticCurveTo(x + overlayWidth, y + overlayHeight, x + overlayWidth - scaledRadius, y + overlayHeight);
+            ctx.lineTo(x + scaledRadius, y + overlayHeight);
+            ctx.quadraticCurveTo(x, y + overlayHeight, x, y + overlayHeight - scaledRadius);
+            ctx.lineTo(x, y + scaledRadius);
+            ctx.quadraticCurveTo(x, y, x + scaledRadius, y);
+            ctx.closePath();
+            ctx.clip();
+            
+            ctx.drawImage(overlayImg, x, y, overlayWidth, overlayHeight);
+            ctx.restore();
+          }
+        }
+
         // Add drawing rectangles if any
         if (rectangles.length > 0 && imgRef.current) {
           const imgWidth = imgRef.current.clientWidth;
@@ -346,7 +402,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -512,6 +568,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
+    } else if (isDraggingOverlayImage) {
+      setOverlayImagePosition({ 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
+      });
     }
   };
 
@@ -551,6 +612,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
+    } else if (isDraggingOverlayImage) {
+      e.preventDefault();
+      setOverlayImagePosition({ 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
+      });
     }
   };
 
@@ -579,6 +646,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setIsResizingFontSize(false);
     setIsResizingWidth(false);
     setIsDraggingWatermark(false);
+    setIsDraggingOverlayImage(false);
   };
 
   return (
@@ -764,6 +832,34 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               >
                 <Pen className="h-4 w-4" />
               </Button>
+
+              {/* Overlay Image Button */}
+              <Button
+                type="button"
+                variant={overlayImage ? "default" : "outline"}
+                size="sm"
+                onClick={() => overlayImageInputRef.current?.click()}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : overlayImage
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+                title="Add overlay image"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </Button>
+              <input
+                ref={overlayImageInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleOverlayImageUpload}
+                className="hidden"
+              />
             </div>
 
             {/* Drawing Color Picker - Show when drawing is enabled */}
@@ -827,6 +923,54 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     }}
                   />
                   <span className="text-sm text-white font-medium w-8 text-center">{strokeWidth}px</span>
+                </div>
+              </div>
+            )}
+
+            {/* Overlay Image Controls - Show when overlay image is added */}
+            {overlayImage && image && !cropMode && (
+              <div className="space-y-2">
+                <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Size:</span>
+                  <input
+                    type="range"
+                    min="10"
+                    max="80"
+                    step="5"
+                    value={overlayImageSize}
+                    onChange={(e) => setOverlayImageSize(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{ maxWidth: '150px' }}
+                  />
+                  <span className="text-sm text-white font-medium w-10 text-center">{overlayImageSize}%</span>
+                </div>
+                
+                <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Curve:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="50"
+                    step="2"
+                    value={overlayImageBorderRadius}
+                    onChange={(e) => setOverlayImageBorderRadius(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{ maxWidth: '150px' }}
+                  />
+                  <span className="text-sm text-white font-medium w-10 text-center">{overlayImageBorderRadius}px</span>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOverlayImage(null)}
+                    className="text-xs"
+                    title="Remove overlay image"
+                  >
+                    Remove Overlay
+                  </Button>
                 </div>
               </div>
             )}
@@ -1214,6 +1358,37 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         e.preventDefault();
                         e.stopPropagation();
                         setIsDraggingWatermark(true);
+                      }}
+                    />
+                  )}
+
+                  {/* Overlay Image Preview */}
+                  {overlayImage && imgRef.current && (
+                    <img
+                      src={overlayImage}
+                      alt="Overlay"
+                      className="absolute cursor-move select-none"
+                      draggable={false}
+                      style={{
+                        pointerEvents: 'auto',
+                        zIndex: 11,
+                        left: `calc(50% + ${(overlayImagePosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                        top: `calc(50% + ${(overlayImagePosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                        transform: 'translate(-50%, -50%)',
+                        width: (overlayImageSize / 100) * imgRef.current.clientWidth,
+                        height: 'auto',
+                        borderRadius: `${overlayImageBorderRadius}px`,
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingOverlayImage(true);
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsDraggingOverlayImage(true);
                       }}
                     />
                   )}
