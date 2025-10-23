@@ -570,7 +570,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 type="button"
                 variant={cropMode ? "default" : "outline"}
                 size="sm"
-                onClick={() => {
+                onClick={async () => {
                   if (image) {
                     if (!cropMode) {
                       // Enter crop mode
@@ -583,8 +583,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         height: 100,
                       });
                     } else {
-                      // Exit crop mode
-                      setCropMode(false);
+                      // Confirm crop
+                      await handleConfirmCrop();
                     }
                   }
                 }}
@@ -593,11 +593,18 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   !image
                     ? "opacity-50 cursor-not-allowed"
                     : cropMode
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    ? "bg-green-500 hover:bg-green-600 text-white"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
+                title={cropMode ? "Confirm crop" : "Crop image"}
               >
-                <CropIcon className="h-4 w-4" />
+                {cropMode ? (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <CropIcon className="h-4 w-4" />
+                )}
               </Button>
 
               {/* Watermark Button */}
@@ -722,15 +729,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="max-w-full max-h-[600px]"
                   />
                 </ReactCrop>
-                <div className="flex justify-center">
-                  <Button
-                    size="sm"
-                    onClick={handleConfirmCrop}
-                    className="bg-cyan-500 hover:bg-cyan-600 transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    ✓ Confirm Crop
-                  </Button>
-                </div>
               </div>
             ) : (
               <div className="space-y-2">
