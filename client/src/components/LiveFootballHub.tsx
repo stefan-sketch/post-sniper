@@ -62,7 +62,7 @@ export default function LiveFootballHub() {
 
   // Fetch livescores
   const { data, refetch } = trpc.livescores.getLivescores.useQuery(undefined, {
-    refetchInterval: 10000, // Poll every 10 seconds for faster updates
+    refetchInterval: 30000, // Poll every 30 seconds
     refetchIntervalInBackground: true,
   });
 
