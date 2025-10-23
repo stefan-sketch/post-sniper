@@ -1137,46 +1137,89 @@ export default function Home() {
                                 try {
                                   const html2canvas = (await import('html2canvas')).default;
                                   
-                                  // Find the tweet card element
-                                  const tweetCard = document.querySelector(`[data-tweet-id="${tweet.id}"]`);
-                                  if (!tweetCard) {
-                                    toast.error('Tweet element not found');
-                                    return;
-                                  }
+                                  // Clean tweet text (remove t.co links)
+                                  const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
 
-                                  // Create a temporary container with just header + text
+                                  // Create a custom styled container
                                   const tempContainer = document.createElement('div');
                                   tempContainer.style.position = 'absolute';
                                   tempContainer.style.left = '-9999px';
                                   tempContainer.style.top = '0';
-                                  tempContainer.style.width = '600px';
+                                  tempContainer.style.width = '800px';
                                   tempContainer.style.background = 'rgb(21, 32, 43)';
-                                  tempContainer.style.borderRadius = '16px';
-                                  tempContainer.style.overflow = 'hidden';
-                                  tempContainer.style.padding = '0';
+                                  tempContainer.style.borderRadius = '24px';
+                                  tempContainer.style.padding = '32px';
+                                  tempContainer.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
                                   document.body.appendChild(tempContainer);
 
-                                  // Clone header and text sections
-                                  const header = tweetCard.querySelector('.p-4.flex.items-center.gap-3');
-                                  const textSection = tweetCard.querySelector('.px-4.pb-2');
-                                  
-                                  if (header) {
-                                    const headerClone = header.cloneNode(true) as HTMLElement;
-                                    tempContainer.appendChild(headerClone);
-                                  }
-                                  
-                                  if (textSection) {
-                                    const textClone = textSection.cloneNode(true) as HTMLElement;
-                                    tempContainer.appendChild(textClone);
-                                  }
+                                  // Create header section
+                                  const header = document.createElement('div');
+                                  header.style.display = 'flex';
+                                  header.style.alignItems = 'center';
+                                  header.style.gap = '16px';
+                                  header.style.marginBottom = '20px';
 
-                                  // Capture with html2canvas
+                                  // Avatar
+                                  const avatar = document.createElement('img');
+                                  avatar.src = tweet.author.avatar;
+                                  avatar.crossOrigin = 'anonymous';
+                                  avatar.style.width = '64px';
+                                  avatar.style.height = '64px';
+                                  avatar.style.borderRadius = '50%';
+                                  avatar.style.flexShrink = '0';
+                                  header.appendChild(avatar);
+
+                                  // Name and username container
+                                  const nameContainer = document.createElement('div');
+                                  nameContainer.style.display = 'flex';
+                                  nameContainer.style.alignItems = 'center';
+                                  nameContainer.style.gap = '8px';
+                                  nameContainer.style.flexWrap = 'wrap';
+
+                                  // Name
+                                  const name = document.createElement('span');
+                                  name.textContent = tweet.author.name;
+                                  name.style.fontSize = '22px';
+                                  name.style.fontWeight = '700';
+                                  name.style.color = 'rgb(255, 255, 255)';
+                                  nameContainer.appendChild(name);
+
+                                  // Username
+                                  const username = document.createElement('span');
+                                  username.textContent = `@${tweet.author.username}`;
+                                  username.style.fontSize = '22px';
+                                  username.style.fontWeight = '400';
+                                  username.style.color = 'rgb(139, 152, 165)';
+                                  nameContainer.appendChild(username);
+
+                                  header.appendChild(nameContainer);
+                                  tempContainer.appendChild(header);
+
+                                  // Tweet text
+                                  const text = document.createElement('div');
+                                  text.textContent = cleanText;
+                                  text.style.fontSize = '20px';
+                                  text.style.lineHeight = '1.5';
+                                  text.style.color = 'rgb(255, 255, 255)';
+                                  text.style.whiteSpace = 'pre-wrap';
+                                  text.style.wordWrap = 'break-word';
+                                  tempContainer.appendChild(text);
+
+                                  // Wait for avatar to load
+                                  await new Promise((resolve) => {
+                                    if (avatar.complete) resolve(null);
+                                    else avatar.onload = () => resolve(null);
+                                  });
+
+                                  // Capture with html2canvas at high quality
                                   const canvas = await html2canvas(tempContainer, {
                                     backgroundColor: 'rgb(21, 32, 43)',
-                                    scale: 2, // Higher quality
+                                    scale: 3, // 3x for very high quality
                                     logging: false,
                                     useCORS: true,
-                                    allowTaint: true
+                                    allowTaint: true,
+                                    width: 800,
+                                    windowWidth: 800
                                   });
 
                                   // Clean up temp container
@@ -1194,7 +1237,7 @@ export default function Home() {
                                     document.body.removeChild(a);
                                     URL.revokeObjectURL(url);
                                     toast.success('Screenshot downloaded');
-                                  });
+                                  }, 'image/png', 1.0);
                                 } catch (error) {
                                   console.error('Screenshot failed:', error);
                                   toast.error('Screenshot failed');
