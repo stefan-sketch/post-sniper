@@ -1209,7 +1209,7 @@ export default function Home() {
       </div>
 
       {/* Mobile: Single Column with Switchable View */}
-      <div className="md:hidden flex flex-col flex-1 overflow-hidden" style={{ paddingBottom: 'calc(60px + env(safe-area-inset-bottom))' }}>
+      <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-center gap-2 mb-2">
