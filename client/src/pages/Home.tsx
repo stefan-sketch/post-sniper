@@ -719,11 +719,7 @@ export default function Home() {
 
         {/* Live Posts Column */}
         <div 
-          className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
-          style={{
-            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
-            opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
-          }}
+          className="flex flex-col h-full overflow-hidden"
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
@@ -851,11 +847,7 @@ export default function Home() {
 
         {/* Popular Posts Column */}
         <div 
-          className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
-          style={{
-            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
-            opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
-          }}
+          className="flex flex-col h-full overflow-hidden"
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
