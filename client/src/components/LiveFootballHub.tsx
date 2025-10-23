@@ -204,6 +204,14 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
+        {/* Live Badge */}
+        {isLive && (
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded z-10">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+            LIVE
+          </div>
+        )}
+
         {/* Competition Name (for favorites section) */}
         {showCompetition && (
           <div className={`text-[8px] font-semibold mb-1 ${competitionColors[match.competition]}`}>
@@ -247,9 +255,11 @@ export default function LiveFootballHub() {
                 </span>
               )}
             </div>
-            {homeScorers && !isUpcoming && (
-              <div className={`${isFinished ? 'text-[8px]' : 'text-[9px]'} text-gray-400 mt-1 truncate`}>
-                ⚽ {homeScorers}
+            {homeScorers && !isUpcoming && !isFinished && (
+              <div className="text-[9px] text-gray-400 mt-1 overflow-hidden">
+                <div className="whitespace-nowrap overflow-x-auto hide-scrollbar">
+                  ⚽ {homeScorers}
+                </div>
               </div>
             )}
           </div>
@@ -268,9 +278,11 @@ export default function LiveFootballHub() {
                 </span>
               )}
             </div>
-            {awayScorers && !isUpcoming && (
-              <div className={`${isFinished ? 'text-[8px]' : 'text-[9px]'} text-gray-500 mt-1 truncate`}>
-                ⚽ {awayScorers}
+            {awayScorers && !isUpcoming && !isFinished && (
+              <div className="text-[9px] text-gray-500 mt-1 overflow-hidden">
+                <div className="whitespace-nowrap overflow-x-auto hide-scrollbar">
+                  ⚽ {awayScorers}
+                </div>
               </div>
             )}
           </div>
