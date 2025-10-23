@@ -1,7 +1,7 @@
 import { getDb, getUserSettings, getMonitoredPages, getManagedPages, createAlert } from "./db";
 import { cachedPosts, InsertCachedPost } from "../drizzle/schema";
 import axios from "axios";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { ENV } from "./_core/env";
 import * as cron from "node-cron";
 import crypto from "crypto";
@@ -213,7 +213,7 @@ export class BackgroundJobService {
             const existingPost = await db
               .select()
               .from(cachedPosts)
-              .where(eq(cachedPosts.id, cachedPost.id))
+              .where(and(eq(cachedPosts.id, cachedPost.id), eq(cachedPosts.pageId, page.id)))
               .limit(1);
             
             const previousReactions = existingPost[0]?.reactions || cachedPost.reactions;
@@ -240,12 +240,15 @@ export class BackgroundJobService {
               .insert(cachedPosts)
               .values({ ...cachedPost, previousReactions })
               .onConflictDoUpdate({
-                target: cachedPosts.id,
+                target: [cachedPosts.id, cachedPosts.pageId],
                 set: {
                   previousReactions: previousReactions,
                   reactions: cachedPost.reactions,
                   comments: cachedPost.comments,
                   shares: cachedPost.shares,
+                  pageName: cachedPost.pageName,
+                  borderColor: cachedPost.borderColor,
+                  profilePicture: cachedPost.profilePicture,
                   updatedAt: new Date(),
                 },
               });

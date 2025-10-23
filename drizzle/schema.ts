@@ -108,7 +108,7 @@ export type InsertAlert = typeof alerts.$inferInsert;
  * Cached posts data - stores fetched posts server-side
  */
 export const cachedPosts = pgTable("cached_posts", {
-  id: varchar("id", { length: 255 }).primaryKey(), // postId
+  id: varchar("id", { length: 255 }).notNull(), // postId
   pageId: varchar("pageId", { length: 64 }).notNull(),
   pageName: varchar("pageName", { length: 255 }).notNull(),
   borderColor: varchar("borderColor", { length: 7 }).notNull(),
@@ -126,6 +126,7 @@ export const cachedPosts = pgTable("cached_posts", {
   fetchedAt: timestamp("fetchedAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 }, (table) => ({
+  pk: primaryKey({ columns: [table.id, table.pageId] }),
   postDateIdx: index("idx_cached_posts_post_date").on(table.postDate.desc()),
   pageIdIdx: index("idx_cached_posts_page_id").on(table.pageId),
   reactionsIdx: index("idx_cached_posts_reactions").on(table.reactions.desc()),
