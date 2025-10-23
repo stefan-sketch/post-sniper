@@ -478,10 +478,10 @@ export default function Home() {
                 setTimeout(() => {
                   setCurrentView(newView);
                   setViewTransition('none');
-                  // Keep isViewSwitching true for a bit longer to prevent animations
+                  // Keep isViewSwitching true longer to prevent post animations during transition
                   setTimeout(() => {
                     setIsViewSwitching(false);
-                  }, 100);
+                  }, 600);
                 }, 500);
               }}
               className="group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
@@ -699,7 +699,7 @@ export default function Home() {
           <div 
             className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: isViewSwitching ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in forwards' : 'slideInFromLeft 0.5s ease-out')
+              animation: isViewSwitching ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
             }}
           >
             <LiveFootballHub />
