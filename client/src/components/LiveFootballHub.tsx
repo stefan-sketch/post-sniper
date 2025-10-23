@@ -48,7 +48,9 @@ export default function LiveFootballHub() {
   const [matchStatusFilter, setMatchStatusFilter] = useState<'all' | 'live' | 'upcoming' | 'finished'>('all');
   const [showStatusFilter, setShowStatusFilter] = useState(false);
   const previousScoresRef = useRef<Map<string, number>>(new Map());
+  const previousStatusRef = useRef<Map<string, string>>(new Map());
   const [celebratingGoals, setCelebratingGoals] = useState<Set<string>>(new Set());
+  const [justFinishedMatches, setJustFinishedMatches] = useState<Set<string>>(new Set());
 
   // Update current time every second for countdown
   useEffect(() => {
@@ -73,15 +75,19 @@ export default function LiveFootballHub() {
       justScored: false,
     }));
 
-    // Detect new goals
+    // Detect new goals and status changes
     setMatches(prev => {
       return newMatches.map(newMatch => {
         const prevMatch = prev.find(m => m.id === newMatch.id);
         const prevTotal = previousScoresRef.current.get(newMatch.id) || 0;
         const newTotal = newMatch.homeScore + newMatch.awayScore;
+        const prevStatus = previousStatusRef.current.get(newMatch.id);
 
         // Check if there's a new goal (only for live/ht/ft matches, not upcoming)
         const justScored = prevMatch && newMatch.status !== 'upcoming' && newTotal > prevTotal;
+
+        // Check if match just finished
+        const justFinished = prevStatus && prevStatus !== 'ft' && newMatch.status === 'ft';
 
         if (justScored) {
           previousScoresRef.current.set(newMatch.id, newTotal);
@@ -99,6 +105,20 @@ export default function LiveFootballHub() {
           // Initialize score tracking
           previousScoresRef.current.set(newMatch.id, newTotal);
         }
+
+        // Track status changes
+        if (justFinished) {
+          setJustFinishedMatches(prev => new Set(prev).add(newMatch.id));
+          // Remove animation flag after animation completes
+          setTimeout(() => {
+            setJustFinishedMatches(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(newMatch.id);
+              return newSet;
+            });
+          }, 700); // Match animation duration
+        }
+        previousStatusRef.current.set(newMatch.id, newMatch.status);
 
         return {
           ...newMatch,
@@ -148,6 +168,17 @@ export default function LiveFootballHub() {
     acc[match.competition].push(match);
     return acc;
   }, {} as Record<Competition, Match[]>);
+
+  // Sort matches within each competition: live/ht/upcoming first, then finished
+  Object.keys(matchesByCompetition).forEach(competition => {
+    matchesByCompetition[competition as Competition].sort((a, b) => {
+      // Finished matches go to bottom
+      if (a.status === 'ft' && b.status !== 'ft') return 1;
+      if (a.status !== 'ft' && b.status === 'ft') return -1;
+      // Otherwise maintain order
+      return 0;
+    });
+  });
 
   // Sort competitions by priority
   const sortedCompetitions = Object.keys(matchesByCompetition).sort(
@@ -484,7 +515,17 @@ export default function LiveFootballHub() {
               {/* League Matches */}
               {!isCollapsed && (
                 <div className="space-y-2">
-                  {leagueMatches.map(match => renderMatchCard(match))}
+                  {leagueMatches.map(match => (
+                    <div
+                      key={match.id}
+                      className="transition-all duration-700 ease-in-out"
+                      style={{
+                        animation: justFinishedMatches.has(match.id) ? 'slideToBottom 0.7s ease-in-out' : 'none'
+                      }}
+                    >
+                      {renderMatchCard(match)}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

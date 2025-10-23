@@ -520,3 +520,20 @@
   }
 }
 
+
+
+/* Slide to bottom animation for finished matches */
+@keyframes slideToBottom {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(20px);
+    opacity: 1;
+  }
+}
+
