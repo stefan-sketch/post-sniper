@@ -65,7 +65,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingEnabled, setDrawingEnabled] = useState(false);
   const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
-  const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number}>>([]);
+  const [strokeWidth, setStrokeWidth] = useState(4); // Default stroke width
+  const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -333,7 +334,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             const height = (rect.height / imgHeight) * canvas.height;
             
             ctx.strokeStyle = rect.color;
-            ctx.lineWidth = 8; // Thick border
+            // Scale stroke width proportionally to canvas size
+            ctx.lineWidth = (rect.strokeWidth / imgWidth) * canvas.width;
             ctx.strokeRect(x, y, width, height);
           });
         }
@@ -568,7 +570,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       
       // Only save if rectangle has meaningful size (at least 5px)
       if (width > 5 && height > 5) {
-        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height }]);
+        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height, strokeWidth }]);
       }
       setCurrentRect(null);
     }
@@ -766,8 +768,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
             {/* Drawing Color Picker - Show when drawing is enabled */}
             {drawingEnabled && image && !cropMode && (
-              <div className="flex gap-2 items-center justify-center">
-                <span className="text-sm text-gray-400">Color:</span>
+              <div className="space-y-2">
+                <div className="flex gap-2 items-center justify-center">
+                  <span className="text-sm text-gray-400">Color:</span>
                 <button
                   type="button"
                   onClick={() => setDrawingColor('yellow')}
@@ -795,17 +798,36 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   style={{ backgroundColor: '#800020' }}
                   title="Burgundy"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setRectangles([])}
-                  disabled={rectangles.length === 0}
-                  className="ml-2 text-xs"
-                  title="Clear rectangles"
-                >
-                  Clear
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRectangles([])}
+                    disabled={rectangles.length === 0}
+                    className="ml-2 text-xs"
+                    title="Clear rectangles"
+                  >
+                    Clear
+                  </Button>
+                </div>
+                
+                {/* Stroke Width Slider */}
+                <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Width:</span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="12"
+                    step="1"
+                    value={strokeWidth}
+                    onChange={(e) => setStrokeWidth(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{
+                      maxWidth: '200px'
+                    }}
+                  />
+                  <span className="text-sm text-white font-medium w-8 text-center">{strokeWidth}px</span>
+                </div>
               </div>
             )}
           </div>
@@ -962,7 +984,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           height={rect.height}
                           fill="none"
                           stroke={rect.color}
-                          strokeWidth="4"
+                          strokeWidth={rect.strokeWidth}
                         />
                       ))}
                       {/* Render current rectangle being drawn */}
@@ -980,7 +1002,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             height={height}
                             fill="none"
                             stroke={color}
-                            strokeWidth="4"
+                            strokeWidth={strokeWidth}
                           />
                         );
                       })()}
