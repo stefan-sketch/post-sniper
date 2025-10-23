@@ -563,7 +563,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
           {/* Overlay Controls - Always visible, greyed out when no image */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Tools</label>
             <div className="flex gap-2">
               {/* Crop Button */}
               <Button
