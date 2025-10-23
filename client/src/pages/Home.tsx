@@ -29,6 +29,7 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
   const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track when Football Hub is sliding out
   const [footballPressed, setFootballPressed] = useState(false);
 
   // For mobile dropdown
@@ -490,7 +491,19 @@ export default function Home() {
             {/* Column Toggle - Desktop only, Feed view only */}
             {currentView === 'feed' && (
               <button
-                onClick={() => setFeedColumns(feedColumns === 2 ? 3 : 2)}
+                onClick={() => {
+                  if (feedColumns === 3) {
+                    // Trigger exit animation
+                    setIsAnimatingOut(true);
+                    // Wait for animation to complete before changing columns
+                    setTimeout(() => {
+                      setFeedColumns(2);
+                      setIsAnimatingOut(false);
+                    }, 500);
+                  } else {
+                    setFeedColumns(3);
+                  }
+                }}
                 className="hidden md:block group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
                 title={feedColumns === 2 ? 'Show Live Football Hub (3 columns)' : 'Hide Live Football Hub (2 columns)'}
               >
@@ -684,18 +697,18 @@ export default function Home() {
 
       {/* Desktop: Two/Three Column Layout with smooth transition */}
       <div 
-        className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 ? 'gap-4' : 'gap-6'}`}
+        className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 || isAnimatingOut ? 'gap-4' : 'gap-6'}`}
         style={{
-          gridTemplateColumns: feedColumns === 3 ? '1fr 1fr 1fr' : '1fr 1fr',
+          gridTemplateColumns: feedColumns === 3 || isAnimatingOut ? '1fr 1fr 1fr' : '1fr 1fr',
           transition: 'grid-template-columns 0.5s ease-in-out, gap 0.5s ease-in-out'
         }}
       >
         {/* Live Football Hub - Slides in from LEFT, positioned first in grid */}
-        {feedColumns === 3 && (
+        {(feedColumns === 3 || isAnimatingOut) && (
           <div 
-            className="flex flex-col h-full overflow-hidden animate-slideInFromLeft"
+            className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: 'slideInFromLeft 0.5s ease-out'
+              animation: isAnimatingOut ? 'slideOutToLeft 0.5s ease-in forwards' : 'slideInFromLeft 0.5s ease-out'
             }}
           >
             <LiveFootballHub />
@@ -706,8 +719,8 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
           style={{
-            transform: feedColumns === 3 ? 'scale(0.98)' : 'scale(1)',
-            opacity: feedColumns === 3 ? 0.95 : 1
+            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
+            opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
           <div className="flex items-center justify-between mb-3">
@@ -785,7 +798,7 @@ export default function Home() {
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
+          <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -822,8 +835,8 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
           style={{
-            transform: feedColumns === 3 ? 'scale(0.98)' : 'scale(1)',
-            opacity: feedColumns === 3 ? 0.95 : 1
+            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
+            opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
           <div className="flex items-center justify-between gap-3 mb-3">
@@ -931,7 +944,7 @@ export default function Home() {
             feedType === 'twitter' ? 'via-white to-transparent' : 'via-[#1877F2] to-transparent'
           }`}></div>
           
-          <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
+          <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
