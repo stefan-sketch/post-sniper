@@ -1177,6 +1177,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         if (currentLine) lineCount++;
                       });
                       
+                      // Auto-expand height based on content (like Canva)
                       const boxHeight = Math.max(lineHeight * 1.5, lineCount * lineHeight + previewFontSize * 0.4);
                       
                       return (
@@ -1232,7 +1233,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               // Prevent dragging when clicking inside text
                               e.stopPropagation();
                             }}
-                            className="absolute inset-0 bg-transparent border-none outline-none resize-none text-center flex items-center justify-center"
+                            className="absolute inset-0 bg-transparent border-none outline-none resize-none text-center"
                             style={{
                               fontSize: `${previewFontSize}px`,
                               fontFamily: 'Impact, "Arial Black", sans-serif',
@@ -1244,6 +1245,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               lineHeight: '1.2',
                               letterSpacing: '0.1em',
                               pointerEvents: isEditingText ? 'auto' : 'none',
+                              whiteSpace: 'pre-wrap',
+                              wordWrap: 'break-word',
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
                             maxLength={200}
                           />
