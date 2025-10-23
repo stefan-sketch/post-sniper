@@ -311,18 +311,7 @@ export default function LiveFootballHub() {
           </div>
         </div>
 
-        {/* Countdown for upcoming matches */}
-        {isUpcoming && (() => {
-          const countdown = getTimeUntilKickoff(match.kickoffTime);
-          if (!countdown) return null;
-          return (
-            <div className={`text-[10px] text-center mt-2 font-semibold ${
-              countdown.urgent ? 'text-red-500 animate-blink' : 'text-gray-400'
-            }`}>
-              {countdown.text}
-            </div>
-          );
-        })()}
+
       </div>
     );
   };

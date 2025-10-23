@@ -734,7 +734,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] w-[280px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -761,7 +761,7 @@ export default function Home() {
                               </svg>
                             )}
                           </div>
-                          <span className={isSelected ? 'text-white font-medium' : 'text-gray-400'}>{page.name}</span>
+                          <span className={`${isSelected ? 'text-white font-medium' : 'text-gray-400'} break-words`}>{page.name}</span>
                         </button>
                       );
                     })}
@@ -1227,7 +1227,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] w-[280px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -1254,7 +1254,7 @@ export default function Home() {
                               </svg>
                             )}
                           </div>
-                          <span className={isSelected ? 'text-white font-medium' : 'text-gray-400'}>{page.name}</span>
+                          <span className={`${isSelected ? 'text-white font-medium' : 'text-gray-400'} break-words`}>{page.name}</span>
                         </button>
                       );
                     })}
