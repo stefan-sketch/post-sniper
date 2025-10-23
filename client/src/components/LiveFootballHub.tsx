@@ -334,12 +334,12 @@ export default function LiveFootballHub() {
               <span className={`${
                 isFinished ? 'text-xs' : 
                 match.homeTeam.length > 15 ? 'text-xs' : 'text-sm'
-              } font-semibold text-white truncate max-w-[140px]`}>
+              } font-semibold ${isFinished ? 'text-gray-500' : 'text-white'} truncate max-w-[140px]`}>
                 {match.homeTeam}
               </span>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
-                  match.justScored ? 'text-red-400' : 'text-white'
+                  isFinished ? 'text-gray-500' : (match.justScored ? 'text-red-400' : 'text-white')
                 }`}>
                   {match.homeScore}
                 </span>
@@ -369,12 +369,12 @@ export default function LiveFootballHub() {
               <span className={`${
                 isFinished ? 'text-xs' : 
                 match.awayTeam.length > 15 ? 'text-xs' : 'text-sm'
-              } font-semibold text-white truncate max-w-[140px]`}>
+              } font-semibold ${isFinished ? 'text-gray-500' : 'text-white'} truncate max-w-[140px]`}>
                 {match.awayTeam}
               </span>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
-                  match.justScored ? 'text-red-400' : 'text-white'
+                  isFinished ? 'text-gray-500' : (match.justScored ? 'text-red-400' : 'text-white')
                 }`}>
                   {match.awayScore}
                 </span>
