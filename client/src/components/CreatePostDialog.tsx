@@ -65,8 +65,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingEnabled, setDrawingEnabled] = useState(false);
   const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
-  const [drawingPaths, setDrawingPaths] = useState<Array<{color: string, points: {x: number, y: number}[]}>>([]);
-  const [currentPath, setCurrentPath] = useState<{x: number, y: number}[]>([]);
+  const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number}>>([]);
+  const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
@@ -321,30 +321,20 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           });
         }
 
-        // Add drawing paths if any
-        if (drawingPaths.length > 0 && imgRef.current) {
+        // Add drawing rectangles if any
+        if (rectangles.length > 0 && imgRef.current) {
           const imgWidth = imgRef.current.clientWidth;
           const imgHeight = imgRef.current.clientHeight;
           
-          drawingPaths.forEach(path => {
-            if (path.points.length > 1) {
-              ctx.strokeStyle = path.color;
-              ctx.lineWidth = 8; // Thick line
-              ctx.lineCap = 'round';
-              ctx.lineJoin = 'round';
-              
-              ctx.beginPath();
-              path.points.forEach((point, i) => {
-                const x = (point.x / imgWidth) * canvas.width;
-                const y = (point.y / imgHeight) * canvas.height;
-                if (i === 0) {
-                  ctx.moveTo(x, y);
-                } else {
-                  ctx.lineTo(x, y);
-                }
-              });
-              ctx.stroke();
-            }
+          rectangles.forEach(rect => {
+            const x = (rect.x / imgWidth) * canvas.width;
+            const y = (rect.y / imgHeight) * canvas.height;
+            const width = (rect.width / imgWidth) * canvas.width;
+            const height = (rect.height / imgHeight) * canvas.height;
+            
+            ctx.strokeStyle = rect.color;
+            ctx.lineWidth = 8; // Thick border
+            ctx.strokeRect(x, y, width, height);
           });
         }
 
@@ -354,7 +344,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, drawingPaths]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -496,8 +486,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     const xPercent = (x / rect.width) * 100;
     const yPercent = (y / rect.height) * 100;
     
-    if (isDrawing && drawingEnabled) {
-      setCurrentPath(prev => [...prev, { x, y }]);
+    if (isDrawing && drawingEnabled && currentRect) {
+      setCurrentRect({ ...currentRect, endX: x, endY: y });
     } else if (isDraggingTextBox) {
       setTextBoxPosition({ 
         x: Math.max(0, Math.min(100, xPercent)), 
@@ -532,9 +522,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     const xPercent = (x / rect.width) * 100;
     const yPercent = (y / rect.height) * 100;
     
-    if (isDrawing && drawingEnabled) {
+    if (isDrawing && drawingEnabled && currentRect) {
       e.preventDefault();
-      setCurrentPath(prev => [...prev, { x, y }]);
+      setCurrentRect({ ...currentRect, endX: x, endY: y });
     } else if (isDraggingTextBox) {
       e.preventDefault();
       setTextBoxPosition({ 
@@ -563,15 +553,24 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   };
 
   const handleMouseUp = () => {
-    if (isDrawing && currentPath.length > 1) {
-      // Save the completed path
+    if (isDrawing && currentRect) {
+      // Save the completed rectangle
       const colorMap = {
         'yellow': '#FFD700',
         'black': '#000000',
         'burgundy': '#800020'
       };
-      setDrawingPaths(prev => [...prev, { color: colorMap[drawingColor], points: currentPath }]);
-      setCurrentPath([]);
+      const { startX, startY, endX, endY } = currentRect;
+      const x = Math.min(startX, endX);
+      const y = Math.min(startY, endY);
+      const width = Math.abs(endX - startX);
+      const height = Math.abs(endY - startY);
+      
+      // Only save if rectangle has meaningful size (at least 5px)
+      if (width > 5 && height > 5) {
+        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height }]);
+      }
+      setCurrentRect(null);
     }
     setIsDrawing(false);
     setIsDraggingTextBox(false);
@@ -800,10 +799,10 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setDrawingPaths([])}
-                  disabled={drawingPaths.length === 0}
+                  onClick={() => setRectangles([])}
+                  disabled={rectangles.length === 0}
                   className="ml-2 text-xs"
-                  title="Clear drawings"
+                  title="Clear rectangles"
                 >
                   Clear
                 </Button>
@@ -878,7 +877,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       const x = e.clientX - rect.left;
                       const y = e.clientY - rect.top;
                       setIsDrawing(true);
-                      setCurrentPath([{ x, y }]);
+                      setCurrentRect({ startX: x, startY: y, endX: x, endY: y });
                     }
                   }}
                   onTouchStart={(e) => {
@@ -888,7 +887,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       const x = touch.clientX - rect.left;
                       const y = touch.clientY - rect.top;
                       setIsDrawing(true);
-                      setCurrentPath([{ x, y }]);
+                      setCurrentRect({ startX: x, startY: y, endX: x, endY: y });
                     }
                   }}
                 >
@@ -953,29 +952,38 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         height: imgRef.current.clientHeight,
                       }}
                     >
-                      {/* Render completed paths */}
-                      {drawingPaths.map((path, i) => (
-                        <polyline
+                      {/* Render completed rectangles */}
+                      {rectangles.map((rect, i) => (
+                        <rect
                           key={i}
-                          points={path.points.map(p => `${p.x},${p.y}`).join(' ')}
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
                           fill="none"
-                          stroke={path.color}
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                          stroke={rect.color}
+                          strokeWidth="4"
                         />
                       ))}
-                      {/* Render current path being drawn */}
-                      {currentPath.length > 1 && (
-                        <polyline
-                          points={currentPath.map(p => `${p.x},${p.y}`).join(' ')}
-                          fill="none"
-                          stroke={drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020'}
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      )}
+                      {/* Render current rectangle being drawn */}
+                      {currentRect && (() => {
+                        const x = Math.min(currentRect.startX, currentRect.endX);
+                        const y = Math.min(currentRect.startY, currentRect.endY);
+                        const width = Math.abs(currentRect.endX - currentRect.startX);
+                        const height = Math.abs(currentRect.endY - currentRect.startY);
+                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020';
+                        return (
+                          <rect
+                            x={x}
+                            y={y}
+                            width={width}
+                            height={height}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth="4"
+                          />
+                        );
+                      })()}
                     </svg>
                   )}
 
