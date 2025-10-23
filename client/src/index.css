@@ -137,8 +137,8 @@
   html {
     overflow: hidden;  /* Completely disable scrolling */
     width: 100%;
-    height: 100vh;
-    height: -webkit-fill-available;
+    height: 100dvh;
+    height: 100vh; /* Fallback for older browsers */
   }
   
   body {
@@ -146,10 +146,12 @@
     overflow: hidden;  /* Completely disable scrolling */
     max-width: 100vw;
     width: 100%;
-    height: 100vh;
-    height: -webkit-fill-available;
+    height: 100dvh;
+    height: 100vh; /* Fallback for older browsers */
     touch-action: none;
     overscroll-behavior: none;
+    /* Allow content to extend into safe areas on iOS */
+    padding-bottom: 0;
   }
   
   #root {
