@@ -29,6 +29,7 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
   const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
+  const [footballPressed, setFootballPressed] = useState(false);
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -539,9 +540,42 @@ export default function Home() {
             >
               <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
-            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
-              SDL MEDIA
-            </h1>
+            {/* Football Icon + Title */}
+            <button
+              onMouseDown={() => setFootballPressed(true)}
+              onMouseUp={() => setFootballPressed(false)}
+              onMouseLeave={() => setFootballPressed(false)}
+              onTouchStart={() => setFootballPressed(true)}
+              onTouchEnd={() => setFootballPressed(false)}
+              className="flex items-center gap-2 group cursor-pointer transition-transform active:scale-95"
+            >
+              {/* Football Icon */}
+              <svg 
+                className={`w-6 h-6 md:w-8 md:h-8 transition-all duration-300 ${
+                  footballPressed 
+                    ? 'text-red-500 animate-spin' 
+                    : 'text-white group-hover:text-green-400'
+                }`}
+                viewBox="0 0 24 24" 
+                fill="currentColor"
+              >
+                {/* Football/Soccer ball icon */}
+                <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                <path d="M12 6l1.5 4.5h4.5l-3.5 2.5 1.5 4.5-3.5-2.5-3.5 2.5 1.5-4.5-3.5-2.5h4.5z" opacity="0.7" />
+              </svg>
+              
+              <h1 
+                className={`text-xl md:text-2xl font-bold tracking-wider transition-colors duration-300 ${
+                  footballPressed 
+                    ? 'text-red-500' 
+                    : 'text-white'
+                }`}
+                style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}
+              >
+                SDL MEDIA
+              </h1>
+            </button>
             {/* Create post button - desktop only */}
             <Button
               variant="ghost"
