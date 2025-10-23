@@ -136,6 +136,8 @@ interface Match {
   awayTeamLogo?: string;
   goalScorers: GoalScorer[];
   kickoffTime: string;
+  homeRedCards?: number;
+  awayRedCards?: number;
 }
 
 async function fetchInplayMatches(): Promise<Match[]> {
@@ -381,6 +383,11 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             };
           });
 
+          // Get red cards (type_id 20 = direct red, type_id 21 = second yellow)
+          const redCardEvents = fixture.events?.filter(e => e.type_id === 20 || e.type_id === 21) || [];
+          const homeRedCards = redCardEvents.filter(e => e.participant_id === homeParticipant.id).length;
+          const awayRedCards = redCardEvents.filter(e => e.participant_id === awayParticipant.id).length;
+
           // Get competition
           const competition = fixture.league?.id 
             ? LEAGUE_ID_TO_COMPETITION[fixture.league.id]
@@ -404,6 +411,8 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             awayTeamLogo: awayParticipant.image_path,
             goalScorers,
             kickoffTime: fixture.starting_at,
+            homeRedCards,
+            awayRedCards,
           };
         } catch (error) {
           console.error('Error processing fixture:', error);

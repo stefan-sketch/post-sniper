@@ -26,6 +26,10 @@ interface Match {
   kickoffTime: string;
   justScored?: boolean;
   scoringTeam?: 'home' | 'away' | null;
+  homeRedCards?: number;
+  awayRedCards?: number;
+  justGotRedCard?: boolean;
+  redCardTeam?: 'home' | 'away' | null;
 }
 
 const competitionPriority: Record<Competition, number> = {
@@ -50,8 +54,10 @@ export default function LiveFootballHub() {
   const [showStatusFilter, setShowStatusFilter] = useState(false);
   const previousScoresRef = useRef<Map<string, number>>(new Map());
   const previousStatusRef = useRef<Map<string, string>>(new Map());
+  const previousRedCardsRef = useRef<Map<string, { home: number; away: number }>>(new Map());
   const [celebratingGoals, setCelebratingGoals] = useState<Set<string>>(new Set());
   const [justFinishedMatches, setJustFinishedMatches] = useState<Set<string>>(new Set());
+  const [celebratingRedCards, setCelebratingRedCards] = useState<Set<string>>(new Set());
 
   // Update current time every second for countdown
   useEffect(() => {
@@ -95,6 +101,23 @@ export default function LiveFootballHub() {
           }
         }
 
+        // Check if there's a new red card
+        const prevRedCards = previousRedCardsRef.current.get(newMatch.id) || { home: 0, away: 0 };
+        const newHomeRedCards = newMatch.homeRedCards || 0;
+        const newAwayRedCards = newMatch.awayRedCards || 0;
+        const totalPrevRedCards = prevRedCards.home + prevRedCards.away;
+        const totalNewRedCards = newHomeRedCards + newAwayRedCards;
+        
+        const justGotRedCard = prevMatch && newMatch.status !== 'upcoming' && totalNewRedCards > totalPrevRedCards;
+        let redCardTeam: 'home' | 'away' | null = null;
+        if (justGotRedCard && prevMatch) {
+          if (newHomeRedCards > prevRedCards.home) {
+            redCardTeam = 'home';
+          } else if (newAwayRedCards > prevRedCards.away) {
+            redCardTeam = 'away';
+          }
+        }
+
         // Check if match just finished
         const justFinished = prevStatus && prevStatus !== 'ft' && newMatch.status === 'ft';
 
@@ -115,6 +138,23 @@ export default function LiveFootballHub() {
           previousScoresRef.current.set(newMatch.id, newTotal);
         }
 
+        if (justGotRedCard) {
+          previousRedCardsRef.current.set(newMatch.id, { home: newHomeRedCards, away: newAwayRedCards });
+          // Trigger red card animation
+          setCelebratingRedCards(prev => new Set(prev).add(newMatch.id));
+          // Remove from celebration after 5 seconds
+          setTimeout(() => {
+            setCelebratingRedCards(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(newMatch.id);
+              return newSet;
+            });
+          }, 5000);
+        } else if (!previousRedCardsRef.current.has(newMatch.id)) {
+          // Initialize red card tracking
+          previousRedCardsRef.current.set(newMatch.id, { home: newHomeRedCards, away: newAwayRedCards });
+        }
+
         // Track status changes
         if (justFinished) {
           setJustFinishedMatches(prev => new Set(prev).add(newMatch.id));
@@ -133,6 +173,8 @@ export default function LiveFootballHub() {
           ...newMatch,
           justScored: justScored || false,
           scoringTeam: scoringTeam,
+          justGotRedCard: justGotRedCard || false,
+          redCardTeam: redCardTeam,
         };
       });
     });
@@ -263,6 +305,7 @@ export default function LiveFootballHub() {
     const isUpcoming = match.status === 'upcoming';
     const isHalfTime = match.status === 'ht';
     const isCelebrating = celebratingGoals.has(match.id);
+    const isRedCardCelebrating = celebratingRedCards.has(match.id);
     
     return (
       <div
@@ -271,11 +314,26 @@ export default function LiveFootballHub() {
           isFinished ? 'p-2 opacity-60' : 'p-3'
         }`}
       >
+        {/* Red Card Animation Overlay */}
+        {isRedCardCelebrating && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 rounded-lg animate-pulse">
+            <div className="flex flex-col items-center gap-2">
+              {/* Red Card Image */}
+              <div className="w-16 h-24 bg-red-600 rounded-lg shadow-2xl shadow-red-600/50 flex items-center justify-center animate-bounce">
+                <div className="w-12 h-20 bg-red-700 rounded-md"></div>
+              </div>
+              {/* RED CARD Text */}
+              <div className="text-2xl font-black text-red-500 tracking-wider animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+                RED CARD!
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Match Minute / Kickoff Time / Full Time / Half Time - Bottom Right Corner */}
         {isLive && (
           <div className="absolute bottom-2 right-2 text-[10px] text-red-400 font-bold z-10">
-            {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
+            {match.minute > 90 ? `90+${match.minute - 90}'` : `${match.minute}'`}
           </div>
         )}
         {isHalfTime && (
@@ -325,6 +383,14 @@ export default function LiveFootballHub() {
               }`}>
                 {match.homeTeam}
               </span>
+              {/* Red Cards */}
+              {(match.homeRedCards || 0) > 0 && (
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: match.homeRedCards || 0 }).map((_, idx) => (
+                    <div key={idx} className="w-2 h-3 bg-red-600 rounded-sm"></div>
+                  ))}
+                </div>
+              )}
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold transition-all duration-300 ${
                   isFinished ? 'text-gray-500' : 
@@ -364,6 +430,14 @@ export default function LiveFootballHub() {
               }`}>
                 {match.awayTeam}
               </span>
+              {/* Red Cards */}
+              {(match.awayRedCards || 0) > 0 && (
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: match.awayRedCards || 0 }).map((_, idx) => (
+                    <div key={idx} className="w-2 h-3 bg-red-600 rounded-sm"></div>
+                  ))}
+                </div>
+              )}
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold transition-all duration-300 ${
                   isFinished ? 'text-gray-500' : 
