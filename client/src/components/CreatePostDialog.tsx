@@ -71,9 +71,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [overlayImagePosition, setOverlayImagePosition] = useState({ x: 50, y: 50 }); // percentage
-  const [overlayImageSize, setOverlayImageSize] = useState(30); // percentage of main image width
+  const [overlayImageSize, setOverlayImageSize] = useState(100); // percentage of original size
   const [overlayImageBorderRadius, setOverlayImageBorderRadius] = useState(8); // pixels
+  const [overlayImageBorderWidth, setOverlayImageBorderWidth] = useState(0); // pixels
+  const [overlayImageBorderColor, setOverlayImageBorderColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
+  const [overlayImageOriginalSize, setOverlayImageOriginalSize] = useState({ width: 0, height: 0 });
   const [isDraggingOverlayImage, setIsDraggingOverlayImage] = useState(false);
+  const [isResizingOverlayImage, setIsResizingOverlayImage] = useState(false);
   const overlayImageInputRef = useRef<HTMLInputElement>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -90,8 +94,14 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => {
-        setOverlayImage(reader.result as string);
-        toast.success("Overlay image added!");
+        const img = new Image();
+        img.onload = () => {
+          setOverlayImageOriginalSize({ width: img.width, height: img.height });
+          setOverlayImage(reader.result as string);
+          setOverlayImageSize(100); // Start at 100% of original size
+          toast.success("Overlay image added!");
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -342,7 +352,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         }
 
         // Add overlay image if present (will be drawn synchronously after it loads)
-        if (overlayImage && imgRef.current) {
+        if (overlayImage && imgRef.current && overlayImageOriginalSize.width > 0) {
           const overlayImg = new Image();
           overlayImg.crossOrigin = 'anonymous';
           overlayImg.src = overlayImage;
@@ -350,8 +360,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           // Draw overlay image synchronously if already loaded
           if (overlayImg.complete) {
             const imgWidth = imgRef.current.clientWidth;
-            const overlayWidth = (overlayImageSize / 100) * canvas.width;
-            const overlayHeight = (overlayImg.height / overlayImg.width) * overlayWidth;
+            const displayWidth = (overlayImageSize / 100) * overlayImageOriginalSize.width;
+            const displayHeight = (overlayImageSize / 100) * overlayImageOriginalSize.height;
+            const scaleRatio = canvas.width / imgWidth;
+            const overlayWidth = displayWidth * scaleRatio;
+            const overlayHeight = displayHeight * scaleRatio;
             
             const x = (overlayImagePosition.x / 100) * canvas.width - overlayWidth / 2;
             const y = (overlayImagePosition.y / 100) * canvas.height - overlayHeight / 2;
@@ -376,6 +389,33 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             
             ctx.drawImage(overlayImg, x, y, overlayWidth, overlayHeight);
             ctx.restore();
+            
+            // Draw border if enabled
+            if (overlayImageBorderWidth > 0) {
+              const borderColorMap = {
+                'yellow': '#FFD700',
+                'black': '#000000',
+                'burgundy': '#800020'
+              };
+              const scaledBorderWidth = (overlayImageBorderWidth / imgWidth) * canvas.width;
+              
+              ctx.strokeStyle = borderColorMap[overlayImageBorderColor];
+              ctx.lineWidth = scaledBorderWidth;
+              
+              // Draw rounded border
+              ctx.beginPath();
+              ctx.moveTo(x + scaledRadius, y);
+              ctx.lineTo(x + overlayWidth - scaledRadius, y);
+              ctx.quadraticCurveTo(x + overlayWidth, y, x + overlayWidth, y + scaledRadius);
+              ctx.lineTo(x + overlayWidth, y + overlayHeight - scaledRadius);
+              ctx.quadraticCurveTo(x + overlayWidth, y + overlayHeight, x + overlayWidth - scaledRadius, y + overlayHeight);
+              ctx.lineTo(x + scaledRadius, y + overlayHeight);
+              ctx.quadraticCurveTo(x, y + overlayHeight, x, y + overlayHeight - scaledRadius);
+              ctx.lineTo(x, y + scaledRadius);
+              ctx.quadraticCurveTo(x, y, x + scaledRadius, y);
+              ctx.closePath();
+              ctx.stroke();
+            }
           }
         }
 
@@ -421,7 +461,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius, borderRadius]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius, overlayImageBorderWidth, overlayImageBorderColor, overlayImageOriginalSize, borderRadius]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -592,6 +632,15 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
+    } else if (isResizingOverlayImage) {
+      // Calculate distance from center to determine size
+      const centerX = resizeStartState.x;
+      const centerY = resizeStartState.y;
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - resizeStartState.x, 2) + Math.pow(resizeStartState.y - resizeStartState.y, 2));
+      const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
+      const delta = currentDist - startDist;
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
+      setOverlayImageSize(newSize);
     }
   };
 
@@ -637,6 +686,15 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
+    } else if (isResizingOverlayImage) {
+      e.preventDefault();
+      const centerX = resizeStartState.x;
+      const centerY = resizeStartState.y;
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - resizeStartState.x, 2) + Math.pow(resizeStartState.y - resizeStartState.y, 2));
+      const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
+      const delta = currentDist - startDist;
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
+      setOverlayImageSize(newSize);
     }
   };
 
@@ -666,6 +724,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setIsResizingWidth(false);
     setIsDraggingWatermark(false);
     setIsDraggingOverlayImage(false);
+    setIsResizingOverlayImage(false);
   };
 
   return (
@@ -968,21 +1027,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             {overlayImage && image && !cropMode && (
               <div className="space-y-2">
                 <div className="flex gap-3 items-center justify-center px-4">
-                  <span className="text-sm text-gray-400 whitespace-nowrap">Size:</span>
-                  <input
-                    type="range"
-                    min="10"
-                    max="80"
-                    step="5"
-                    value={overlayImageSize}
-                    onChange={(e) => setOverlayImageSize(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                    style={{ maxWidth: '150px' }}
-                  />
-                  <span className="text-sm text-white font-medium w-10 text-center">{overlayImageSize}%</span>
-                </div>
-                
-                <div className="flex gap-3 items-center justify-center px-4">
                   <span className="text-sm text-gray-400 whitespace-nowrap">Curve:</span>
                   <input
                     type="range"
@@ -996,6 +1040,54 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   />
                   <span className="text-sm text-white font-medium w-10 text-center">{overlayImageBorderRadius}px</span>
                 </div>
+
+                <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Border:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    step="2"
+                    value={overlayImageBorderWidth}
+                    onChange={(e) => setOverlayImageBorderWidth(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{ maxWidth: '150px' }}
+                  />
+                  <span className="text-sm text-white font-medium w-10 text-center">{overlayImageBorderWidth}px</span>
+                </div>
+
+                {overlayImageBorderWidth > 0 && (
+                  <div className="flex gap-2 items-center justify-center">
+                    <span className="text-sm text-gray-400">Color:</span>
+                    <button
+                      type="button"
+                      onClick={() => setOverlayImageBorderColor('yellow')}
+                      className={`w-6 h-6 rounded-full border-2 ${
+                        overlayImageBorderColor === 'yellow' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                      }`}
+                      style={{ backgroundColor: '#FFD700' }}
+                      title="Yellow"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setOverlayImageBorderColor('black')}
+                      className={`w-6 h-6 rounded-full border-2 ${
+                        overlayImageBorderColor === 'black' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                      }`}
+                      style={{ backgroundColor: '#000000' }}
+                      title="Black"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setOverlayImageBorderColor('burgundy')}
+                      className={`w-6 h-6 rounded-full border-2 ${
+                        overlayImageBorderColor === 'burgundy' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                      }`}
+                      style={{ backgroundColor: '#800020' }}
+                      title="Burgundy"
+                    />
+                  </div>
+                )}
 
                 <div className="flex justify-center">
                   <Button
@@ -1362,35 +1454,89 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   )}
 
                   {/* Overlay Image Preview */}
-                  {overlayImage && imgRef.current && (
-                    <img
-                      src={overlayImage}
-                      alt="Overlay"
-                      className="absolute cursor-move select-none"
-                      draggable={false}
-                      style={{
-                        pointerEvents: 'auto',
-                        zIndex: 11,
-                        left: `calc(50% + ${(overlayImagePosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
-                        top: `calc(50% + ${(overlayImagePosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
-                        transform: 'translate(-50%, -50%)',
-                        width: (overlayImageSize / 100) * imgRef.current.clientWidth,
-                        height: 'auto',
-                        borderRadius: `${overlayImageBorderRadius}px`,
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingOverlayImage(true);
-                      }}
-                      onTouchStart={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsDraggingOverlayImage(true);
-                      }}
-                    />
-                  )}
+                  {overlayImage && imgRef.current && overlayImageOriginalSize.width > 0 && (() => {
+                    const displayWidth = (overlayImageSize / 100) * overlayImageOriginalSize.width;
+                    const displayHeight = (overlayImageSize / 100) * overlayImageOriginalSize.height;
+                    const borderColorMap = {
+                      'yellow': '#FFD700',
+                      'black': '#000000',
+                      'burgundy': '#800020'
+                    };
+                    
+                    return (
+                      <div
+                        className="absolute cursor-move select-none"
+                        style={{
+                          pointerEvents: 'auto',
+                          zIndex: 11,
+                          left: `calc(50% + ${(overlayImagePosition.x - 50) * (imgRef.current.clientWidth / 100)}px)`,
+                          top: `calc(50% + ${(overlayImagePosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                        onMouseDown={(e) => {
+                          if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'IMG') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDraggingOverlayImage(true);
+                          }
+                        }}
+                        onTouchStart={(e) => {
+                          if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'IMG') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDraggingOverlayImage(true);
+                          }
+                        }}
+                      >
+                        <img
+                          src={overlayImage}
+                          alt="Overlay"
+                          draggable={false}
+                          style={{
+                            width: `${displayWidth}px`,
+                            height: `${displayHeight}px`,
+                            borderRadius: `${overlayImageBorderRadius}px`,
+                            border: overlayImageBorderWidth > 0 ? `${overlayImageBorderWidth}px solid ${borderColorMap[overlayImageBorderColor]}` : 'none',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                          }}
+                        />
+                        {/* Resize Handle - Bottom Right Corner */}
+                        <div
+                          className="absolute bottom-0 right-0 w-6 h-6 bg-white border-2 border-cyan-500 rounded-full cursor-nwse-resize shadow-lg"
+                          style={{ transform: 'translate(50%, 50%)' }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+                            setResizeStartState({ 
+                              x: overlayImagePosition.x, 
+                              y: overlayImagePosition.y, 
+                              fontSize: 0, 
+                              width: overlayImageSize 
+                            });
+                            setIsResizingOverlayImage(true);
+                          }}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const touch = e.touches[0];
+                            const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                            const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                            setResizeStartState({ 
+                              x: overlayImagePosition.x, 
+                              y: overlayImagePosition.y, 
+                              fontSize: 0, 
+                              width: overlayImageSize 
+                            });
+                            setIsResizingOverlayImage(true);
+                          }}
+                        />
+                      </div>
+                    );
+                  })()}
 
                   {/* Drawing Canvas Overlay - Top Layer */}
                   {imgRef.current && (
