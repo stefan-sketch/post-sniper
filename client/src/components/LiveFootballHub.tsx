@@ -171,9 +171,11 @@ export default function LiveFootballHub() {
 
   // Helper function to get goal scorers for a team
   const getTeamScorers = (match: Match, team: 'home' | 'away') => {
-    const scorers = match.goalScorers.filter(s => s.team === team);
+    const scorers = match.goalScorers
+      .filter(s => s.team === team)
+      .sort((a, b) => a.minute - b.minute); // Sort by minute (first goal first)
     if (scorers.length === 0) return null;
-    return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
+    return scorers;
   };
 
   // Helper function to format kickoff time
@@ -302,8 +304,10 @@ export default function LiveFootballHub() {
               )}
             </div>
             {homeScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-400 mt-1 pr-2">
-                ⚽ {homeScorers}
+              <div className="text-[9px] text-gray-400 mt-1 pr-2 space-y-0.5">
+                {homeScorers.map((scorer, idx) => (
+                  <div key={idx}>⚽ {scorer.player} {scorer.minute}'</div>
+                ))}
               </div>
             )}
           </div>
@@ -335,8 +339,10 @@ export default function LiveFootballHub() {
               )}
             </div>
             {awayScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-500 mt-1 pr-2">
-                ⚽ {awayScorers}
+              <div className="text-[9px] text-gray-400 mt-1 pr-2 space-y-0.5">
+                {awayScorers.map((scorer, idx) => (
+                  <div key={idx}>⚽ {scorer.player} {scorer.minute}'</div>
+                ))}
               </div>
             )}
           </div>
