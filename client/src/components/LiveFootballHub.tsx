@@ -207,10 +207,9 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Live Badge with Minute */}
+        {/* Match Minute - Bottom Right Corner (Live matches only) */}
         {isLive && (
-          <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded z-10">
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+          <div className="absolute bottom-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
           </div>
         )}
@@ -220,7 +219,7 @@ export default function LiveFootballHub() {
           {/* Home Team */}
           <div>
             <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 ${isLive ? 'pr-16' : 'pr-2'}`}>
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 pr-2`}>
                 {match.homeTeam}
               </span>
               {isUpcoming ? (

@@ -30,6 +30,7 @@ export default function Home() {
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
   const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track when Football Hub is sliding out
+  const [viewTransition, setViewTransition] = useState<'none' | 'to-pages' | 'to-feed'>('none'); // Track view transition direction
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -460,12 +461,19 @@ export default function Home() {
           {/* Left: View Toggle + Column Toggle */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
-              className="group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+              onClick={() => {
+                const newView = currentView === 'feed' ? 'pages' : 'feed';
+                setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
+                setTimeout(() => {
+                  setCurrentView(newView);
+                  setViewTransition('none');
+                }, 500);
+              }}
+              className="group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
               {/* Animated glow ring */}
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
               
               {/* Icon with rotation animation */}
               <svg 
@@ -503,11 +511,11 @@ export default function Home() {
                     setFeedColumns(3);
                   }
                 }}
-                className="hidden md:block group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
+                className="hidden md:block group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
                 title={feedColumns === 2 ? 'Show Live Football Hub' : 'Hide Live Football Hub'}
               >
                 {/* Animated glow ring */}
-                <div className={`absolute inset-0 rounded-lg bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 ${
+                <div className={`absolute inset-0 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 ${
                   feedColumns === 3 || isAnimatingOut
                     ? 'from-green-500/50 via-green-500/80 to-green-500/50 opacity-100 animate-pulse'
                     : 'from-green-500/0 via-green-500/50 to-green-500/0 group-hover:opacity-100'
@@ -649,7 +657,13 @@ export default function Home() {
       </header>
 
       {/* Conditional Content Based on View */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div 
+        className="flex-1 flex flex-col overflow-hidden"
+        style={{
+          animation: viewTransition === 'to-pages' ? 'slideOutToLeft 0.5s ease-in-out forwards' : 
+                     viewTransition === 'to-feed' ? 'slideInFromRight 0.5s ease-in-out' : 'none'
+        }}
+      >
       {currentView === 'feed' ? (
         <>
 
