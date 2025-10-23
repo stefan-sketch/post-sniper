@@ -1555,9 +1555,10 @@ export default function Home() {
           </div>
         </>
       )}
-      </div>
 
       {/* Bottom Navigation Bar - Mobile Only - Outside main container for true fixed positioning */}
+      </div>
+
       {currentView === 'feed' && (
         <div className="md:hidden fixed left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999, transform: 'translateY(0)', paddingBottom: '34px' }}>
           <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '42px' }}>
@@ -1622,7 +1623,6 @@ export default function Home() {
         }}
         initialImage={droppedImage}
       />
-    </div>
   );
 }
 
