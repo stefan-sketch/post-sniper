@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { trpc } from '../lib/trpc';
 
 type Competition = 'Champions League' | 'Europa League' | 'Premier League' | 'Championship';
@@ -21,7 +21,6 @@ interface Match {
   competition: Competition;
   goalScorers: GoalScorer[];
   kickoffTime: string;
-  isFavorite: boolean;
   justScored?: boolean;
 }
 
@@ -42,7 +41,6 @@ const competitionColors: Record<Competition, string> = {
 export default function LiveFootballHub() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<Competition>>(new Set());
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [currentTime, setCurrentTime] = useState(Date.now());
   const previousScoresRef = useRef<Map<string, number>>(new Map());
 
@@ -66,7 +64,6 @@ export default function LiveFootballHub() {
 
     const newMatches = data.matches.map(match => ({
       ...match,
-      isFavorite: favorites.has(match.id),
       justScored: false,
     }));
 
@@ -93,7 +90,7 @@ export default function LiveFootballHub() {
         };
       });
     });
-  }, [data, favorites]);
+  }, [data]);
 
   // Clear justScored flag after 5 seconds
   useEffect(() => {
@@ -105,22 +102,6 @@ export default function LiveFootballHub() {
 
     return () => clearTimeout(timeout);
   }, [matches]);
-
-  const toggleFavorite = (matchId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(matchId)) {
-        newFavorites.delete(matchId);
-      } else {
-        newFavorites.add(matchId);
-      }
-      return newFavorites;
-    });
-
-    setMatches(prev => prev.map(match => 
-      match.id === matchId ? { ...match, isFavorite: !match.isFavorite } : match
-    ));
-  };
 
   const toggleLeague = (competition: Competition) => {
     setCollapsedLeagues(prev => {
@@ -134,19 +115,14 @@ export default function LiveFootballHub() {
     });
   };
 
-  // Get favorited matches
-  const favoritedMatches = matches.filter(m => m.isFavorite);
-
-  // Group non-favorited matches by competition
-  const matchesByCompetition = matches
-    .filter(m => !m.isFavorite)
-    .reduce((acc, match) => {
-      if (!acc[match.competition]) {
-        acc[match.competition] = [];
-      }
-      acc[match.competition].push(match);
-      return acc;
-    }, {} as Record<Competition, Match[]>);
+  // Group matches by competition
+  const matchesByCompetition = matches.reduce((acc, match) => {
+    if (!acc[match.competition]) {
+      acc[match.competition] = [];
+    }
+    acc[match.competition].push(match);
+    return acc;
+  }, {} as Record<Competition, Match[]>);
 
   // Sort competitions by priority
   const sortedCompetitions = Object.keys(matchesByCompetition).sort(
@@ -202,7 +178,7 @@ export default function LiveFootballHub() {
   };
 
   // Render match card
-  const renderMatchCard = (match: Match, showCompetition: boolean = false) => {
+  const renderMatchCard = (match: Match) => {
     const homeScorers = getTeamScorers(match, 'home');
     const awayScorers = getTeamScorers(match, 'away');
     const isFinished = match.status === 'ft';
@@ -219,8 +195,6 @@ export default function LiveFootballHub() {
             ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
             : isLive
             ? 'border-green-500/50 animate-pulse-border'
-            : match.isFavorite
-            ? 'border-yellow-500/50'
             : 'border-white/10 hover:border-green-500/30'
         }`}
         style={{
@@ -235,41 +209,18 @@ export default function LiveFootballHub() {
 
         {/* Live Badge */}
         {isLive && (
-          <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded z-10">
+          <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-500 text-white text-[8px] font-bold px-2 py-0.5 rounded z-10">
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
             LIVE
           </div>
         )}
 
-        {/* Competition Name (for favorites section) */}
-        {showCompetition && (
-          <div className={`text-[8px] font-semibold mb-1 ${competitionColors[match.competition]}`}>
-            {match.competition}
-          </div>
-        )}
-
-        {/* Star Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(match.id);
-          }}
-          className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded transition-colors z-10"
-          title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          <Star 
-            className={`w-4 h-4 transition-colors ${
-              match.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
-            }`}
-          />
-        </button>
-
         {/* Teams and Scores */}
-        <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10 pr-8`}>
+        <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10`}>
           {/* Home Team */}
           <div>
             <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1`}>
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 pr-2`}>
                 {match.homeTeam}
               </span>
               {isUpcoming ? (
@@ -285,10 +236,8 @@ export default function LiveFootballHub() {
               )}
             </div>
             {homeScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-400 mt-1 overflow-hidden">
-                <div className="whitespace-nowrap overflow-x-auto hide-scrollbar">
-                  ⚽ {homeScorers}
-                </div>
+              <div className="text-[9px] text-gray-400 mt-1 pr-2">
+                ⚽ {homeScorers}
               </div>
             )}
           </div>
@@ -296,7 +245,7 @@ export default function LiveFootballHub() {
           {/* Away Team */}
           <div>
             <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400 truncate flex-1`}>
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400 truncate flex-1 pr-2`}>
                 {match.awayTeam}
               </span>
               {!isUpcoming && (
@@ -308,10 +257,8 @@ export default function LiveFootballHub() {
               )}
             </div>
             {awayScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-500 mt-1 overflow-hidden">
-                <div className="whitespace-nowrap overflow-x-auto hide-scrollbar">
-                  ⚽ {awayScorers}
-                </div>
+              <div className="text-[9px] text-gray-500 mt-1 pr-2">
+                ⚽ {awayScorers}
               </div>
             )}
           </div>
@@ -391,22 +338,6 @@ export default function LiveFootballHub() {
 
       {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
-        {/* Favorites Section */}
-        {favoritedMatches.length > 0 && (
-          <div className="space-y-2">
-            <div className="bg-yellow-900/30 backdrop-blur-sm rounded-lg p-3 border border-yellow-500/50">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs font-semibold text-yellow-400">FAVORITES</span>
-              </div>
-            </div>
-            
-            <div className="space-y-2 pl-2">
-              {favoritedMatches.map(match => renderMatchCard(match, true))}
-            </div>
-          </div>
-        )}
-
         {/* League Sections */}
         {sortedCompetitions.map((competition) => {
           const leagueMatches = matchesByCompetition[competition];
@@ -454,7 +385,7 @@ export default function LiveFootballHub() {
               {/* League Matches */}
               {!isCollapsed && (
                 <div className="space-y-2 pl-2">
-                  {leagueMatches.map(match => renderMatchCard(match, false))}
+                  {leagueMatches.map(match => renderMatchCard(match))}
                 </div>
               )}
             </div>
