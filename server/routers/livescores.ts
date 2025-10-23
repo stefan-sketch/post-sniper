@@ -251,7 +251,7 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           let status = STATE_MAPPING[stateName] || 'upcoming';
           
           // Fallback: If match has goals or kickoff time has passed by 5+ minutes, treat as live
-          const kickoffTime = new Date(fixture.starting_at).getTime();
+          const kickoffTime = fixture.starting_at_timestamp * 1000; // Use timestamp
           const now = Date.now();
           const minutesSinceKickoff = Math.floor((now - kickoffTime) / 1000 / 60);
           const hasGoals = (fixture.events?.filter(e => e.type_id === 14).length || 0) > 0;
@@ -282,22 +282,20 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           // Calculate minute (for live matches)
           let minute = 0;
           if (status === 'live') {
-            // Parse the starting time (API returns in Europe/London timezone)
-            const startTime = new Date(fixture.starting_at).getTime();
+            // Use timestamp (timezone-agnostic) instead of parsing date string
+            const startTime = fixture.starting_at_timestamp * 1000; // Convert to milliseconds
             const now = Date.now();
             const elapsed = Math.floor((now - startTime) / 1000 / 60);
-            minute = Math.min(Math.max(elapsed, 0), 90);
+            minute = Math.min(Math.max(elapsed, 1), 90); // Minimum 1' for live matches
             
-            if (fixture.id === 19568973 || fixture.id === '19568973') {
-              console.log('[Livescores] Minute calculation:', {
-                match: `${homeParticipant.name} vs ${awayParticipant.name}`,
-                starting_at: fixture.starting_at,
-                startTime: new Date(startTime).toISOString(),
-                now: new Date(now).toISOString(),
-                elapsed,
-                minute
-              });
-            }
+            console.log('[Livescores] Minute calculation:', {
+              match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+              starting_at_timestamp: fixture.starting_at_timestamp,
+              startTime: new Date(startTime).toISOString(),
+              now: new Date(now).toISOString(),
+              elapsed,
+              minute
+            });
           } else if (status === 'ht') {
             minute = 45;
           } else if (status === 'ft') {

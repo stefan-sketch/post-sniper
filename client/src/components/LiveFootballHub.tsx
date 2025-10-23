@@ -285,12 +285,12 @@ export default function LiveFootballHub() {
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
               )}
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
                 {match.awayTeam}
               </span>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
-                  match.justScored ? 'text-red-400' : 'text-gray-400'
+                  match.justScored ? 'text-red-400' : 'text-white'
                 }`}>
                   {match.awayScore}
                 </span>
