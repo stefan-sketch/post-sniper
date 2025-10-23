@@ -44,6 +44,7 @@ interface SportmonksParticipant {
     position: number;
   };
   name: string;
+  image_path?: string;
 }
 
 interface SportmonksScore {
@@ -112,6 +113,9 @@ interface Match {
   minute: number;
   status: 'upcoming' | 'live' | 'ft' | 'ht';
   competition: Competition;
+  competitionLogo?: string;
+  homeTeamLogo?: string;
+  awayTeamLogo?: string;
   goalScorers: GoalScorer[];
   kickoffTime: string;
 }
@@ -129,7 +133,7 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
   
   // Fetch fixtures for today from the specified leagues
-  const url = `${SPORTMONKS_BASE_URL}/fixtures?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds};fixtureDate:${dateStr}`;
+  const url = `${SPORTMONKS_BASE_URL}/fixtures?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds};fixtureDate:${dateStr}`;
 
   try {
     const response = await fetch(url);
@@ -207,6 +211,9 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
             minute,
             status,
             competition,
+            competitionLogo: fixture.league?.image_path,
+            homeTeamLogo: homeParticipant.image_path,
+            awayTeamLogo: awayParticipant.image_path,
             goalScorers,
             kickoffTime: fixture.starting_at,
           };

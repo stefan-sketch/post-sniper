@@ -19,6 +19,9 @@ interface Match {
   minute: number;
   status: 'upcoming' | 'live' | 'ft' | 'ht';
   competition: Competition;
+  competitionLogo?: string;
+  homeTeamLogo?: string;
+  awayTeamLogo?: string;
   goalScorers: GoalScorer[];
   kickoffTime: string;
   justScored?: boolean;
@@ -207,10 +210,15 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Match Minute - Top Right Corner (Live matches only) */}
+        {/* Match Minute / Kickoff Time - Top Right Corner */}
         {isLive && (
           <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
+          </div>
+        )}
+        {isUpcoming && (
+          <div className="absolute top-2 right-2 text-[10px] text-gray-400 font-bold z-10">
+            {formatKickoffTime(match.kickoffTime)}
           </div>
         )}
 
@@ -219,14 +227,19 @@ export default function LiveFootballHub() {
           {/* Home Team */}
           <div>
             <div className="flex items-center gap-2">
+              {/* Home Team Logo */}
+              {match.homeTeamLogo && (
+                <img 
+                  src={match.homeTeamLogo} 
+                  alt={match.homeTeam}
+                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
               <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
                 {match.homeTeam}
               </span>
-              {isUpcoming ? (
-                <span className="text-sm text-gray-400">
-                  {formatKickoffTime(match.kickoffTime)}
-                </span>
-              ) : (
+              {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-white'
                 }`}>
@@ -244,6 +257,15 @@ export default function LiveFootballHub() {
           {/* Away Team */}
           <div>
             <div className="flex items-center gap-2">
+              {/* Away Team Logo */}
+              {match.awayTeamLogo && (
+                <img 
+                  src={match.awayTeamLogo} 
+                  alt={match.awayTeam}
+                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
               <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
                 {match.awayTeam}
               </span>
@@ -292,19 +314,16 @@ export default function LiveFootballHub() {
     return (
       <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center justify-center gap-3 flex-1">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
         </div>
       </div>
 
-      {/* Separator line */}
-      <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-white/30 to-transparent mb-3 flex-shrink-0"></div>
-
-        {/* Empty state */}
-        <div className="flex-1 flex items-center justify-center text-gray-500">
+      {/* Empty state */}
+      <div className="flex-1 flex items-center justify-center text-gray-500">
           <div className="text-center">
             <div className="text-4xl mb-2">⚽</div>
             <div>No matches today</div>
@@ -318,19 +337,20 @@ export default function LiveFootballHub() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center justify-center gap-3 flex-1">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
         </div>
       </div>
 
-      {/* Separator line */}
-      <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3 flex-shrink-0"></div>
-
       {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
+        {/* Printer line - thin white line at the top */}
+        <div className="sticky top-0 z-10 relative h-0.5 bg-white/30 mb-3 overflow-hidden flex-shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
+        </div>
         {/* League Sections */}
         {sortedCompetitions.map((competition) => {
           const leagueMatches = matchesByCompetition[competition];
@@ -339,32 +359,39 @@ export default function LiveFootballHub() {
           
           return (
             <div key={competition} className="space-y-2">
-              {/* League Header */}
+              {/* League Header - Simple text without card */}
               <div 
-                className="bg-gray-800/70 backdrop-blur-sm rounded-lg p-2 border border-white/20 cursor-pointer hover:border-white/40 transition-all"
+                className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity py-1 px-1"
                 onClick={() => toggleLeague(competition)}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {/* Competition Name with Match Count */}
-                    <span className={`text-xs font-semibold ${competitionColors[competition]}`}>
-                      {competition} ({leagueMatches.length})
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {isCollapsed ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronUp className="w-5 h-5 text-gray-400" />
-                    )}
-                  </div>
+                <div className="flex items-center gap-2">
+                  {/* Competition Logo */}
+                  {leagueMatches[0]?.competitionLogo && (
+                    <img 
+                      src={leagueMatches[0].competitionLogo} 
+                      alt={competition}
+                      className="w-5 h-5 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )}
+                  {/* Competition Name with Match Count */}
+                  <span className={`text-xs font-semibold ${competitionColors[competition]}`}>
+                    {competition} ({leagueMatches.length})
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {isCollapsed ? (
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4 text-gray-400" />
+                  )}
                 </div>
               </div>
 
               {/* League Matches */}
               {!isCollapsed && (
-                <div className="space-y-2 pl-2">
+                <div className="space-y-2">
                   {leagueMatches.map(match => renderMatchCard(match))}
                 </div>
               )}

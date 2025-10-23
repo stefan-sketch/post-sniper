@@ -237,17 +237,6 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {!hideActions && post.image && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-              onClick={handleCopyImage}
-              title="Copy image to clipboard"
-            >
-              <ImageIcon className="h-4 w-4" />
-            </Button>
-          )}
           {!hideActions && post.message && (
             <Button
               size="sm"
@@ -265,7 +254,7 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
       {/* Post Image */}
       {post.image && (
         <div 
-          className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+          className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
           onClick={handleOpenPost}
         >
           <img 
@@ -273,13 +262,28 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
             alt="Post content"
             loading="lazy"
             decoding="async"
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-cover"
             draggable="true"
             onDragStart={(e) => {
               e.dataTransfer.setData('text/uri-list', post.image!);
               e.dataTransfer.effectAllowed = 'copy';
             }}
           />
+          {/* Copy image button overlay */}
+          {!hideActions && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="absolute top-2 right-2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopyImage(e);
+              }}
+              title="Copy image to clipboard"
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
     </div>
