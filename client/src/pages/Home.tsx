@@ -32,6 +32,7 @@ export default function Home() {
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track when Football Hub is sliding out
   const [viewTransition, setViewTransition] = useState<'none' | 'to-pages' | 'to-feed'>('none'); // Track view transition direction
   const [isViewSwitching, setIsViewSwitching] = useState(false); // Prevent post animations during view switch
+  const justSwitchedToFeed = useRef(false); // Track if we just switched to feed view to prevent MATCHDAY animation
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -493,12 +494,21 @@ export default function Home() {
                 const newView = currentView === 'feed' ? 'pages' : 'feed';
                 setIsViewSwitching(true);
                 setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
+                if (newView === 'feed') {
+                  justSwitchedToFeed.current = true;
+                }
                 setTimeout(() => {
                   setCurrentView(newView);
                   setViewTransition('none');
                   // Keep isViewSwitching true longer to prevent post animations during transition
                   setTimeout(() => {
                     setIsViewSwitching(false);
+                    // Reset justSwitchedToFeed after animations complete
+                    if (newView === 'feed') {
+                      setTimeout(() => {
+                        justSwitchedToFeed.current = false;
+                      }, 100);
+                    }
                   }, 600);
                 }, 500);
               }}
@@ -710,7 +720,7 @@ export default function Home() {
           <div 
             className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: (isViewSwitching || viewTransition === 'to-feed') ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
+              animation: (isViewSwitching || viewTransition === 'to-feed' || justSwitchedToFeed.current) ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
             }}
           >
             <LiveFootballHub />
@@ -1904,11 +1914,15 @@ export default function Home() {
                   onClick={() => {
                     setIsViewSwitching(true);
                     setViewTransition('to-feed');
+                    justSwitchedToFeed.current = true;
                     setTimeout(() => {
                       setCurrentView('feed');
                       setViewTransition('none');
                       setTimeout(() => {
                         setIsViewSwitching(false);
+                        setTimeout(() => {
+                          justSwitchedToFeed.current = false;
+                        }, 100);
                       }, 600);
                     }, 500);
                   }}
