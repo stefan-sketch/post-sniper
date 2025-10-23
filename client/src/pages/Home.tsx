@@ -276,7 +276,8 @@ export default function Home() {
     if (!pagesQuery.data) return [];
     return pagesQuery.data.map(page => ({
       id: page.id,
-      name: page.profileName
+      name: page.profileName,
+      profilePicture: page.profilePicture
     }));
   }, [pagesQuery.data]);
 
@@ -734,7 +735,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] w-[280px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] p-2 flex flex-wrap gap-2 max-w-[calc(100vw-2rem)]">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -750,18 +751,24 @@ export default function Home() {
                             }
                             setSelectedPageFilters(newFilters);
                           }}
-                          className="w-full px-3 py-2 text-sm text-left hover:bg-white/10 transition-colors flex items-center gap-2 first:rounded-t-lg last:rounded-b-lg"
+                          className="relative transition-all"
+                          title={page.name}
                         >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                            isSelected ? 'bg-[#1877F2] border-[#1877F2]' : 'border-gray-600'
+                          <div className={`w-10 h-10 rounded-full overflow-hidden ${
+                            isSelected ? 'ring-2 ring-[#1877F2]' : 'opacity-60 hover:opacity-100'
                           }`}>
-                            {isSelected && (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
+                            {page.profilePicture ? (
+                              <img 
+                                src={page.profilePicture} 
+                                alt={page.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white">
+                                {page.name.charAt(0).toUpperCase()}
+                              </div>
                             )}
                           </div>
-                          <span className={`${isSelected ? 'text-white font-medium' : 'text-gray-400'} break-words`}>{page.name}</span>
                         </button>
                       );
                     })}
@@ -1227,7 +1234,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] w-[280px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] p-2 flex flex-wrap gap-2 max-w-[calc(100vw-2rem)]">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -1243,18 +1250,24 @@ export default function Home() {
                             }
                             setSelectedPageFilters(newFilters);
                           }}
-                          className="w-full px-3 py-2 text-sm text-left hover:bg-white/10 transition-colors flex items-center gap-2 first:rounded-t-lg last:rounded-b-lg"
+                          className="relative transition-all"
+                          title={page.name}
                         >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                            isSelected ? 'bg-[#1877F2] border-[#1877F2]' : 'border-gray-600'
+                          <div className={`w-10 h-10 rounded-full overflow-hidden ${
+                            isSelected ? 'ring-2 ring-[#1877F2]' : 'opacity-60 hover:opacity-100'
                           }`}>
-                            {isSelected && (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
+                            {page.profilePicture ? (
+                              <img 
+                                src={page.profilePicture} 
+                                alt={page.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white">
+                                {page.name.charAt(0).toUpperCase()}
+                              </div>
                             )}
                           </div>
-                          <span className={`${isSelected ? 'text-white font-medium' : 'text-gray-400'} break-words`}>{page.name}</span>
                         </button>
                       );
                     })}
