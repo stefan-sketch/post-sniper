@@ -25,6 +25,7 @@ interface Match {
   goalScorers: GoalScorer[];
   kickoffTime: string;
   justScored?: boolean;
+  scoringTeam?: 'home' | 'away' | null;
 }
 
 const competitionPriority: Record<Competition, number> = {
@@ -83,8 +84,16 @@ export default function LiveFootballHub() {
         const newTotal = newMatch.homeScore + newMatch.awayScore;
         const prevStatus = previousStatusRef.current.get(newMatch.id);
 
-        // Check if there's a new goal (only for live/ht/ft matches, not upcoming)
+        // Check if there's a new goal and which team scored
         const justScored = prevMatch && newMatch.status !== 'upcoming' && newTotal > prevTotal;
+        let scoringTeam: 'home' | 'away' | null = null;
+        if (justScored && prevMatch) {
+          if (newMatch.homeScore > prevMatch.homeScore) {
+            scoringTeam = 'home';
+          } else if (newMatch.awayScore > prevMatch.awayScore) {
+            scoringTeam = 'away';
+          }
+        }
 
         // Check if match just finished
         const justFinished = prevStatus && prevStatus !== 'ft' && newMatch.status === 'ft';
@@ -123,6 +132,7 @@ export default function LiveFootballHub() {
         return {
           ...newMatch,
           justScored: justScored || false,
+          scoringTeam: scoringTeam,
         };
       });
     });
@@ -259,30 +269,8 @@ export default function LiveFootballHub() {
         key={match.id}
         className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border border-white/10 transition-all relative ${
           isFinished ? 'p-2 opacity-60' : 'p-3'
-        } ${
-          match.justScored 
-            ? 'shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
-            : ''
         }`}
-        style={{
-          animation: match.justScored ? 'shake-red 30s ease-in-out' : 'none'
-        }}
       >
-        {/* Goal Celebration Overlay */}
-        {isCelebrating && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 rounded-lg animate-pulse">
-            <div className="text-center">
-              <div className="text-6xl mb-2 animate-bounce">⚽</div>
-              <div className="text-3xl font-bold text-white animate-pulse">GOAL!</div>
-            </div>
-          </div>
-        )}
-
-        {/* Red Flash Animation Overlay */}
-        {match.justScored && !isCelebrating && (
-          <div className="absolute inset-0 bg-red-500/10 rounded-lg pointer-events-none animate-pulse-red" 
-               style={{ animation: 'pulse-red 30s ease-in-out' }} />
-        )}
 
         {/* Match Minute / Kickoff Time / Full Time / Half Time - Bottom Right Corner */}
         {isLive && (
@@ -331,12 +319,16 @@ export default function LiveFootballHub() {
               <span className={`${
                 isFinished ? 'text-xs' : 
                 match.homeTeam.length > 15 ? 'text-xs' : 'text-sm'
-              } font-semibold ${isFinished ? 'text-gray-500' : 'text-white'} truncate max-w-[140px]`}>
+              } font-semibold truncate max-w-[140px] transition-all duration-300 ${
+                isFinished ? 'text-gray-500' : 
+                (match.justScored && match.scoringTeam === 'home' ? 'text-green-400 animate-pulse' : 'text-white')
+              }`}>
                 {match.homeTeam}
               </span>
               {!isUpcoming && (
-                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
-                  isFinished ? 'text-gray-500' : (match.justScored ? 'text-red-400' : 'text-white')
+                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold transition-all duration-300 ${
+                  isFinished ? 'text-gray-500' : 
+                  (match.justScored && match.scoringTeam === 'home' ? 'text-green-400 animate-pulse' : 'text-white')
                 }`}>
                   {match.homeScore}
                 </span>
@@ -366,12 +358,16 @@ export default function LiveFootballHub() {
               <span className={`${
                 isFinished ? 'text-xs' : 
                 match.awayTeam.length > 15 ? 'text-xs' : 'text-sm'
-              } font-semibold ${isFinished ? 'text-gray-500' : 'text-white'} truncate max-w-[140px]`}>
+              } font-semibold truncate max-w-[140px] transition-all duration-300 ${
+                isFinished ? 'text-gray-500' : 
+                (match.justScored && match.scoringTeam === 'away' ? 'text-green-400 animate-pulse' : 'text-white')
+              }`}>
                 {match.awayTeam}
               </span>
               {!isUpcoming && (
-                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
-                  isFinished ? 'text-gray-500' : (match.justScored ? 'text-red-400' : 'text-white')
+                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold transition-all duration-300 ${
+                  isFinished ? 'text-gray-500' : 
+                  (match.justScored && match.scoringTeam === 'away' ? 'text-green-400 animate-pulse' : 'text-white')
                 }`}>
                   {match.awayScore}
                 </span>
