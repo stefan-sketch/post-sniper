@@ -485,7 +485,7 @@ export default function Home() {
                   }, 600);
                 }, 500);
               }}
-              className="group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+              className="hidden md:flex group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
               {/* Animated glow ring */}
@@ -1770,7 +1770,28 @@ export default function Home() {
               backgroundColor: `${tintColor}15` // 15 is ~8% opacity in hex
             }}
           >
-            <div className="flex items-center justify-around px-4" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
+            <div className="flex items-center justify-between px-4" style={{ paddingTop: '0px', paddingBottom: '0px' }}>
+              {/* View Switcher Button - Left Side */}
+              <button
+                onClick={() => {
+                  setIsViewSwitching(true);
+                  setViewTransition('to-feed');
+                  setTimeout(() => {
+                    setCurrentView('feed');
+                    setViewTransition('none');
+                    setTimeout(() => {
+                      setIsViewSwitching(false);
+                    }, 600);
+                  }, 500);
+                }}
+                className="p-2 rounded-full bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all"
+                title="Switch to Feed"
+              >
+                <TrendingUp className="h-5 w-5" />
+              </button>
+              
+              {/* Page Selector Buttons - Center */}
+              <div className="flex items-center justify-center gap-2">
               {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
                 const isActive = (index === 0 && pagesView === 'away-days') || 
                                  (index === 1 && pagesView === 'funnys') || 
@@ -1812,6 +1833,10 @@ export default function Home() {
                   </button>
                 );
               })}
+              </div>
+              
+              {/* Spacer for balance - Right Side */}
+              <div className="w-9"></div>
             </div>
           </div>,
           document.body

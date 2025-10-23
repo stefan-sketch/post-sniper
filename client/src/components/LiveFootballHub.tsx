@@ -301,11 +301,16 @@ export default function LiveFootballHub() {
             </svg>
           </div>
         )}
-        {isUpcoming && (
-          <div className="absolute bottom-2 right-2 text-[10px] text-gray-400 font-bold z-10">
-            {formatKickoffTime(match.kickoffTime)}
-          </div>
-        )}
+        {isUpcoming && (() => {
+          const countdown = getTimeUntilKickoff(match.kickoffTime);
+          return (
+            <div className={`absolute bottom-2 right-2 text-[10px] font-bold z-10 ${
+              countdown?.urgent ? 'text-red-400 animate-pulse' : 'text-gray-400'
+            }`}>
+              {countdown ? countdown.text : formatKickoffTime(match.kickoffTime)}
+            </div>
+          );
+        })()}
         {isFinished && (
           <div className="absolute bottom-2 right-2 text-[10px] text-gray-400 font-semibold z-10">
             Full Time
