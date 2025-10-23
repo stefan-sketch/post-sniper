@@ -674,14 +674,15 @@ export default function Home() {
       </header>
 
       {/* Conditional Content Based on View */}
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+      {/* Feed View */}
       <div 
-        className="flex-1 flex flex-col overflow-hidden"
+        className={`flex-1 flex flex-col overflow-hidden ${currentView === 'feed' ? '' : 'hidden'}`}
         style={{
-          animation: viewTransition === 'to-pages' ? 'slideOutToLeft 0.5s ease-in-out forwards' : 
-                     viewTransition === 'to-feed' ? 'slideInFromLeft 0.5s ease-in-out' : 'none'
+          animation: viewTransition === 'to-feed' ? 'slideInFromLeft 0.5s ease-in-out' : 'none'
         }}
       >
-      {currentView === 'feed' ? (
+      {currentView === 'feed' && (
         <>
 
 
@@ -1594,7 +1595,17 @@ export default function Home() {
       </div>
 
         </>
-      ) : (
+      )}
+      </div>
+      
+      {/* Pages View */}
+      <div 
+        className={`flex-1 flex flex-col overflow-hidden ${currentView === 'pages' ? '' : 'hidden'}`}
+        style={{
+          animation: viewTransition === 'to-pages' ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'none'
+        }}
+      >
+      {currentView === 'pages' && (
         /* Pages View - 3 Facebook Pages */
         <>
           {/* Mobile View Selector - Icons only */}
@@ -1721,6 +1732,7 @@ export default function Home() {
           </div>
         </>
       )}
+      </div>
       </div>
 
       {/* Bottom Navigation Bar - Rendered via Portal directly into body to bypass all container constraints */}
