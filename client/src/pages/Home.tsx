@@ -650,11 +650,24 @@ export default function Home() {
 
       {/* Desktop: Two/Three Column Layout with smooth transition */}
       <div 
-        className={`hidden md:grid gap-6 flex-1 overflow-hidden transition-all duration-500 ease-in-out`}
+        className={`hidden md:grid gap-6 flex-1 overflow-hidden`}
         style={{
-          gridTemplateColumns: feedColumns === 3 ? '1fr 1fr 1fr' : '1fr 1fr'
+          gridTemplateColumns: feedColumns === 3 ? '1fr 1fr 1fr' : '1fr 1fr',
+          transition: 'grid-template-columns 0.5s ease-in-out'
         }}
       >
+        {/* Live Football Hub - Slides in from LEFT, positioned first in grid */}
+        {feedColumns === 3 && (
+          <div 
+            className="flex flex-col h-full overflow-hidden animate-slideInFromLeft"
+            style={{
+              animation: 'slideInFromLeft 0.5s ease-out'
+            }}
+          >
+            <LiveFootballHub />
+          </div>
+        )}
+
         {/* Live Posts Column */}
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-between mb-3">
@@ -1087,19 +1100,6 @@ export default function Home() {
               </>
             )}
           </div>
-        </div>
-
-        {/* Live Football Hub - Only visible in 3-column mode */}
-        <div 
-          className={`flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out`}
-          style={{
-            opacity: feedColumns === 3 ? 1 : 0,
-            transform: feedColumns === 3 ? 'translateX(0)' : 'translateX(100%)',
-            width: feedColumns === 3 ? 'auto' : '0',
-            overflow: feedColumns === 3 ? 'visible' : 'hidden'
-          }}
-        >
-          <LiveFootballHub />
         </div>
       </div>
 
