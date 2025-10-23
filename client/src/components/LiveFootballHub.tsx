@@ -430,7 +430,7 @@ export default function LiveFootballHub() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden mt-0.5">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-2 flex-1">
