@@ -1111,19 +1111,135 @@ export default function Home() {
                       </div>
                       <div className="flex items-center gap-1">
                         {tweet.text && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                            onClick={() => {
-                              const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                              navigator.clipboard.writeText(cleanText);
-                              toast.success('Caption copied to clipboard');
-                            }}
-                            title="Copy caption"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                              onClick={() => {
+                                const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                                navigator.clipboard.writeText(cleanText);
+                                toast.success('Caption copied to clipboard');
+                              }}
+                              title="Copy caption"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                              onClick={async () => {
+                                try {
+                                  // Create canvas for screenshot
+                                  const canvas = document.createElement('canvas');
+                                  const ctx = canvas.getContext('2d');
+                                  if (!ctx) return;
+
+                                  // Set canvas size (Twitter-like dimensions)
+                                  const width = 600;
+                                  const padding = 24;
+                                  const lineHeight = 24;
+                                  const avatarSize = 48;
+                                  const borderRadius = 16;
+
+                                  // Calculate text height
+                                  ctx.font = '15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                                  const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                                  const words = cleanText.split(' ');
+                                  const lines = [];
+                                  let currentLine = '';
+                                  const maxWidth = width - (padding * 2);
+
+                                  for (const word of words) {
+                                    const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                                    const metrics = ctx.measureText(testLine);
+                                    if (metrics.width > maxWidth && currentLine) {
+                                      lines.push(currentLine);
+                                      currentLine = word;
+                                    } else {
+                                      currentLine = testLine;
+                                    }
+                                  }
+                                  if (currentLine) lines.push(currentLine);
+
+                                  const textHeight = lines.length * lineHeight;
+                                  const height = padding + avatarSize + 12 + textHeight + padding;
+
+                                  canvas.width = width;
+                                  canvas.height = height;
+
+                                  // Draw rounded rectangle background
+                                  ctx.fillStyle = '#15202B';
+                                  ctx.beginPath();
+                                  ctx.moveTo(borderRadius, 0);
+                                  ctx.lineTo(width - borderRadius, 0);
+                                  ctx.quadraticCurveTo(width, 0, width, borderRadius);
+                                  ctx.lineTo(width, height - borderRadius);
+                                  ctx.quadraticCurveTo(width, height, width - borderRadius, height);
+                                  ctx.lineTo(borderRadius, height);
+                                  ctx.quadraticCurveTo(0, height, 0, height - borderRadius);
+                                  ctx.lineTo(0, borderRadius);
+                                  ctx.quadraticCurveTo(0, 0, borderRadius, 0);
+                                  ctx.closePath();
+                                  ctx.fill();
+
+                                  // Load and draw avatar
+                                  const avatar = new Image();
+                                  avatar.crossOrigin = 'anonymous';
+                                  avatar.src = tweet.author.avatar;
+                                  await new Promise((resolve) => { avatar.onload = resolve; });
+
+                                  ctx.save();
+                                  ctx.beginPath();
+                                  ctx.arc(padding + avatarSize/2, padding + avatarSize/2, avatarSize/2, 0, Math.PI * 2);
+                                  ctx.closePath();
+                                  ctx.clip();
+                                  ctx.drawImage(avatar, padding, padding, avatarSize, avatarSize);
+                                  ctx.restore();
+
+                                  // Draw author name
+                                  ctx.fillStyle = '#FFFFFF';
+                                  ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                                  ctx.fillText(tweet.author.name, padding + avatarSize + 12, padding + 20);
+
+                                  // Draw username
+                                  ctx.fillStyle = '#8B98A5';
+                                  ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                                  ctx.fillText(`@${tweet.author.username}`, padding + avatarSize + 12, padding + 40);
+
+                                  // Draw tweet text
+                                  ctx.fillStyle = '#FFFFFF';
+                                  ctx.font = '15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                                  let y = padding + avatarSize + 12 + 8;
+                                  for (const line of lines) {
+                                    ctx.fillText(line, padding, y);
+                                    y += lineHeight;
+                                  }
+
+                                  // Download screenshot
+                                  canvas.toBlob((blob) => {
+                                    if (!blob) return;
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `tweet-${tweet.author.username}-${tweet.id}.png`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                    toast.success('Screenshot downloaded');
+                                  });
+                                } catch (error) {
+                                  console.error('Screenshot failed:', error);
+                                  toast.error('Screenshot failed');
+                                }
+                              }}
+                              title="Screenshot tweet"
+                            >
+                              <ImagePlus className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
