@@ -215,7 +215,24 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
 
           // Get state
           const stateName = fixture.state?.developer_name || 'NS';
-          const status = STATE_MAPPING[stateName] || 'upcoming';
+          let status = STATE_MAPPING[stateName] || 'upcoming';
+          
+          // Fallback: If match has goals or kickoff time has passed by 5+ minutes, treat as live
+          const kickoffTime = new Date(fixture.starting_at).getTime();
+          const now = Date.now();
+          const minutesSinceKickoff = Math.floor((now - kickoffTime) / 1000 / 60);
+          const hasGoals = (fixture.events?.filter(e => e.type_id === 14).length || 0) > 0;
+          
+          if (status === 'upcoming' && (hasGoals || minutesSinceKickoff >= 5)) {
+            console.log('[Livescores] Overriding status to live:', {
+              fixtureId: fixture.id,
+              match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+              apiState: stateName,
+              hasGoals,
+              minutesSinceKickoff
+            });
+            status = 'live';
+          }
           
           // Log state for debugging
           if (fixture.id === 19568973 || fixture.id === '19568973') {
@@ -224,7 +241,8 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
               stateName,
               status,
               fullState: fixture.state,
-              hasGoals: fixture.events?.filter(e => e.type_id === 14).length || 0
+              hasGoals,
+              minutesSinceKickoff
             });
           }
 
