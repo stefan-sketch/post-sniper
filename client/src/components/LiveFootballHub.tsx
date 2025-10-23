@@ -497,7 +497,7 @@ export default function LiveFootballHub() {
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ paddingTop: '0px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
         <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-base font-semibold text-white" style={{ lineHeight: '1.5rem', margin: 0, padding: 0 }}>
             MATCHDAY

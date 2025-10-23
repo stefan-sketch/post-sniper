@@ -710,7 +710,7 @@ export default function Home() {
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
               <h2 className="text-base font-semibold text-[#1877F2] flex items-center gap-2" style={{ lineHeight: '1.5rem', margin: 0, padding: 0 }}>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -842,14 +842,12 @@ export default function Home() {
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="flex items-center justify-center gap-3 flex-1" style={{ alignItems: 'center' }}>
-              <div className="flex items-center gap-2" style={{ height: '1.75rem' }}>
-                <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
-                  feedType === 'popular' ? 'text-[#1877F2]' : 'text-white'
-                }`} style={{ marginTop: '0' }} />
-              </div>
-            {/* Toggle Switch - Smaller */}
+          <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
+            <div className="flex items-center justify-center gap-2 flex-1">
+              <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
+                feedType === 'popular' ? 'text-[#1877F2]' : 'text-white'
+              }`} />
+              {/* Toggle Switch - Smaller */}
             <button
               onClick={() => setFeedType(feedType === 'popular' ? 'twitter' : 'popular')}
               className="relative inline-flex h-7 w-24 items-center rounded-full bg-gray-700 transition-all hover:bg-gray-600 overflow-hidden"
