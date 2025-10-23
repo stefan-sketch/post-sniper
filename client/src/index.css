@@ -297,6 +297,33 @@
   animation: slideInFromLeft 0.5s ease-out;
 }
 
+/* Compact posts mode for 3-column layout */
+.compact-posts .glass-card {
+  font-size: 0.9rem;
+  padding: 0.75rem;
+}
+
+.compact-posts .glass-card h3 {
+  font-size: 0.95rem;
+}
+
+.compact-posts .glass-card img {
+  max-height: 300px;
+}
+
+.compact-posts .glass-card .flex.items-center.gap-5 {
+  gap: 0.75rem;
+}
+
+.compact-posts .glass-card .flex.items-center.gap-2 svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.compact-posts .glass-card .flex.items-center.gap-2 span {
+  font-size: 0.85rem;
+}
+
 /* Enhanced react-image-crop styling */
 .ReactCrop {
   position: relative;

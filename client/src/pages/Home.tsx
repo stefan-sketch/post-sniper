@@ -684,10 +684,10 @@ export default function Home() {
 
       {/* Desktop: Two/Three Column Layout with smooth transition */}
       <div 
-        className={`hidden md:grid gap-6 flex-1 overflow-hidden`}
+        className={`hidden md:grid flex-1 overflow-hidden ${feedColumns === 3 ? 'gap-4' : 'gap-6'}`}
         style={{
           gridTemplateColumns: feedColumns === 3 ? '1fr 1fr 1fr' : '1fr 1fr',
-          transition: 'grid-template-columns 0.5s ease-in-out'
+          transition: 'grid-template-columns 0.5s ease-in-out, gap 0.5s ease-in-out'
         }}
       >
         {/* Live Football Hub - Slides in from LEFT, positioned first in grid */}
@@ -785,7 +785,7 @@ export default function Home() {
           <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
-          <div ref={liveScrollRef} className="space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
+          <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -931,7 +931,7 @@ export default function Home() {
             feedType === 'twitter' ? 'via-white to-transparent' : 'via-[#1877F2] to-transparent'
           }`}></div>
           
-          <div ref={popularScrollRef} className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative" style={{ touchAction: 'pan-y' }}>
+          <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
