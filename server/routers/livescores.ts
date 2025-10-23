@@ -126,17 +126,16 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
     return [];
   }
 
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date();
-  const dateStr = today.toISOString().split('T')[0];
-
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
   
-  // Fetch fixtures for today from the specified leagues using the correct endpoint
-  const url = `${SPORTMONKS_BASE_URL}/fixtures/between/${dateStr}/${dateStr}?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds}`;
+  // Use livescores endpoint which has broader access and returns:
+  // - Live matches
+  // - Matches starting within 15 minutes
+  // - Matches finished within 15 minutes
+  const url = `${SPORTMONKS_BASE_URL}/livescores?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds}`;
 
   try {
-    console.log('[Livescores] Fetching fixtures for date:', dateStr);
+    console.log('[Livescores] Fetching livescores from API');
     console.log('[Livescores] API URL:', url.replace(SPORTMONKS_API_TOKEN, 'REDACTED'));
     
     const response = await fetch(url);
