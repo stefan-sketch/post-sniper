@@ -314,7 +314,7 @@ function getMockMatches(): Match[] {
       ],
       kickoffTime: new Date(now.getTime() - 54 * 60 * 1000).toISOString(),
     },
-    // Premier League - Upcoming
+    // Premier League - Upcoming (10 minutes - RED BLINKING)
     {
       id: '6',
       homeTeam: 'Chelsea',
@@ -325,7 +325,7 @@ function getMockMatches(): Match[] {
       status: 'upcoming',
       competition: 'Premier League',
       goalScorers: [],
-      kickoffTime: new Date(now.getTime() + 45 * 60 * 1000).toISOString(),
+      kickoffTime: new Date(now.getTime() + 10 * 60 * 1000).toISOString(),
     },
     // Premier League - Finished
     {
