@@ -11,6 +11,7 @@ import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
+import LiveFootballHub from "@/components/LiveFootballHub";
 import { toast } from "sonner";
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
 
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
+  const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -454,34 +456,77 @@ export default function Home() {
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: View Toggle - Single Switch Icon */}
-          <button
-            onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
-            className="group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
-            title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
-          >
-            {/* Animated glow ring */}
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
-            
-            {/* Icon with rotation animation */}
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className="relative z-10 transition-transform duration-500 group-hover:rotate-180"
+          {/* Left: View Toggle + Column Toggle */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
+              className="group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+              title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
-              <polyline points="17 1 21 5 17 9"/>
-              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-              <polyline points="7 23 3 19 7 15"/>
-              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-            </svg>
-          </button>
+              {/* Animated glow ring */}
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
+              
+              {/* Icon with rotation animation */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="relative z-10 transition-transform duration-500 group-hover:rotate-180"
+              >
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+            </button>
+
+            {/* Column Toggle - Desktop only, Feed view only */}
+            {currentView === 'feed' && (
+              <button
+                onClick={() => setFeedColumns(feedColumns === 2 ? 3 : 2)}
+                className="hidden md:block group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
+                title={feedColumns === 2 ? 'Show Live Football Hub (3 columns)' : 'Hide Live Football Hub (2 columns)'}
+              >
+                {/* Animated glow ring */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/0 via-green-500/50 to-green-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
+                
+                {/* Icon - Grid layout */}
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="relative z-10 transition-all duration-300"
+                >
+                  {feedColumns === 2 ? (
+                    // 2 columns icon
+                    <>
+                      <rect x="3" y="3" width="7" height="18" />
+                      <rect x="14" y="3" width="7" height="18" />
+                    </>
+                  ) : (
+                    // 3 columns icon
+                    <>
+                      <rect x="3" y="3" width="5" height="18" />
+                      <rect x="10" y="3" width="4" height="18" />
+                      <rect x="16" y="3" width="5" height="18" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            )}
+          </div>
 
           {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
@@ -603,8 +648,13 @@ export default function Home() {
         <>
 
 
-      {/* Desktop: Two Column Layout */}
-      <div className="hidden md:grid grid-cols-2 gap-6 flex-1 overflow-hidden">
+      {/* Desktop: Two/Three Column Layout with smooth transition */}
+      <div 
+        className={`hidden md:grid gap-6 flex-1 overflow-hidden transition-all duration-500 ease-in-out`}
+        style={{
+          gridTemplateColumns: feedColumns === 3 ? '1fr 1fr 1fr' : '1fr 1fr'
+        }}
+      >
         {/* Live Posts Column */}
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex items-center justify-between mb-3">
@@ -1037,6 +1087,19 @@ export default function Home() {
               </>
             )}
           </div>
+        </div>
+
+        {/* Live Football Hub - Only visible in 3-column mode */}
+        <div 
+          className={`flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out`}
+          style={{
+            opacity: feedColumns === 3 ? 1 : 0,
+            transform: feedColumns === 3 ? 'translateX(0)' : 'translateX(100%)',
+            width: feedColumns === 3 ? 'auto' : '0',
+            overflow: feedColumns === 3 ? 'visible' : 'hidden'
+          }}
+        >
+          <LiveFootballHub />
         </div>
       </div>
 
