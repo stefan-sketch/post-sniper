@@ -72,6 +72,25 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
     e.stopPropagation();
     if (post.image) {
       try {
+        // Check if clipboard API is available (not available in iOS PWA)
+        const isClipboardAvailable = navigator.clipboard && typeof ClipboardItem !== 'undefined';
+        
+        if (!isClipboardAvailable) {
+          // Fallback for iOS PWA: Download the image instead
+          const response = await fetch(post.image);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `post-${post.id}.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success("Image downloaded! (Clipboard not available in PWA)");
+          return;
+        }
+        
         // Fetch the image
         const response = await fetch(post.image);
         const blob = await response.blob();
@@ -107,7 +126,22 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
         toast.success("Image copied to clipboard!");
       } catch (error) {
         console.error('Copy failed:', error);
-        toast.error("Failed to copy image");
+        // Fallback: Try to download instead
+        try {
+          const response = await fetch(post.image);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `post-${post.id}.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success("Image downloaded! (Copy to clipboard failed)");
+        } catch (downloadError) {
+          toast.error("Failed to copy or download image");
+        }
       }
     }
   };
