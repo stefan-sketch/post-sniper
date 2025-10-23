@@ -6,9 +6,10 @@ interface FacebookPageColumnProps {
   pageId: string;
   pageName: string;
   borderColor: string;
+  hidePageHeader?: boolean;
 }
 
-export default function FacebookPageColumn({ pageId, pageName, borderColor }: FacebookPageColumnProps) {
+export default function FacebookPageColumn({ pageId, pageName, borderColor, hidePageHeader = false }: FacebookPageColumnProps) {
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
   const postsQuery = trpc.cachedPosts.getByPage.useQuery(
@@ -105,7 +106,7 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
           }}
           showDismiss={false}
           hideActions={true}
-          hidePageHeader={false}
+          hidePageHeader={hidePageHeader}
         />
         </div>
         );

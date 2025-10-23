@@ -1664,6 +1664,7 @@ export default function Home() {
                     pageId={page.id}
                     pageName={page.profileName}
                     borderColor={page.borderColor}
+                    hidePageHeader={true}
                   />
                 </div>
               ))
