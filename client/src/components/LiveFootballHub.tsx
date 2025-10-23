@@ -218,16 +218,16 @@ export default function LiveFootballHub() {
         <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10`}>
           {/* Home Team */}
           <div>
-            <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1 pr-2`}>
+            <div className="flex items-center gap-2">
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
                 {match.homeTeam}
               </span>
               {isUpcoming ? (
-                <span className="text-sm text-gray-400 ml-2">
+                <span className="text-sm text-gray-400">
                   {formatKickoffTime(match.kickoffTime)}
                 </span>
               ) : (
-                <span className={`${isFinished ? 'text-xl' : 'text-2xl'} font-bold ml-2 ${
+                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-white'
                 }`}>
                   {match.homeScore}
@@ -243,12 +243,12 @@ export default function LiveFootballHub() {
 
           {/* Away Team */}
           <div>
-            <div className="flex items-center justify-between">
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400 truncate flex-1 pr-2`}>
+            <div className="flex items-center gap-2">
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
                 {match.awayTeam}
               </span>
               {!isUpcoming && (
-                <span className={`${isFinished ? 'text-xl' : 'text-2xl'} font-bold ml-2 ${
+                <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-gray-400'
                 }`}>
                   {match.awayScore}
