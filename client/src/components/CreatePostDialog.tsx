@@ -58,7 +58,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [fontSize, setFontSize] = useState(48); // base font size in pixels
   const [watermarkPosition, setWatermarkPosition] = useState({ x: 85, y: 10 }); // percentage from top-left
   const [isDraggingTextBox, setIsDraggingTextBox] = useState(false);
-  const [isResizingTextBox, setIsResizingTextBox] = useState(false);
+  const [isResizingFontSize, setIsResizingFontSize] = useState(false);
+  const [isResizingWidth, setIsResizingWidth] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
   const [isEditingText, setIsEditingText] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -502,14 +503,17 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
-    } else if (isResizingTextBox) {
+    } else if (isResizingFontSize) {
+      // Top-left circle handle: resize font size only
       const deltaX = xPercent - resizeStartState.x;
       const deltaY = yPercent - resizeStartState.y;
-      // Use diagonal distance to scale both fontSize and width proportionally
       const delta = (deltaX + deltaY) / 2;
-      const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
-      const newWidth = Math.max(30, Math.min(100, resizeStartState.width + deltaX));
+      const newFontSize = Math.max(16, Math.min(120, resizeStartState.fontSize + delta * 2));
       setFontSize(newFontSize);
+    } else if (isResizingWidth) {
+      // Right-side handle: resize width only
+      const deltaX = xPercent - resizeStartState.x;
+      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
       setTextBoxWidth(newWidth);
     } else if (isDraggingWatermark) {
       setWatermarkPosition({ 
@@ -537,15 +541,17 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
-    } else if (isResizingTextBox) {
+    } else if (isResizingFontSize) {
       e.preventDefault();
       const deltaX = xPercent - resizeStartState.x;
       const deltaY = yPercent - resizeStartState.y;
-      // Use diagonal distance to scale both fontSize and width proportionally
       const delta = (deltaX + deltaY) / 2;
-      const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
-      const newWidth = Math.max(30, Math.min(100, resizeStartState.width + deltaX));
+      const newFontSize = Math.max(16, Math.min(120, resizeStartState.fontSize + delta * 2));
       setFontSize(newFontSize);
+    } else if (isResizingWidth) {
+      e.preventDefault();
+      const deltaX = xPercent - resizeStartState.x;
+      const newWidth = Math.max(20, Math.min(100, resizeStartState.width + deltaX));
       setTextBoxWidth(newWidth);
     } else if (isDraggingWatermark) {
       e.preventDefault();
@@ -569,7 +575,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     }
     setIsDrawing(false);
     setIsDraggingTextBox(false);
-    setIsResizingTextBox(false);
+    setIsResizingFontSize(false);
+    setIsResizingWidth(false);
     setIsDraggingWatermark(false);
   };
 
@@ -1075,41 +1082,76 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             maxLength={200}
                           />
                       
-                      {/* Resize Handle - Bottom Right Corner - Only show when editing */}
+                      {/* Font Size Handle - Top Left Circle - Only show when editing */}
                       {isEditingText && (
                         <div
-                          className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 cursor-nwse-resize"
-                          style={{ transform: 'translate(50%, 50%)' }}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const rect = imgRef.current!.getBoundingClientRect();
-                          const x = ((e.clientX - rect.left) / rect.width) * 100;
-                          const y = ((e.clientY - rect.top) / rect.height) * 100;
-                          setResizeStartState({ 
-                            x, 
-                            y, 
-                            fontSize: fontSize, 
-                            width: textBoxWidth 
-                          });
-                          setIsResizingTextBox(true);
-                        }}
-                        onTouchStart={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const rect = imgRef.current!.getBoundingClientRect();
-                          const touch = e.touches[0];
-                          const x = ((touch.clientX - rect.left) / rect.width) * 100;
-                          const y = ((touch.clientY - rect.top) / rect.height) * 100;
-                          setResizeStartState({ 
-                            x, 
-                            y, 
-                            fontSize: fontSize, 
-                            width: textBoxWidth 
-                          });
-                          setIsResizingTextBox(true);
-                        }}
-                      />
+                          className="absolute top-0 left-0 w-6 h-6 bg-white border-2 border-cyan-500 rounded-full cursor-nwse-resize shadow-lg"
+                          style={{ transform: 'translate(-50%, -50%)' }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+                            setResizeStartState({ 
+                              x, 
+                              y, 
+                              fontSize: fontSize, 
+                              width: textBoxWidth 
+                            });
+                            setIsResizingFontSize(true);
+                          }}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const touch = e.touches[0];
+                            const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                            const y = ((touch.clientY - rect.top) / rect.height) * 100;
+                            setResizeStartState({ 
+                              x, 
+                              y, 
+                              fontSize: fontSize, 
+                              width: textBoxWidth 
+                            });
+                            setIsResizingFontSize(true);
+                          }}
+                        />
+                      )}
+
+                      {/* Width Handle - Right Side - Only show when editing */}
+                      {isEditingText && (
+                        <div
+                          className="absolute top-1/2 right-0 w-4 h-8 bg-cyan-500 cursor-ew-resize"
+                          style={{ transform: 'translate(50%, -50%)' }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                            setResizeStartState({ 
+                              x, 
+                              y: 0, 
+                              fontSize: fontSize, 
+                              width: textBoxWidth 
+                            });
+                            setIsResizingWidth(true);
+                          }}
+                          onTouchStart={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const rect = imgRef.current!.getBoundingClientRect();
+                            const touch = e.touches[0];
+                            const x = ((touch.clientX - rect.left) / rect.width) * 100;
+                            setResizeStartState({ 
+                              x, 
+                              y: 0, 
+                              fontSize: fontSize, 
+                              width: textBoxWidth 
+                            });
+                            setIsResizingWidth(true);
+                          }}
+                        />
                       )}
                         </div>
                       );
