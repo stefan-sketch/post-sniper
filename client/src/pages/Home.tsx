@@ -1021,7 +1021,9 @@ export default function Home() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-white">{tweet.author.name}</span>
-                          <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
+                          {!(feedColumns === 3 || isAnimatingOut) && (
+                            <span className="text-gray-500 text-sm">@{tweet.author.username}</span>
+                          )}
                         </div>
                         {timeAgo && <p className="text-xs text-gray-500">{timeAgo}</p>}
                       </div>
