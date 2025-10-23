@@ -412,9 +412,7 @@ export default function LiveFootballHub() {
       </div>
 
       {/* Printer line - thin white line between header and content */}
-      <div className="relative h-0.5 bg-white/30 overflow-hidden flex-shrink-0 mb-3">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
-      </div>
+      <div className="h-0.5 bg-white/40 flex-shrink-0 mb-3"></div>
 
       {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">

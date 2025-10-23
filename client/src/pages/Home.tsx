@@ -678,9 +678,6 @@ export default function Home() {
       {/* Feed View */}
       <div 
         className={`flex-1 flex flex-col overflow-hidden ${currentView === 'feed' ? '' : 'hidden'}`}
-        style={{
-          animation: viewTransition === 'to-feed' ? 'slideInFromLeft 0.5s ease-in-out' : 'none'
-        }}
       >
       {currentView === 'feed' && (
         <>
@@ -1601,9 +1598,6 @@ export default function Home() {
       {/* Pages View */}
       <div 
         className={`flex-1 flex flex-col overflow-hidden ${currentView === 'pages' ? '' : 'hidden'}`}
-        style={{
-          animation: viewTransition === 'to-pages' ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'none'
-        }}
       >
       {currentView === 'pages' && (
         /* Pages View - 3 Facebook Pages */
