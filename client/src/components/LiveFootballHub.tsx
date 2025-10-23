@@ -430,7 +430,7 @@ export default function LiveFootballHub() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -484,11 +484,13 @@ export default function LiveFootballHub() {
         </div>
       </div>
 
-      {/* Printer line - thin white line between header and content */}
-      <div className="h-0.5 bg-white/40 flex-shrink-0 mb-3"></div>
-
-      {/* Content */}
-      <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
+      {/* Content with printer line inside */}
+      <div className="overflow-y-auto flex-1 pr-2 hide-scrollbar">
+        {/* Printer line - thin white line where new matches emerge from */}
+        <div className="sticky top-0 z-10 relative h-0.5 bg-white/40 mb-3 overflow-hidden flex-shrink-0">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
+        </div>
+        <div className="space-y-3">
         {/* League Sections */}
         {sortedCompetitions.map((competition) => {
           const leagueMatches = matchesByCompetition[competition];
@@ -537,6 +539,7 @@ export default function LiveFootballHub() {
             </div>
           );
         })}
+        </div>
       </div>
 
       <style>{`
