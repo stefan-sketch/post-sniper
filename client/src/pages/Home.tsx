@@ -1608,8 +1608,8 @@ export default function Home() {
       {currentView === 'pages' && (
         /* Pages View - 3 Facebook Pages */
         <>
-          {/* Mobile View Selector - Icons only */}
-          <div className="md:hidden mb-2 flex gap-2 justify-center items-center flex-shrink-0">
+          {/* Mobile View Selector - Hidden, moved to footer */}
+          <div className="hidden">
             {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
               const isActive = (index === 0 && pagesView === 'away-days') || 
                                (index === 1 && pagesView === 'funnys') || 
@@ -1772,6 +1772,62 @@ export default function Home() {
               </svg>
               <span className="text-xs font-medium">X.com</span>
             </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Pages View Footer - Mobile only */}
+      {currentView === 'pages' && createPortal(
+        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
+          <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+            {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
+              const isActive = (index === 0 && pagesView === 'away-days') || 
+                               (index === 1 && pagesView === 'funnys') || 
+                               (index === 2 && pagesView === 'footy-feed');
+              const viewName = index === 0 ? 'away-days' : index === 1 ? 'funnys' : 'footy-feed';
+              
+              return (
+                <button
+                  key={page.id}
+                  onClick={() => {
+                    console.log('Switching to page:', viewName);
+                    setPagesView(viewName as any);
+                  }}
+                  className="flex flex-col items-center gap-1 transition-all"
+                >
+                  <div 
+                    className={`h-10 w-10 rounded-full overflow-hidden flex-shrink-0 transition-all ${
+                      isActive 
+                        ? 'ring-2 ring-white/50 scale-110' 
+                        : 'opacity-60'
+                    }`}
+                    style={{ 
+                      border: `2px solid ${page.borderColor}`,
+                      backgroundColor: isActive ? `${page.borderColor}20` : 'transparent'
+                    }}
+                  >
+                    {page.profilePicture ? (
+                      <img 
+                        src={page.profilePicture} 
+                        alt={page.profileName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-bold">
+                        {page.profileName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <span 
+                    className="text-xs font-medium"
+                    style={{ color: isActive ? page.borderColor : '#9CA3AF' }}
+                  >
+                    {page.profileName.split(' ')[0]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>,
         document.body
