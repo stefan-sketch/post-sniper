@@ -221,24 +221,31 @@ export default function LiveFootballHub() {
             {formatKickoffTime(match.kickoffTime)}
           </div>
         )}
+        {isFinished && (
+          <div className="absolute top-2 right-2 text-[9px] text-gray-500 font-medium z-10">
+            Full Time
+          </div>
+        )}
 
         {/* Teams and Scores */}
         <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10`}>
           {/* Home Team */}
           <div>
-            <div className="flex items-center gap-2">
-              {/* Home Team Logo */}
-              {match.homeTeamLogo && (
-                <img 
-                  src={match.homeTeamLogo} 
-                  alt={match.homeTeam}
-                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              )}
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
-                {match.homeTeam}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                {/* Home Team Logo */}
+                {match.homeTeamLogo && (
+                  <img 
+                    src={match.homeTeamLogo} 
+                    alt={match.homeTeam}
+                    className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
+                <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
+                  {match.homeTeam}
+                </span>
+              </div>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-white'
@@ -256,19 +263,21 @@ export default function LiveFootballHub() {
 
           {/* Away Team */}
           <div>
-            <div className="flex items-center gap-2">
-              {/* Away Team Logo */}
-              {match.awayTeamLogo && (
-                <img 
-                  src={match.awayTeamLogo} 
-                  alt={match.awayTeam}
-                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              )}
-              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
-                {match.awayTeam}
-              </span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                {/* Away Team Logo */}
+                {match.awayTeamLogo && (
+                  <img 
+                    src={match.awayTeamLogo} 
+                    alt={match.awayTeam}
+                    className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
+                <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
+                  {match.awayTeam}
+                </span>
+              </div>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-gray-400'
