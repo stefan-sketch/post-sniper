@@ -216,6 +216,17 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           // Get state
           const stateName = fixture.state?.developer_name || 'NS';
           const status = STATE_MAPPING[stateName] || 'upcoming';
+          
+          // Log state for debugging
+          if (fixture.id === 19568973 || fixture.id === '19568973') {
+            console.log('[Livescores] FCSB vs Bologna state:', {
+              fixtureId: fixture.id,
+              stateName,
+              status,
+              fullState: fixture.state,
+              hasGoals: fixture.events?.filter(e => e.type_id === 14).length || 0
+            });
+          }
 
           // Calculate minute (for live matches)
           let minute = 0;
