@@ -99,31 +99,11 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
         const response = await fetch(post.image);
         const blob = await response.blob();
         
-        // Convert to PNG using canvas (better clipboard support)
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = URL.createObjectURL(blob);
-        });
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
-        
-        // Convert to PNG blob
-        const pngBlob = await new Promise<Blob>((resolve) => {
-          canvas.toBlob((blob) => resolve(blob!), 'image/png');
-        });
-        
-        // Copy PNG to clipboard
+        // Copy image blob directly to clipboard
+        // Safari supports both image/png and image/jpeg
         await navigator.clipboard.write([
           new ClipboardItem({
-            'image/png': pngBlob
+            [blob.type]: blob
           })
         ]);
         
