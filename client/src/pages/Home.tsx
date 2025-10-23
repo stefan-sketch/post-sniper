@@ -1615,7 +1615,7 @@ export default function Home() {
                   {/* Page Header with Icon */}
                   <div className="flex items-center gap-3 mb-3 px-2">
                     <div 
-                      className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
+                      className="h-8 w-8 rounded-full overflow-hidden flex-shrink-0"
                       style={{ 
                         border: `1px solid ${page.borderColor}`,
                         boxShadow: `0 0 10px ${page.borderColor}40`
