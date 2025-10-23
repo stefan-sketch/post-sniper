@@ -734,7 +734,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -891,7 +891,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showTimeFilter && (
-                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
                     {(['2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}
@@ -1227,7 +1227,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showPageFilter && (
-                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-h-[300px] overflow-y-auto">
+                  <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[220px] max-w-[calc(100vw-2rem)] max-h-[300px] overflow-y-auto">
                     {availablePages.map((page) => {
                       const isSelected = selectedPageFilters.has(page.id);
                       return (
@@ -1316,7 +1316,7 @@ export default function Home() {
                   </svg>
                 </button>
                 {showTimeFilter && (
-                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
                     {(['2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}

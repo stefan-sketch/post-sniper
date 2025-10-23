@@ -165,14 +165,20 @@ export default function LiveFootballHub() {
     return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
   };
 
-  // Helper function to format kickoff time
+  // Helper function to format kickoff time in UK timezone (BST/GMT)
   const formatKickoffTime = (kickoffTime: string) => {
-    const date = new Date(kickoffTime);
-    return date.toLocaleTimeString('en-GB', { 
-      hour: '2-digit', 
+    // Parse the UTC time from API
+    const utcDate = new Date(kickoffTime);
+    
+    // Use Intl.DateTimeFormat for reliable timezone conversion
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'Europe/London' // UK timezone (automatically handles BST/GMT)
+      timeZone: 'Europe/London',
+      hour12: false
     });
+    
+    return formatter.format(utcDate);
   };
 
   // Helper function to get time until kickoff
@@ -385,7 +391,7 @@ export default function LiveFootballHub() {
               </svg>
             </button>
             {showStatusFilter && (
-              <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[140px]">
+              <div className="absolute top-full right-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] w-[140px] max-w-[calc(100vw-2rem)]">
                 {['all', 'live', 'upcoming', 'finished'].map((status) => (
                   <button
                     key={status}
