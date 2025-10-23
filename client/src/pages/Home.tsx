@@ -1835,8 +1835,16 @@ export default function Home() {
               })}
               </div>
               
-              {/* Spacer for balance - Right Side */}
-              <div className="w-9"></div>
+              {/* Create Post Button - Right Side */}
+              <button
+                onClick={() => setShowCreatePost(true)}
+                className="p-2 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all shadow-lg shadow-cyan-500/50"
+                title="Create Post"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
             </div>
           </div>,
           document.body
