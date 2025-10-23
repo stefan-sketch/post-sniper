@@ -189,7 +189,7 @@ export default function LiveFootballHub() {
       <div
         key={match.id}
         className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border transition-all relative ${
-          isFinished ? 'p-2 opacity-60' : isLive ? 'p-3 pb-6' : 'p-3'
+          isFinished ? 'p-2 opacity-60' : 'p-3'
         } ${
           match.justScored 
             ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
@@ -207,9 +207,9 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Match Minute - Bottom Right Corner (Live matches only) */}
+        {/* Match Minute - Top Right Corner (Live matches only) */}
         {isLive && (
-          <div className="absolute bottom-2 right-2 text-[10px] text-red-400 font-bold z-10">
+          <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
           </div>
         )}
@@ -294,12 +294,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <svg className="w-6 h-6 animate-spin-slow" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12" />
-              <path d="M4.93 4.93 L7.76 7.76 M16.24 16.24 L19.07 19.07 M4.93 19.07 L7.76 16.24 M16.24 7.76 L19.07 4.93" />
-            </svg>
+          <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
         </div>
@@ -325,19 +320,14 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <svg className="w-6 h-6 animate-spin-slow" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12" />
-              <path d="M4.93 4.93 L7.76 7.76 M16.24 16.24 L19.07 19.07 M4.93 19.07 L7.76 16.24 M16.24 7.76 L19.07 4.93" />
-            </svg>
+          <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
         </div>
       </div>
 
       {/* Separator line */}
-      <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
+      <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent mb-3 flex-shrink-0"></div>
 
       {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
