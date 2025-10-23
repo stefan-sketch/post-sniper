@@ -910,9 +910,11 @@ export default function Home() {
               <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1 bg-[#1877F2] hover:bg-[#1664D8] text-white shadow-lg"
-                  style={{ minWidth: '60px', height: '28px' }}
+                  className="px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-sm flex items-center gap-1"
                 >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
