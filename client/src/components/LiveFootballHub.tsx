@@ -218,16 +218,12 @@ export default function LiveFootballHub() {
     return (
       <div
         key={match.id}
-        className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border transition-all relative ${
+        className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border border-white/10 transition-all relative ${
           isFinished ? 'p-2 opacity-60' : 'p-3'
         } ${
           match.justScored 
-            ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
-            : isLive
-            ? 'border-green-500'
-            : isHalfTime
-            ? 'border-orange-500'
-            : 'border-white/10 hover:border-green-500/30'
+            ? 'shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
+            : ''
         } ${
           isCelebrating ? 'opacity-0' : 'opacity-100'
         }`}
