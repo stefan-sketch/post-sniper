@@ -60,6 +60,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [isDraggingTextBox, setIsDraggingTextBox] = useState(false);
   const [isResizingTextBox, setIsResizingTextBox] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
+  const [isEditingText, setIsEditingText] = useState(false);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
@@ -251,9 +252,10 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
         // Add gradient overlay if enabled
         if (useGradient) {
-          const gradient = ctx.createLinearGradient(0, canvas.height * 0.67, 0, canvas.height);
+          // Start gradient higher up (50% of image) and extend to very bottom
+          const gradient = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
           gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-          gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
@@ -266,6 +268,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           ctx.font = `${scaledFontSize}px Impact, 'Arial Black', sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
+          ctx.letterSpacing = '0.1em'; // Increase letter spacing
           
           const textX = (textBoxPosition.x / 100) * canvas.width;
           const textY = (textBoxPosition.y / 100) * canvas.height;
@@ -787,7 +790,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         transform: 'translate(-50%, -50%)',
                         width: imgRef.current.clientWidth,
                         height: imgRef.current.clientHeight,
-                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.95) 100%)',
+                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)',
                       }}
                     />
                   )}
@@ -828,7 +831,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       
                       return (
                         <div
-                          className="absolute border-2 border-cyan-500 bg-cyan-500/10 cursor-move select-none"
+                          className={`absolute select-none ${isEditingText ? 'border-2 border-cyan-500 bg-cyan-500/10 cursor-move' : 'cursor-move'}`}
                           style={{
                             pointerEvents: 'auto',
                             zIndex: 10,
@@ -838,15 +841,28 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             width: `${boxWidth}px`,
                             height: `${boxHeight}px`,
                           }}
+                          onClick={(e) => {
+                            // If clicking the box itself (not the textarea), enable editing
+                            if (e.target === e.currentTarget) {
+                              setIsEditingText(true);
+                              setTimeout(() => textareaRef.current?.focus(), 0);
+                            }
+                          }}
                           onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsDraggingTextBox(true);
+                            // Only allow dragging if not clicking on textarea
+                            if (e.target === e.currentTarget && !isEditingText) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsDraggingTextBox(true);
+                            }
                           }}
                           onTouchStart={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsDraggingTextBox(true);
+                            // Only allow dragging if not clicking on textarea
+                            if (e.target === e.currentTarget && !isEditingText) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsDraggingTextBox(true);
+                            }
                           }}
                         >
                           {/* Editable Text - Click to edit */}
@@ -856,9 +872,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             onChange={(e) => setOverlayText(e.target.value)}
                             onClick={(e) => {
                               e.stopPropagation();
+                              setIsEditingText(true);
                               // Select all text when clicked
                               e.currentTarget.select();
                             }}
+                            onFocus={() => setIsEditingText(true)}
+                            onBlur={() => setIsEditingText(false)}
                             onMouseDown={(e) => {
                               // Prevent dragging when clicking inside text
                               e.stopPropagation();
@@ -871,16 +890,19 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               color: 'white',
                               textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
                               padding: '8px',
-                              cursor: 'text',
+                              cursor: isEditingText ? 'text' : 'move',
                               lineHeight: '1.2',
+                              letterSpacing: '0.1em',
+                              pointerEvents: isEditingText ? 'auto' : 'none',
                             }}
                             maxLength={200}
                           />
                       
-                      {/* Resize Handle - Bottom Right Corner */}
-                      <div
-                        className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 cursor-nwse-resize"
-                        style={{ transform: 'translate(50%, 50%)' }}
+                      {/* Resize Handle - Bottom Right Corner - Only show when editing */}
+                      {isEditingText && (
+                        <div
+                          className="absolute bottom-0 right-0 w-4 h-4 bg-cyan-500 cursor-nwse-resize"
+                          style={{ transform: 'translate(50%, 50%)' }}
                         onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -911,6 +933,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                           setIsResizingTextBox(true);
                         }}
                       />
+                      )}
                         </div>
                       );
                     }
