@@ -536,22 +536,24 @@ export default function Home() {
                     : 'from-green-500/0 via-green-500/50 to-green-500/0 group-hover:opacity-100'
                 }`}></div>
                 
-                {/* Football Icon */}
+                {/* M Icon */}
                 <svg 
                   className={`relative z-10 transition-all duration-300 ${
                     feedColumns === 3 || isAnimatingOut
-                      ? 'text-green-400 animate-spin'
+                      ? 'text-green-400'
                       : 'text-gray-400 group-hover:text-green-400'
                   }`}
                   width="20" 
                   height="20" 
                   viewBox="0 0 24 24" 
-                  fill="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
                 >
-                  {/* Football/Soccer ball icon */}
-                  <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                  <path d="M12 6l1.5 4.5h4.5l-3.5 2.5 1.5 4.5-3.5-2.5-3.5 2.5 1.5-4.5-3.5-2.5h4.5z" opacity="0.7" />
+                  {/* Circle */}
+                  <circle cx="12" cy="12" r="10" />
+                  {/* M Letter */}
+                  <path d="M7 15V9l2.5 4L12 9l2.5 4L17 9v6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             )}

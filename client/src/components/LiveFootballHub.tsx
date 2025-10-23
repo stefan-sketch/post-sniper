@@ -45,6 +45,8 @@ export default function LiveFootballHub() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<Competition>>(new Set());
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [matchStatusFilter, setMatchStatusFilter] = useState<'all' | 'live' | 'upcoming' | 'finished'>('all');
+  const [showStatusFilter, setShowStatusFilter] = useState(false);
   const previousScoresRef = useRef<Map<string, number>>(new Map());
 
   // Update current time every second for countdown
@@ -118,8 +120,17 @@ export default function LiveFootballHub() {
     });
   };
 
+  // Filter matches based on status filter
+  const filteredMatches = matches.filter(match => {
+    if (matchStatusFilter === 'all') return true;
+    if (matchStatusFilter === 'live') return match.status === 'live' || match.status === 'ht';
+    if (matchStatusFilter === 'upcoming') return match.status === 'upcoming';
+    if (matchStatusFilter === 'finished') return match.status === 'ft';
+    return true;
+  });
+
   // Group matches by competition
-  const matchesByCompetition = matches.reduce((acc, match) => {
+  const matchesByCompetition = filteredMatches.reduce((acc, match) => {
     if (!acc[match.competition]) {
       acc[match.competition] = [];
     }
@@ -210,9 +221,9 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Match Minute / Kickoff Time / Full Time - Top Left Corner */}
+        {/* Match Minute / Kickoff Time / Full Time - Top Right Corner */}
         {isLive && (
-          <div className="absolute top-2 left-2 text-[10px] text-red-400 font-bold z-10">
+          <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
           </div>
         )}
@@ -222,7 +233,7 @@ export default function LiveFootballHub() {
           </div>
         )}
         {isFinished && (
-          <div className="absolute top-2 left-2 text-[9px] text-gray-500 font-medium z-10">
+          <div className="absolute top-2 right-2 text-[10px] text-gray-400 font-semibold z-10">
             Full Time
           </div>
         )}
@@ -231,21 +242,19 @@ export default function LiveFootballHub() {
         <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10`}>
           {/* Home Team */}
           <div>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {/* Home Team Logo */}
-                {match.homeTeamLogo && (
-                  <img 
-                    src={match.homeTeamLogo} 
-                    alt={match.homeTeam}
-                    className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                )}
-                <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
-                  {match.homeTeam}
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              {/* Home Team Logo */}
+              {match.homeTeamLogo && (
+                <img 
+                  src={match.homeTeamLogo} 
+                  alt={match.homeTeam}
+                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white`}>
+                {match.homeTeam}
+              </span>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-white'
@@ -263,21 +272,19 @@ export default function LiveFootballHub() {
 
           {/* Away Team */}
           <div>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {/* Away Team Logo */}
-                {match.awayTeamLogo && (
-                  <img 
-                    src={match.awayTeamLogo} 
-                    alt={match.awayTeam}
-                    className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                )}
-                <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
-                  {match.awayTeam}
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              {/* Away Team Logo */}
+              {match.awayTeamLogo && (
+                <img 
+                  src={match.awayTeamLogo} 
+                  alt={match.awayTeam}
+                  className={`${isFinished ? 'w-4 h-4' : 'w-5 h-5'} object-contain flex-shrink-0`}
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              )}
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400`}>
+                {match.awayTeam}
+              </span>
               {!isUpcoming && (
                 <span className={`${isFinished ? 'text-lg' : 'text-xl'} font-bold ${
                   match.justScored ? 'text-red-400' : 'text-gray-400'
@@ -326,6 +333,10 @@ export default function LiveFootballHub() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
+            </svg>
             MATCHDAY
           </h2>
         </div>
@@ -349,17 +360,64 @@ export default function LiveFootballHub() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
+            </svg>
             MATCHDAY
           </h2>
+          {/* Status filter dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowStatusFilter(!showStatusFilter)}
+              className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-white/10 hover:bg-white/20 text-white shadow-sm flex items-center gap-1.5"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              {matchStatusFilter === 'all' ? 'All' : matchStatusFilter === 'live' ? 'Live' : matchStatusFilter === 'upcoming' ? 'Upcoming' : 'Finished'}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showStatusFilter && (
+              <div className="absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] min-w-[140px]">
+                {['all', 'live', 'upcoming', 'finished'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setMatchStatusFilter(status as typeof matchStatusFilter);
+                      setShowStatusFilter(false);
+                    }}
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-white/10 transition-colors flex items-center gap-2 first:rounded-t-lg last:rounded-b-lg"
+                  >
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                      matchStatusFilter === status ? 'bg-white border-white' : 'border-gray-600'
+                    }`}>
+                      {matchStatusFilter === status && (
+                        <svg className="w-3 h-3 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className={matchStatusFilter === status ? 'text-white font-medium' : 'text-gray-400'}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Printer line - thin white line between header and content */}
+      <div className="relative h-0.5 bg-white/30 overflow-hidden flex-shrink-0 mb-3">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
       </div>
 
       {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
-        {/* Printer line - thin white line at the top */}
-        <div className="sticky top-0 z-10 relative h-0.5 bg-white/30 mb-3 overflow-hidden flex-shrink-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
-        </div>
         {/* League Sections */}
         {sortedCompetitions.map((competition) => {
           const leagueMatches = matchesByCompetition[competition];
