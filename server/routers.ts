@@ -10,6 +10,7 @@ import { manualFetchRouter } from "./routers/manualFetch";
 import { publerRouter } from "./routers/publer";
 import { twitterRouter } from "./routers/twitter";
 import { managedPagesRouter } from "./routers/managedPages";
+import { livescoresRouter } from "./routers/livescores";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -21,6 +22,7 @@ export const appRouter = router({
   publer: publerRouter,
   twitter: twitterRouter,
   managedPages: managedPagesRouter,
+  livescores: livescoresRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

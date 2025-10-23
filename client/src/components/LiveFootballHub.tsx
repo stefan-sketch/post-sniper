@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Star, ChevronDown, ChevronUp } from 'lucide-react';
+import { trpc } from '../lib/trpc';
 
-type Competition = 'Champions League' | 'Europa League' | 'Conference League' | 'Premier League' | 'Championship';
+type Competition = 'Champions League' | 'Europa League' | 'Premier League' | 'Championship';
 
 interface GoalScorer {
   player: string;
@@ -15,8 +16,6 @@ interface Match {
   awayTeam: string;
   homeScore: number;
   awayScore: number;
-  homeXg: number;
-  awayXg: number;
   minute: number;
   status: 'live' | 'ft' | 'ht';
   competition: Competition;
@@ -28,149 +27,63 @@ interface Match {
 const competitionPriority: Record<Competition, number> = {
   'Champions League': 1,
   'Europa League': 2,
-  'Conference League': 3,
-  'Premier League': 4,
-  'Championship': 5,
+  'Premier League': 3,
+  'Championship': 4,
 };
 
 const competitionColors: Record<Competition, string> = {
   'Champions League': 'text-blue-400',
   'Europa League': 'text-orange-400',
-  'Conference League': 'text-green-400',
   'Premier League': 'text-purple-400',
   'Championship': 'text-yellow-400',
 };
 
-const teams: Record<Competition, string[]> = {
-  'Champions League': ['Real Madrid', 'Bayern Munich', 'PSG', 'Man City', 'Barcelona', 'Liverpool'],
-  'Europa League': ['Arsenal', 'Man United', 'Roma', 'Sevilla', 'Ajax', 'Porto'],
-  'Conference League': ['West Ham', 'Fiorentina', 'Aston Villa', 'Brighton', 'Nice', 'Basel'],
-  'Premier League': ['Chelsea', 'Tottenham', 'Newcastle', 'Fulham', 'Brentford', 'Crystal Palace'],
-  'Championship': ['Leeds', 'Leicester', 'Southampton', 'Ipswich', 'West Brom', 'Norwich'],
-};
-
-const playerNames = [
-  'Haaland', 'Mbappé', 'Salah', 'Kane', 'Bellingham', 'Saka', 'Foden', 'Rashford',
-  'Vinicius Jr', 'Rodri', 'De Bruyne', 'Son', 'Watkins', 'Palmer', 'Isak', 'Toney'
-];
-
-const generateRandomMatch = (competition: Competition): Match => {
-  const competitionTeams = teams[competition];
-  const homeTeam = competitionTeams[Math.floor(Math.random() * competitionTeams.length)];
-  let awayTeam = competitionTeams[Math.floor(Math.random() * competitionTeams.length)];
-  while (awayTeam === homeTeam) {
-    awayTeam = competitionTeams[Math.floor(Math.random() * competitionTeams.length)];
-  }
-  
-  const statusRand = Math.random();
-  const status: 'live' | 'ft' | 'ht' = statusRand > 0.7 ? 'ft' : statusRand > 0.5 ? 'ht' : 'live';
-  
-  const homeScore = Math.floor(Math.random() * 4);
-  const awayScore = Math.floor(Math.random() * 4);
-  
-  // Generate xG values (usually between 0.5 and 3.5)
-  const homeXg = Math.round((Math.random() * 3 + 0.5) * 10) / 10;
-  const awayXg = Math.round((Math.random() * 3 + 0.5) * 10) / 10;
-  
-  // Generate goal scorers
-  const goalScorers: GoalScorer[] = [];
-  for (let i = 0; i < homeScore; i++) {
-    goalScorers.push({
-      player: playerNames[Math.floor(Math.random() * playerNames.length)],
-      minute: Math.floor(Math.random() * 90) + 1,
-      team: 'home'
-    });
-  }
-  for (let i = 0; i < awayScore; i++) {
-    goalScorers.push({
-      player: playerNames[Math.floor(Math.random() * playerNames.length)],
-      minute: Math.floor(Math.random() * 90) + 1,
-      team: 'away'
-    });
-  }
-  goalScorers.sort((a, b) => a.minute - b.minute);
-  
-  return {
-    id: Math.random().toString(36).substr(2, 9),
-    homeTeam,
-    awayTeam,
-    homeScore,
-    awayScore,
-    homeXg,
-    awayXg,
-    minute: status === 'ft' ? 90 : status === 'ht' ? 45 : Math.floor(Math.random() * 90) + 1,
-    status,
-    competition,
-    goalScorers,
-    isFavorite: false,
-    justScored: false,
-  };
-};
-
 export default function LiveFootballHub() {
-  const [matches, setMatches] = useState<Match[]>(() => {
-    const competitions: Competition[] = ['Champions League', 'Europa League', 'Conference League', 'Premier League', 'Championship'];
-    return competitions.flatMap(comp => [
-      generateRandomMatch(comp),
-      generateRandomMatch(comp)
-    ]);
-  });
-
+  const [matches, setMatches] = useState<Match[]>([]);
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<Competition>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const previousScoresRef = useRef<Map<string, number>>(new Map());
 
-  // Initialize previous scores
-  useEffect(() => {
-    const scoreMap = new Map<string, number>();
-    matches.forEach(match => {
-      scoreMap.set(match.id, match.homeScore + match.awayScore);
-    });
-    previousScoresRef.current = scoreMap;
-  }, []);
+  // Fetch livescores
+  const { data, refetch } = trpc.livescores.getLivescores.useQuery(undefined, {
+    refetchInterval: 30000, // Poll every 30 seconds
+    refetchIntervalInBackground: true,
+  });
 
-  // Update scores randomly every 5 seconds for live matches
+  // Update matches when data changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMatches(prev => prev.map(match => {
-        if (match.status === 'live' && Math.random() > 0.85) {
-          const scoreHome = Math.random() > 0.5;
-          const newHomeScore = scoreHome ? match.homeScore + 1 : match.homeScore;
-          const newAwayScore = !scoreHome ? match.awayScore + 1 : match.awayScore;
-          
-          const previousTotal = previousScoresRef.current.get(match.id) || 0;
-          const newTotal = newHomeScore + newAwayScore;
-          const justScored = newTotal > previousTotal;
-          
-          if (justScored) {
-            previousScoresRef.current.set(match.id, newTotal);
-            
-            const newGoalScorer: GoalScorer = {
-              player: playerNames[Math.floor(Math.random() * playerNames.length)],
-              minute: match.minute,
-              team: scoreHome ? 'home' : 'away'
-            };
-            
-            return {
-              ...match,
-              homeScore: newHomeScore,
-              awayScore: newAwayScore,
-              goalScorers: [...match.goalScorers, newGoalScorer],
-              minute: Math.min(match.minute + Math.floor(Math.random() * 3), 90),
-              justScored: true,
-            };
-          }
-          
-          return {
-            ...match,
-            minute: Math.min(match.minute + Math.floor(Math.random() * 3), 90)
-          };
+    if (!data?.matches) return;
+
+    const newMatches = data.matches.map(match => ({
+      ...match,
+      isFavorite: favorites.has(match.id),
+      justScored: false,
+    }));
+
+    // Detect new goals
+    setMatches(prev => {
+      return newMatches.map(newMatch => {
+        const prevMatch = prev.find(m => m.id === newMatch.id);
+        const prevTotal = previousScoresRef.current.get(newMatch.id) || 0;
+        const newTotal = newMatch.homeScore + newMatch.awayScore;
+
+        // Check if there's a new goal
+        const justScored = prevMatch && newTotal > prevTotal;
+
+        if (justScored) {
+          previousScoresRef.current.set(newMatch.id, newTotal);
+        } else if (!previousScoresRef.current.has(newMatch.id)) {
+          // Initialize score tracking
+          previousScoresRef.current.set(newMatch.id, newTotal);
         }
-        return match;
-      }));
-    }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
+        return {
+          ...newMatch,
+          justScored: justScored || false,
+        };
+      });
+    });
+  }, [data, favorites]);
 
   // Clear justScored flag after 5 seconds
   useEffect(() => {
@@ -184,6 +97,16 @@ export default function LiveFootballHub() {
   }, [matches]);
 
   const toggleFavorite = (matchId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(matchId)) {
+        newFavorites.delete(matchId);
+      } else {
+        newFavorites.add(matchId);
+      }
+      return newFavorites;
+    });
+
     setMatches(prev => prev.map(match => 
       match.id === matchId ? { ...match, isFavorite: !match.isFavorite } : match
     ));
@@ -233,6 +156,45 @@ export default function LiveFootballHub() {
     if (scorers.length === 0) return null;
     return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
   };
+
+  // Show loading or empty state
+  if (!data) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center text-gray-400">
+        <div className="animate-pulse">Loading live scores...</div>
+      </div>
+    );
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-center gap-2 flex-1">
+            <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" className="animate-pulse" />
+              </svg>
+              LIVE FOOTBALL HUB
+            </h2>
+          </div>
+        </div>
+
+        {/* Separator line */}
+        <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
+
+        {/* Empty state */}
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <div className="text-4xl mb-2">⚽</div>
+            <div>No live matches at the moment</div>
+            <div className="text-sm text-gray-600 mt-1">Check back during match days!</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
