@@ -202,13 +202,14 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             return null;
           }
 
-          // Get scores from API
+          // Get scores from API (try CURRENT first, then fall back to latest score)
           const homeScoreObj = fixture.scores?.find(
-            s => s.participant_id === homeParticipant.participant_id && s.description === 'CURRENT'
-          );
+            s => s.participant_id === homeParticipant.id && s.description === 'CURRENT'
+          ) || fixture.scores?.filter(s => s.participant_id === homeParticipant.id).sort((a, b) => b.id - a.id)[0];
+          
           const awayScoreObj = fixture.scores?.find(
-            s => s.participant_id === awayParticipant.participant_id && s.description === 'CURRENT'
-          );
+            s => s.participant_id === awayParticipant.id && s.description === 'CURRENT'
+          ) || fixture.scores?.filter(s => s.participant_id === awayParticipant.id).sort((a, b) => b.id - a.id)[0];
 
           let homeScore = homeScoreObj?.score.goals || 0;
           let awayScore = awayScoreObj?.score.goals || 0;
@@ -229,8 +230,8 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           });
           
           if (goalEventsForScore.length > 0 && homeScore === 0 && awayScore === 0) {
-            const homeGoals = goalEventsForScore.filter(e => e.participant_id === homeParticipant.participant_id);
-            const awayGoals = goalEventsForScore.filter(e => e.participant_id === awayParticipant.participant_id);
+            const homeGoals = goalEventsForScore.filter(e => e.participant_id === homeParticipant.id);
+            const awayGoals = goalEventsForScore.filter(e => e.participant_id === awayParticipant.id);
             homeScore = homeGoals.length;
             awayScore = awayGoals.length;
             console.log('[Livescores] ✅ Calculated scores from events:', {
@@ -238,8 +239,8 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
               homeScore,
               awayScore,
               totalGoals: goalEventsForScore.length,
-              homeParticipantId: homeParticipant.participant_id,
-              awayParticipantId: awayParticipant.participant_id,
+              homeParticipantId: homeParticipant.id,
+              awayParticipantId: awayParticipant.id,
               homeGoalEvents: homeGoals.map(g => ({ player: g.player_name, participantId: g.participant_id })),
               awayGoalEvents: awayGoals.map(g => ({ player: g.player_name, participantId: g.participant_id }))
             });
@@ -306,7 +307,7 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           // Get goal scorers
           const goalEvents = fixture.events?.filter(e => e.type_id === 14) || [];
           const goalScorers: GoalScorer[] = goalEvents.map(event => {
-            const isHomeTeam = event.participant_id === homeParticipant.participant_id;
+            const isHomeTeam = event.participant_id === homeParticipant.id;
             return {
               player: event.player_name || 'Unknown',
               minute: event.minute + (event.extra_minute || 0),
