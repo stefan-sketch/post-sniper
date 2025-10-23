@@ -76,6 +76,23 @@ interface SportmonksState {
   name: string;
   short_name: string;
   developer_name: string;
+  minute?: number;
+}
+
+interface SportmonksPeriod {
+  id: number;
+  fixture_id: number;
+  type_id: number;
+  started: number;
+  ended: number | null;
+  counts_from: number;
+  ticking: boolean;
+  sort_order: number;
+  description: string;
+  time_added: number | null;
+  period_length: number | null;
+  minutes: number | null;
+  seconds: number | null;
 }
 
 interface SportmonksLeague {
@@ -96,6 +113,7 @@ interface SportmonksFixture {
   events?: SportmonksEvent[];
   state?: SportmonksState;
   league?: SportmonksLeague;
+  periods?: SportmonksPeriod[];
 }
 
 interface GoalScorer {
@@ -279,13 +297,59 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             });
           }
 
-          // Get minute from API state (most accurate)
+          // Get minute from periods data (most accurate for live matches)
           let minute = 0;
           if (status === 'live') {
-            // Use minute from state if available
-            if (fixture.state?.minute) {
+            // Check if we have periods data
+            if (fixture.periods && fixture.periods.length > 0) {
+              // Find the currently ticking period
+              const currentPeriod = fixture.periods.find(p => p.ticking);
+              
+              if (currentPeriod) {
+                const periodMinute = currentPeriod.minutes || 0;
+                
+                // Determine which half we're in based on description
+                if (currentPeriod.description === '2ND_HALF') {
+                  // Second half: add 45 to the period minute
+                  minute = 45 + periodMinute;
+                } else if (currentPeriod.description === '1ST_HALF') {
+                  // First half: use period minute directly
+                  minute = periodMinute;
+                } else {
+                  // Unknown period, use period minute
+                  minute = periodMinute;
+                }
+                
+                console.log('[Livescores] ✅ Using minute from periods:', {
+                  match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                  period: currentPeriod.description,
+                  periodMinute,
+                  displayMinute: minute
+                });
+              } else {
+                // No ticking period, try state.minute
+                if (fixture.state?.minute) {
+                  minute = fixture.state.minute;
+                  console.log('[Livescores] Using minute from state (no ticking period):', {
+                    match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                    minute
+                  });
+                } else {
+                  // Fallback: calculate from timestamp
+                  const startTime = fixture.starting_at_timestamp * 1000;
+                  const now = Date.now();
+                  const elapsed = Math.floor((now - startTime) / 1000 / 60);
+                  minute = Math.min(Math.max(elapsed, 1), 90);
+                  console.log('[Livescores] Calculated minute from timestamp:', {
+                    match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                    minute
+                  });
+                }
+              }
+            } else if (fixture.state?.minute) {
+              // No periods data, use state.minute
               minute = fixture.state.minute;
-              console.log('[Livescores] ✅ Using minute from state:', {
+              console.log('[Livescores] Using minute from state (no periods):', {
                 match: `${homeParticipant.name} vs ${awayParticipant.name}`,
                 minute
               });
@@ -295,7 +359,7 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
               const now = Date.now();
               const elapsed = Math.floor((now - startTime) / 1000 / 60);
               minute = Math.min(Math.max(elapsed, 1), 90);
-              console.log('[Livescores] Calculated minute from timestamp:', {
+              console.log('[Livescores] Calculated minute from timestamp (no state):', {
                 match: `${homeParticipant.name} vs ${awayParticipant.name}`,
                 minute
               });
