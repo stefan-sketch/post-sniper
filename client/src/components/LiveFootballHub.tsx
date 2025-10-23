@@ -210,9 +210,9 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 5s ease-in-out' }} />
         )}
 
-        {/* Match Minute / Kickoff Time - Top Right Corner */}
+        {/* Match Minute / Kickoff Time / Full Time - Top Left Corner */}
         {isLive && (
-          <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
+          <div className="absolute top-2 left-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
           </div>
         )}
@@ -222,7 +222,7 @@ export default function LiveFootballHub() {
           </div>
         )}
         {isFinished && (
-          <div className="absolute top-2 right-2 text-[9px] text-gray-500 font-medium z-10">
+          <div className="absolute top-2 left-2 text-[9px] text-gray-500 font-medium z-10">
             Full Time
           </div>
         )}
