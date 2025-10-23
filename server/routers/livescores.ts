@@ -213,16 +213,35 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           let homeScore = homeScoreObj?.score.goals || 0;
           let awayScore = awayScoreObj?.score.goals || 0;
           
+          console.log('[Livescores] Initial scores:', {
+            match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+            homeScore,
+            awayScore,
+            hasScoreObjs: !!homeScoreObj && !!awayScoreObj
+          });
+          
           // Fallback: Calculate scores from goal events if API scores are 0 but goals exist
-          const goalEvents = fixture.events?.filter(e => e.type_id === 14) || [];
-          if (goalEvents.length > 0 && homeScore === 0 && awayScore === 0) {
-            homeScore = goalEvents.filter(e => e.participant_id === homeParticipant.participant_id).length;
-            awayScore = goalEvents.filter(e => e.participant_id === awayParticipant.participant_id).length;
-            console.log('[Livescores] Calculated scores from events:', {
+          const goalEventsForScore = fixture.events?.filter(e => e.type_id === 14) || [];
+          console.log('[Livescores] Goal events check:', {
+            match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+            goalEventsCount: goalEventsForScore.length,
+            willCalculate: goalEventsForScore.length > 0 && homeScore === 0 && awayScore === 0
+          });
+          
+          if (goalEventsForScore.length > 0 && homeScore === 0 && awayScore === 0) {
+            const homeGoals = goalEventsForScore.filter(e => e.participant_id === homeParticipant.participant_id);
+            const awayGoals = goalEventsForScore.filter(e => e.participant_id === awayParticipant.participant_id);
+            homeScore = homeGoals.length;
+            awayScore = awayGoals.length;
+            console.log('[Livescores] ✅ Calculated scores from events:', {
               match: `${homeParticipant.name} vs ${awayParticipant.name}`,
               homeScore,
               awayScore,
-              totalGoals: goalEvents.length
+              totalGoals: goalEventsForScore.length,
+              homeParticipantId: homeParticipant.participant_id,
+              awayParticipantId: awayParticipant.participant_id,
+              homeGoalEvents: homeGoals.map(g => ({ player: g.player_name, participantId: g.participant_id })),
+              awayGoalEvents: awayGoals.map(g => ({ player: g.player_name, participantId: g.participant_id }))
             });
           }
 
