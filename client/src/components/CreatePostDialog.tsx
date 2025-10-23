@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw } from "lucide-react";
+import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -597,7 +597,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
               >
-                {cropMode ? "✓ Crop" : "Crop"}
+                <CropIcon className="h-4 w-4" />
               </Button>
 
               {/* Watermark Button */}
@@ -614,9 +614,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
-                title={!selectedPage ? "Select a page first" : ""}
+                title={!selectedPage ? "Select a page first" : "Add watermark"}
               >
-                {useWatermark ? "✓ Watermark" : "Watermark"}
+                <ImageIcon className="h-4 w-4" />
               </Button>
 
               {/* Gradient Button */}
@@ -633,8 +633,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
+                title="Add gradient overlay"
               >
-                {useGradient ? "✓ Gradient" : "Gradient"}
+                <Palette className="h-4 w-4" />
               </Button>
 
               {/* Text Button */}
@@ -664,8 +665,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
+                title="Add text overlay"
               >
-                {overlayText ? "✓ Text" : "Text"}
+                <Type className="h-4 w-4" />
               </Button>
             </div>
           </div>
