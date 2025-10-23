@@ -477,7 +477,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white" style={{ lineHeight: '1.75rem' }}>
             MATCHDAY
           </h2>
         </div>
@@ -500,7 +500,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white" style={{ lineHeight: '1.75rem' }}>
             MATCHDAY
           </h2>
           {/* Status filter dropdown */}
