@@ -585,19 +585,10 @@ export default function Home() {
             </Button>
           </div>
 
-          {/* Right: Settings (mobile only) + Online Status + Notifications + Drag-drop icon (desktop only) */}
+          {/* Right: Online Status (far left on mobile) + Settings + Notifications + Drag-drop icon (desktop only) */}
           <div className="flex items-center gap-1">
-            {/* Settings button - mobile only */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="md:hidden relative h-8 w-8 flex-shrink-0"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-            {/* Online Status */}
-            <div className="flex items-center gap-1.5 text-xs mr-1">
+            {/* Online Status - far left on mobile, after settings on desktop */}
+            <div className="flex items-center gap-1.5 text-xs md:order-2 md:mr-1">
               {settingsQuery.data?.lastAPIStatus === "success" ? (
                 <>
                   <span className="relative flex h-2 w-2">
@@ -613,11 +604,21 @@ export default function Home() {
                 </>
               )}
             </div>
+            {/* Settings button - mobile only, after API light */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
+              className="md:hidden relative h-8 w-8 flex-shrink-0 md:order-1"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            {/* Alerts button - after settings */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowAlerts(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0 md:order-3"
             >
               <Bell className="h-4 w-4 md:h-5 md:w-5" />
               {(unreadCountQuery.data || 0) > 0 && (
@@ -709,7 +710,7 @@ export default function Home() {
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
-          <div className="flex items-center justify-between mb-2" style={{ marginTop: '-8px' }}>
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center justify-center gap-2 flex-1">
               <h2 className="text-base font-semibold text-[#1877F2] flex items-center gap-2" style={{ lineHeight: '1.5rem', margin: 0, padding: 0 }}>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -841,7 +842,7 @@ export default function Home() {
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
-          <div className="flex items-center justify-between gap-3 mb-2" style={{ marginTop: '-8px' }}>
+          <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex items-center justify-center gap-3 flex-1" style={{ alignItems: 'center' }}>
               <div className="flex items-center gap-2" style={{ height: '1.75rem' }}>
                 <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
