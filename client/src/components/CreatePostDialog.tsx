@@ -66,7 +66,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [drawingEnabled, setDrawingEnabled] = useState(false);
   const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
   const [strokeWidth, setStrokeWidth] = useState(4); // Default stroke width
-  const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number}>>([]);
+  const [borderRadius, setBorderRadius] = useState(0); // Default border radius for rectangles
+  const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
   const [overlayImagePosition, setOverlayImagePosition] = useState({ x: 50, y: 50 }); // percentage
@@ -388,11 +389,29 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             const y = (rect.y / imgHeight) * canvas.height;
             const width = (rect.width / imgWidth) * canvas.width;
             const height = (rect.height / imgHeight) * canvas.height;
+            const radius = (rect.borderRadius / imgWidth) * canvas.width;
             
             ctx.strokeStyle = rect.color;
             // Scale stroke width proportionally to canvas size
             ctx.lineWidth = (rect.strokeWidth / imgWidth) * canvas.width;
-            ctx.strokeRect(x, y, width, height);
+            
+            // Draw rounded rectangle
+            if (radius > 0) {
+              ctx.beginPath();
+              ctx.moveTo(x + radius, y);
+              ctx.lineTo(x + width - radius, y);
+              ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+              ctx.lineTo(x + width, y + height - radius);
+              ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+              ctx.lineTo(x + radius, y + height);
+              ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+              ctx.lineTo(x, y + radius);
+              ctx.quadraticCurveTo(x, y, x + radius, y);
+              ctx.closePath();
+              ctx.stroke();
+            } else {
+              ctx.strokeRect(x, y, width, height);
+            }
           });
         }
 
@@ -402,7 +421,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius, borderRadius]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -637,7 +656,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       
       // Only save if rectangle has meaningful size (at least 5px)
       if (width > 5 && height > 5) {
-        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height, strokeWidth }]);
+        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height, strokeWidth, borderRadius }]);
       }
       setCurrentRect(null);
     }
@@ -924,6 +943,24 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   />
                   <span className="text-sm text-white font-medium w-8 text-center">{strokeWidth}px</span>
                 </div>
+                
+                {/* Border Radius Slider */}
+                <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Curve:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    step="2"
+                    value={borderRadius}
+                    onChange={(e) => setBorderRadius(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{
+                      maxWidth: '200px'
+                    }}
+                  />
+                  <span className="text-sm text-white font-medium w-8 text-center">{borderRadius}px</span>
+                </div>
               </div>
             )}
 
@@ -1106,52 +1143,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
 
-                  {/* Drawing Canvas Overlay */}
-                  {imgRef.current && (
-                    <svg
-                      className="absolute pointer-events-none"
-                      style={{
-                        left: '50%',
-                        top: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: imgRef.current.clientWidth,
-                        height: imgRef.current.clientHeight,
-                      }}
-                    >
-                      {/* Render completed rectangles */}
-                      {rectangles.map((rect, i) => (
-                        <rect
-                          key={i}
-                          x={rect.x}
-                          y={rect.y}
-                          width={rect.width}
-                          height={rect.height}
-                          fill="none"
-                          stroke={rect.color}
-                          strokeWidth={rect.strokeWidth}
-                        />
-                      ))}
-                      {/* Render current rectangle being drawn */}
-                      {currentRect && (() => {
-                        const x = Math.min(currentRect.startX, currentRect.endX);
-                        const y = Math.min(currentRect.startY, currentRect.endY);
-                        const width = Math.abs(currentRect.endX - currentRect.startX);
-                        const height = Math.abs(currentRect.endY - currentRect.startY);
-                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020';
-                        return (
-                          <rect
-                            x={x}
-                            y={y}
-                            width={width}
-                            height={height}
-                            fill="none"
-                            stroke={color}
-                            strokeWidth={strokeWidth}
-                          />
-                        );
-                      })()}
-                    </svg>
-                  )}
+
 
                   {/* Text Box Overlay - Draggable and Resizable */}
                   {overlayText && imgRef.current && (() => {
@@ -1391,6 +1383,58 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         setIsDraggingOverlayImage(true);
                       }}
                     />
+                  )}
+
+                  {/* Drawing Canvas Overlay - Top Layer */}
+                  {imgRef.current && (
+                    <svg
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: imgRef.current.clientWidth,
+                        height: imgRef.current.clientHeight,
+                        zIndex: 12,
+                      }}
+                    >
+                      {/* Render completed rectangles */}
+                      {rectangles.map((rect, i) => (
+                        <rect
+                          key={i}
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                          fill="none"
+                          stroke={rect.color}
+                          strokeWidth={rect.strokeWidth}
+                          rx={rect.borderRadius}
+                          ry={rect.borderRadius}
+                        />
+                      ))}
+                      {/* Render current rectangle being drawn */}
+                      {currentRect && (() => {
+                        const x = Math.min(currentRect.startX, currentRect.endX);
+                        const y = Math.min(currentRect.startY, currentRect.endY);
+                        const width = Math.abs(currentRect.endX - currentRect.startX);
+                        const height = Math.abs(currentRect.endY - currentRect.startY);
+                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020';
+                        return (
+                          <rect
+                            x={x}
+                            y={y}
+                            width={width}
+                            height={height}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth={strokeWidth}
+                            rx={borderRadius}
+                            ry={borderRadius}
+                          />
+                        );
+                      })()}
+                    </svg>
                   )}
                 </div>
 
