@@ -48,6 +48,7 @@ export default function LiveFootballHub() {
   const [matchStatusFilter, setMatchStatusFilter] = useState<'all' | 'live' | 'upcoming' | 'finished'>('all');
   const [showStatusFilter, setShowStatusFilter] = useState(false);
   const previousScoresRef = useRef<Map<string, number>>(new Map());
+  const [celebratingGoals, setCelebratingGoals] = useState<Set<string>>(new Set());
 
   // Update current time every second for countdown
   useEffect(() => {
@@ -84,6 +85,16 @@ export default function LiveFootballHub() {
 
         if (justScored) {
           previousScoresRef.current.set(newMatch.id, newTotal);
+          // Trigger celebration animation
+          setCelebratingGoals(prev => new Set(prev).add(newMatch.id));
+          // Remove from celebration after 3 seconds
+          setTimeout(() => {
+            setCelebratingGoals(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(newMatch.id);
+              return newSet;
+            });
+          }, 3000);
         } else if (!previousScoresRef.current.has(newMatch.id)) {
           // Initialize score tracking
           previousScoresRef.current.set(newMatch.id, newTotal);
@@ -97,13 +108,13 @@ export default function LiveFootballHub() {
     });
   }, [data]);
 
-  // Clear justScored flag after 5 seconds
+  // Clear justScored flag after 30 seconds
   useEffect(() => {
     const timeout = setTimeout(() => {
       setMatches(prev => prev.map(match => 
         match.justScored ? { ...match, justScored: false } : match
       ));
-    }, 5000);
+    }, 30000);
 
     return () => clearTimeout(timeout);
   }, [matches]);
@@ -201,6 +212,7 @@ export default function LiveFootballHub() {
     const isFinished = match.status === 'ft';
     const isLive = match.status === 'live';
     const isUpcoming = match.status === 'upcoming';
+    const isCelebrating = celebratingGoals.has(match.id);
     
     return (
       <div
@@ -213,15 +225,28 @@ export default function LiveFootballHub() {
             : isLive
             ? 'border-green-500'
             : 'border-white/10 hover:border-green-500/30'
+        } ${
+          isCelebrating ? 'opacity-0' : 'opacity-100'
         }`}
         style={{
-          animation: match.justScored ? 'shake-red 5s ease-in-out' : 'none'
+          animation: match.justScored ? 'shake-red 30s ease-in-out' : 'none',
+          transition: isCelebrating ? 'opacity 0.3s ease-out' : 'opacity 0.3s ease-in 3s'
         }}
       >
-        {/* Goal Animation Overlay */}
-        {match.justScored && (
+        {/* Goal Celebration Overlay */}
+        {isCelebrating && (
+          <div className="absolute inset-0 flex items-center justify-center z-50 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 rounded-lg backdrop-blur-md animate-pulse">
+            <div className="text-center">
+              <div className="text-6xl mb-2 animate-bounce">⚽</div>
+              <div className="text-3xl font-bold text-white animate-pulse">GOAL!</div>
+            </div>
+          </div>
+        )}
+
+        {/* Red Flash Animation Overlay */}
+        {match.justScored && !isCelebrating && (
           <div className="absolute inset-0 bg-red-500/10 rounded-lg pointer-events-none animate-pulse-red" 
-               style={{ animation: 'pulse-red 5s ease-in-out' }} />
+               style={{ animation: 'pulse-red 30s ease-in-out' }} />
         )}
 
         {/* Match Minute / Kickoff Time / Full Time - Top Right Corner */}
