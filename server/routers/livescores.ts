@@ -126,7 +126,7 @@ async function fetchInplayMatches(): Promise<Match[]> {
   }
 
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
-  const url = `${SPORTMONKS_BASE_URL}/livescores/inplay?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds}&timezone=Europe/London`;
+  const url = `${SPORTMONKS_BASE_URL}/livescores/inplay?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;periods&filters=fixtureLeagues:${leagueIds}&timezone=Europe/London`;
 
   try {
     console.log('[Livescores] Fetching inplay matches');
@@ -159,7 +159,7 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
   
   // Use fixtures/date endpoint to get all fixtures for today
-  const url = `${SPORTMONKS_BASE_URL}/fixtures/date/${dateStr}?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds}&timezone=Europe/London`;
+  const url = `${SPORTMONKS_BASE_URL}/fixtures/date/${dateStr}?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;periods&filters=fixtureLeagues:${leagueIds}&timezone=Europe/London`;
 
   try {
     console.log('[Livescores] Fetching fixtures for date:', dateStr);
@@ -282,20 +282,31 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           // Calculate minute (for live matches)
           let minute = 0;
           if (status === 'live') {
-            // Use timestamp (timezone-agnostic) instead of parsing date string
-            const startTime = fixture.starting_at_timestamp * 1000; // Convert to milliseconds
-            const now = Date.now();
-            const elapsed = Math.floor((now - startTime) / 1000 / 60);
-            minute = Math.min(Math.max(elapsed, 1), 90); // Minimum 1' for live matches
+            // Try to get minute from periods data (most accurate)
+            const currentPeriod = fixture.periods?.find((p: any) => 
+              p.started === 1 && p.ended === 0
+            );
             
-            console.log('[Livescores] Minute calculation:', {
-              match: `${homeParticipant.name} vs ${awayParticipant.name}`,
-              starting_at_timestamp: fixture.starting_at_timestamp,
-              startTime: new Date(startTime).toISOString(),
-              now: new Date(now).toISOString(),
-              elapsed,
-              minute
-            });
+            if (currentPeriod && currentPeriod.minutes) {
+              minute = currentPeriod.minutes;
+              console.log('[Livescores] Using minute from periods:', {
+                match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                minute,
+                periodName: currentPeriod.name
+              });
+            } else {
+              // Fallback: calculate from timestamp
+              const startTime = fixture.starting_at_timestamp * 1000;
+              const now = Date.now();
+              const elapsed = Math.floor((now - startTime) / 1000 / 60);
+              minute = Math.min(Math.max(elapsed, 1), 90);
+              console.log('[Livescores] Calculated minute from timestamp:', {
+                match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                minute,
+                hasPeriods: !!fixture.periods,
+                periodsCount: fixture.periods?.length || 0
+              });
+            }
           } else if (status === 'ht') {
             minute = 45;
           } else if (status === 'ft') {
