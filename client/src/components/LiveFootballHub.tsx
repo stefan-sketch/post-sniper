@@ -212,6 +212,7 @@ export default function LiveFootballHub() {
     const isFinished = match.status === 'ft';
     const isLive = match.status === 'live';
     const isUpcoming = match.status === 'upcoming';
+    const isHalfTime = match.status === 'ht';
     const isCelebrating = celebratingGoals.has(match.id);
     
     return (
@@ -224,6 +225,8 @@ export default function LiveFootballHub() {
             ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
             : isLive
             ? 'border-green-500'
+            : isHalfTime
+            ? 'border-orange-500'
             : 'border-white/10 hover:border-green-500/30'
         } ${
           isCelebrating ? 'opacity-0' : 'opacity-100'
@@ -249,10 +252,18 @@ export default function LiveFootballHub() {
                style={{ animation: 'pulse-red 30s ease-in-out' }} />
         )}
 
-        {/* Match Minute / Kickoff Time / Full Time - Top Right Corner */}
+        {/* Match Minute / Kickoff Time / Full Time / Half Time - Top Right Corner */}
         {isLive && (
           <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : match.minute > 45 && match.minute <= 50 ? `45+${match.minute - 45}'` : `${match.minute}'`}
+          </div>
+        )}
+        {isHalfTime && (
+          <div className="absolute top-2 right-2 z-10 animate-pulse">
+            <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
           </div>
         )}
         {isUpcoming && (
