@@ -676,7 +676,7 @@ export default function Home() {
         className="flex-1 flex flex-col overflow-hidden"
         style={{
           animation: viewTransition === 'to-pages' ? 'slideOutToLeft 0.5s ease-in-out forwards' : 
-                     viewTransition === 'to-feed' ? 'slideInFromRight 0.5s ease-in-out' : 'none'
+                     viewTransition === 'to-feed' ? 'slideInFromLeft 0.5s ease-in-out' : 'none'
         }}
       >
       {currentView === 'feed' ? (
@@ -696,7 +696,7 @@ export default function Home() {
           <div 
             className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: isAnimatingOut ? 'slideOutToLeft 0.5s ease-in forwards' : 'slideInFromLeft 0.5s ease-out'
+              animation: isViewSwitching ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in forwards' : 'slideInFromLeft 0.5s ease-out')
             }}
           >
             <LiveFootballHub />

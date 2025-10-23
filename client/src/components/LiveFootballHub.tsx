@@ -197,11 +197,11 @@ export default function LiveFootballHub() {
           match.justScored 
             ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
             : isLive
-            ? 'border-green-500/50 animate-pulse-border'
+            ? 'border-green-500'
             : 'border-white/10 hover:border-green-500/30'
         }`}
         style={{
-          animation: match.justScored ? 'shake-red 5s ease-in-out' : isLive ? 'pulse-border 2s ease-in-out infinite' : 'none'
+          animation: match.justScored ? 'shake-red 5s ease-in-out' : 'none'
         }}
       >
         {/* Goal Animation Overlay */}
@@ -325,7 +325,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             MATCHDAY
           </h2>
         </div>
@@ -348,7 +348,7 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center justify-center gap-2 flex-1">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             MATCHDAY
           </h2>
         </div>
