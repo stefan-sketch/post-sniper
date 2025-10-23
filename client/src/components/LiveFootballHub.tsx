@@ -170,15 +170,23 @@ export default function LiveFootballHub() {
     // Parse the UTC time from API
     const utcDate = new Date(kickoffTime);
     
-    // Use Intl.DateTimeFormat for reliable timezone conversion
-    const formatter = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/London',
-      hour12: false
-    });
+    // Check if we're in BST (British Summer Time) - last Sunday of March to last Sunday of October
+    const year = utcDate.getUTCFullYear();
+    const month = utcDate.getUTCMonth();
     
-    return formatter.format(utcDate);
+    // Simple BST check: BST runs from late March to late October
+    // For now, assume BST (UTC+1) during this period
+    const isBST = month >= 2 && month <= 9; // March (2) through October (9)
+    const offset = isBST ? 1 : 0; // BST is UTC+1, GMT is UTC+0
+    
+    // Add offset to UTC time
+    const localDate = new Date(utcDate.getTime() + (offset * 60 * 60 * 1000));
+    
+    // Format as HH:MM
+    const hours = localDate.getUTCHours().toString().padStart(2, '0');
+    const minutes = localDate.getUTCMinutes().toString().padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
   };
 
   // Helper function to get time until kickoff
@@ -429,15 +437,6 @@ export default function LiveFootballHub() {
                 onClick={() => toggleLeague(competition)}
               >
                 <div className="flex items-center gap-2">
-                  {/* Competition Logo */}
-                  {leagueMatches[0]?.competitionLogo && (
-                    <img 
-                      src={leagueMatches[0].competitionLogo} 
-                      alt={competition}
-                      className="w-5 h-5 object-contain"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  )}
                   {/* Competition Name with Match Count */}
                   <span className={`text-xs font-semibold ${competitionColors[competition]}`}>
                     {competition} ({leagueMatches.length})
