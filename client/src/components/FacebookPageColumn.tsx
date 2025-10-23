@@ -105,7 +105,7 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor }: Fa
           }}
           showDismiss={false}
           hideActions={true}
-          hidePageHeader={true}
+          hidePageHeader={false}
         />
         </div>
         );

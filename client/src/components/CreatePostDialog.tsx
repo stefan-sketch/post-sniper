@@ -682,18 +682,20 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="hidden"
                   />
                 </div>
-                {/* Small Paste button in top-right */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePasteFromClipboard();
-                  }}
-                  className="absolute top-2 right-2 text-xs px-2 py-1 h-auto"
-                >
-                  Paste
-                </Button>
+                {/* Small Paste button in top-right - Hidden on iOS */}
+                {!/iPhone|iPad|iPod/.test(navigator.userAgent) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePasteFromClipboard();
+                    }}
+                    className="absolute top-2 right-2 text-xs px-2 py-1 h-auto"
+                  >
+                    Paste
+                  </Button>
+                )}
               </div>
             ) : cropMode ? (
               <div className="space-y-2">
