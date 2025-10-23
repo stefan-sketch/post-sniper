@@ -754,7 +754,7 @@ export default function Home() {
             </div>
           </div>
           {/* Printer line - thin red line where new posts emerge from */}
-          <div className="relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
+          <div className="sticky top-0 z-10 relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
           </div>
           <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
@@ -913,7 +913,7 @@ export default function Home() {
                 )}
                 {/* Printer line - thin blue line where new posts emerge from */}
                 {popularPosts.length > 0 && (
-                  <div className="relative h-0.5 bg-[#1877F2]/30 mb-3 overflow-hidden flex-shrink-0">
+                  <div className="sticky top-0 z-10 relative h-0.5 bg-[#1877F2]/30 mb-3 overflow-hidden flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1877F2] to-transparent animate-pulse"></div>
                   </div>
                 )}
@@ -957,7 +957,7 @@ export default function Home() {
                 )}
                 {/* Printer line - thin white line where new tweets emerge from */}
                 {twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && (
-                  <div className="relative h-0.5 bg-white/30 mb-3 overflow-hidden flex-shrink-0">
+                  <div className="sticky top-0 z-10 relative h-0.5 bg-white/30 mb-3 overflow-hidden flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
                   </div>
                 )}
@@ -1551,7 +1551,8 @@ export default function Home() {
         {/* Floating Create Post Button - Mobile Only */}
         <button
           onClick={() => setShowCreatePost(true)}
-          className="fixed bottom-6 right-6 p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/50 transition-all z-50"
+          className="fixed right-6 p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/50 transition-all z-50 md:bottom-6"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)' }}
           aria-label="Create post"
         >
           <ImagePlus className="h-6 w-6" />
@@ -1691,7 +1692,7 @@ export default function Home() {
 
       {/* Bottom Navigation Bar - Rendered via Portal directly into body to bypass all container constraints */}
       {currentView === 'feed' && createPortal(
-        <div className="md:hidden fixed left-0 right-0 bg-gray-900/50 backdrop-blur-sm border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
+        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
           <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
             <button
               onClick={() => setMobileView('live')}

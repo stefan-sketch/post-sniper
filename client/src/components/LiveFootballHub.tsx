@@ -78,7 +78,7 @@ export default function LiveFootballHub() {
       </div>
 
       {/* Separator line */}
-      <div className="h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
+      <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
 
       {/* Matches */}
       <div className="space-y-2 overflow-y-auto flex-1 pr-2 hide-scrollbar">
