@@ -32,7 +32,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   useEffect(() => {
     if (initialImage) {
       setImage(initialImage);
-      setCropMode(true);
+      setCropMode(false); // Keep crop mode off by default
       setCroppedImage(null);
       // Start with full image selected
       setCrop({
@@ -560,6 +560,108 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             </Button>
           </div>
 
+          {/* Overlay Controls - Always visible, greyed out when no image */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Tools</label>
+            <div className="flex gap-2">
+              {/* Crop Button */}
+              <Button
+                type="button"
+                variant={cropMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (image) {
+                    if (!cropMode) {
+                      // Enter crop mode
+                      setCropMode(true);
+                      setCrop({
+                        unit: '%',
+                        x: 0,
+                        y: 0,
+                        width: 100,
+                        height: 100,
+                      });
+                    } else {
+                      // Exit crop mode
+                      setCropMode(false);
+                    }
+                  }
+                }}
+                disabled={!image}
+                className={`flex-1 transition-all duration-200 ${
+                  !image
+                    ? "opacity-50 cursor-not-allowed"
+                    : cropMode
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {cropMode ? "✓ Crop" : "Crop"}
+              </Button>
+
+              {/* Watermark Button */}
+              <Button
+                type="button"
+                variant={useWatermark ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseWatermark(!useWatermark)}
+                disabled={!image || !selectedPage || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || !selectedPage || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : useWatermark
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+                title={!selectedPage ? "Select a page first" : ""}
+              >
+                {useWatermark ? "✓ Watermark" : "Watermark"}
+              </Button>
+
+              {/* Gradient Button */}
+              <Button
+                type="button"
+                variant={useGradient ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseGradient(!useGradient)}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : useGradient
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {useGradient ? "✓ Gradient" : "Gradient"}
+              </Button>
+
+              {/* Text Button */}
+              <Button
+                type="button"
+                variant={overlayText ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (!overlayText) {
+                    setOverlayText("Your Text Here");
+                  } else {
+                    setOverlayText("");
+                  }
+                }}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : overlayText
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {overlayText ? "✓ Text" : "Text"}
+              </Button>
+            </div>
+          </div>
+
           {/* Image Upload/Preview */}
           <div className="space-y-2">
             {!image ? (
@@ -608,25 +710,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="max-w-full max-h-[600px]"
                   />
                 </ReactCrop>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setImage(null);
-                      setCrop(undefined);
-                      setCompletedCrop(undefined);
-                      setCropMode(true);
-                      setCroppedImage(null);
-                    }}
-                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    Remove Image
-                  </Button>
+                <div className="flex justify-center">
                   <Button
                     size="sm"
                     onClick={handleConfirmCrop}
-                    className="flex-1 bg-cyan-500 hover:bg-cyan-600 transition-all duration-200 hover:scale-[1.02]"
+                    className="bg-cyan-500 hover:bg-cyan-600 transition-all duration-200 hover:scale-[1.02]"
                   >
                     ✓ Confirm Crop
                   </Button>
@@ -656,6 +744,26 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     draggable={false}
                     onContextMenu={(e) => e.preventDefault()}
                   />
+
+                  {/* X button to remove image - Hidden when watermark is active */}
+                  {!useWatermark && (
+                    <button
+                      onClick={() => {
+                        setImage(null);
+                        setCrop(undefined);
+                        setCompletedCrop(undefined);
+                        setCropMode(false);
+                        setCroppedImage(null);
+                        setUseWatermark(false);
+                        setUseGradient(false);
+                        setOverlayText("");
+                      }}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-600 text-white flex items-center justify-center transition-all hover:scale-110 z-20"
+                      title="Remove image"
+                    >
+                      ×
+                    </button>
+                  )}
 
                   {/* Gradient Overlay Preview */}
                   {useGradient && imgRef.current && (
@@ -825,134 +933,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleBackToCrop}
-                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    ← Back to Crop
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setImage(null);
-                      setCrop(undefined);
-                      setCompletedCrop(undefined);
-                      setCropMode(true);
-                      setCroppedImage(null);
-                    }}
-                    className="flex-1 transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    Remove Image
-                  </Button>
-                </div>
+
               </div>
             )}
-          </div>
-
-          {/* Overlay Controls - Always visible, greyed out when no image */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Tools</label>
-            <div className="flex gap-2">
-              {/* Crop Button */}
-              <Button
-                type="button"
-                variant={cropMode ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  if (image) {
-                    if (!cropMode) {
-                      // Enter crop mode
-                      setCropMode(true);
-                      setCrop({
-                        unit: '%',
-                        x: 0,
-                        y: 0,
-                        width: 100,
-                        height: 100,
-                      });
-                    } else {
-                      // Exit crop mode
-                      setCropMode(false);
-                    }
-                  }
-                }}
-                disabled={!image}
-                className={`flex-1 transition-all duration-200 ${
-                  !image
-                    ? "opacity-50 cursor-not-allowed"
-                    : cropMode
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-              >
-                {cropMode ? "✓ Crop" : "Crop"}
-              </Button>
-
-              {/* Watermark Button */}
-              <Button
-                type="button"
-                variant={useWatermark ? "default" : "outline"}
-                size="sm"
-                onClick={() => setUseWatermark(!useWatermark)}
-                disabled={!image || !selectedPage || cropMode}
-                className={`flex-1 transition-all duration-200 ${
-                  !image || !selectedPage || cropMode
-                    ? "opacity-50 cursor-not-allowed"
-                    : useWatermark
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-                title={!selectedPage ? "Select a page first" : ""}
-              >
-                {useWatermark ? "✓ Watermark" : "Watermark"}
-              </Button>
-
-              {/* Gradient Button */}
-              <Button
-                type="button"
-                variant={useGradient ? "default" : "outline"}
-                size="sm"
-                onClick={() => setUseGradient(!useGradient)}
-                disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 ${
-                  !image || cropMode
-                    ? "opacity-50 cursor-not-allowed"
-                    : useGradient
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-              >
-                {useGradient ? "✓ Gradient" : "Gradient"}
-              </Button>
-
-              {/* Text Button */}
-              <Button
-                type="button"
-                variant={overlayText ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  if (!overlayText) {
-                    setOverlayText("Your Text Here");
-                  } else {
-                    setOverlayText("");
-                  }
-                }}
-                disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 ${
-                  !image || cropMode
-                    ? "opacity-50 cursor-not-allowed"
-                    : overlayText
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-              >
-                {overlayText ? "✓ Text" : "Text"}
-              </Button>
-            </div>
           </div>
 
           {/* Caption */}
