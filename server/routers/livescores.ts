@@ -136,10 +136,20 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
   const url = `${SPORTMONKS_BASE_URL}/fixtures?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds};fixtureDate:${dateStr}`;
 
   try {
+    console.log('[Livescores] Fetching fixtures for date:', dateStr);
+    console.log('[Livescores] API URL:', url.replace(SPORTMONKS_API_TOKEN, 'REDACTED'));
+    
     const response = await fetch(url);
     const data = await response.json();
 
+    console.log('[Livescores] API Response status:', response.status);
+    console.log('[Livescores] Fixtures found:', data.data?.length || 0);
+
     if (!data.data || data.data.length === 0) {
+      console.log('[Livescores] No fixtures returned from API');
+      if (data.message) {
+        console.error('[Livescores] API Error:', data.message);
+      }
       return [];
     }
 
