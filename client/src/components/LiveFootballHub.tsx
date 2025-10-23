@@ -179,6 +179,14 @@ export default function LiveFootballHub() {
     const isBST = month >= 2 && month <= 9; // March (2) through October (9)
     const offset = isBST ? 1 : 0; // BST is UTC+1, GMT is UTC+0
     
+    console.log('Timezone conversion:', {
+      kickoffTime,
+      utcDate: utcDate.toISOString(),
+      month,
+      isBST,
+      offset
+    });
+    
     // Add offset to UTC time
     const localDate = new Date(utcDate.getTime() + (offset * 60 * 60 * 1000));
     
@@ -186,7 +194,10 @@ export default function LiveFootballHub() {
     const hours = localDate.getUTCHours().toString().padStart(2, '0');
     const minutes = localDate.getUTCMinutes().toString().padStart(2, '0');
     
-    return `${hours}:${minutes}`;
+    const result = `${hours}:${minutes}`;
+    console.log('Formatted time:', result);
+    
+    return result;
   };
 
   // Helper function to get time until kickoff
