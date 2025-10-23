@@ -43,7 +43,16 @@ export default function LiveFootballHub() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<Competition>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const previousScoresRef = useRef<Map<string, number>>(new Map());
+
+  // Update current time every second for countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch livescores
   const { data, refetch } = trpc.livescores.getLivescores.useQuery(undefined, {
@@ -172,6 +181,26 @@ export default function LiveFootballHub() {
     return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Helper function to get time until kickoff
+  const getTimeUntilKickoff = (kickoffTime: string) => {
+    const kickoff = new Date(kickoffTime).getTime();
+    const now = currentTime;
+    const diff = kickoff - now;
+    
+    if (diff <= 0) return null;
+    
+    const minutes = Math.floor(diff / 1000 / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return { text: `Starts in ${hours} hour${hours > 1 ? 's' : ''}`, urgent: false };
+    } else if (minutes > 0) {
+      return { text: `Starts in ${minutes} minute${minutes > 1 ? 's' : ''}`, urgent: minutes <= 15 };
+    } else {
+      return { text: 'Starting now', urgent: true };
+    }
+  };
+
   // Render match card
   const renderMatchCard = (match: Match, showCompetition: boolean = false) => {
     const homeScorers = getTeamScorers(match, 'home');
@@ -287,6 +316,19 @@ export default function LiveFootballHub() {
             )}
           </div>
         </div>
+
+        {/* Countdown for upcoming matches */}
+        {isUpcoming && (() => {
+          const countdown = getTimeUntilKickoff(match.kickoffTime);
+          if (!countdown) return null;
+          return (
+            <div className={`text-[10px] text-center mt-2 font-semibold ${
+              countdown.urgent ? 'text-red-500 animate-blink' : 'text-gray-400'
+            }`}>
+              {countdown.text}
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -456,6 +498,15 @@ export default function LiveFootballHub() {
 
         .animate-pulse-border {
           animation: pulse-border 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+
+        .animate-blink {
+          animation: blink 1s ease-in-out infinite;
         }
       `}</style>
     </div>
