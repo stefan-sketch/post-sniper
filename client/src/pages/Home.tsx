@@ -1706,7 +1706,7 @@ export default function Home() {
                     }, 600);
                   }, 500);
                 }}
-                className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all"
+                className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all active:scale-90"
                 title="Switch to Pages"
               >
                 <svg 
@@ -1766,7 +1766,7 @@ export default function Home() {
                   setDroppedImage(null);
                   setShowCreatePost(true);
                 }}
-                className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all"
+                className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all active:scale-90"
               >
                 <Plus className="w-6 h-6" />
               </button>
@@ -1811,7 +1811,7 @@ export default function Home() {
                       }, 600);
                     }, 500);
                   }}
-                  className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all"
+                  className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all active:scale-90"
                   title="Switch to Feed"
                 >
                   <svg 
@@ -1850,7 +1850,7 @@ export default function Home() {
                       className="flex items-center justify-center transition-all p-2"
                     >
                       <div 
-                        className={`h-10 w-10 rounded-full overflow-hidden flex-shrink-0 transition-all ${
+                        className={`h-8 w-8 rounded-full overflow-hidden flex-shrink-0 transition-all ${
                           isActive 
                             ? 'ring-2 ring-white/50 scale-110' 
                             : 'opacity-60'
@@ -1883,7 +1883,7 @@ export default function Home() {
                     setDroppedImage(null);
                     setShowCreatePost(true);
                   }}
-                  className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all"
+                  className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all active:scale-90"
                 >
                   <Plus className="w-6 h-6" />
                 </button>
