@@ -132,8 +132,8 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
 
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
   
-  // Fetch fixtures for today from the specified leagues
-  const url = `${SPORTMONKS_BASE_URL}/fixtures?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds};fixtureDate:${dateStr}`;
+  // Fetch fixtures for today from the specified leagues using the correct endpoint
+  const url = `${SPORTMONKS_BASE_URL}/fixtures/between/${dateStr}/${dateStr}?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league;participants.image&filters=fixtureLeagues:${leagueIds}`;
 
   try {
     console.log('[Livescores] Fetching fixtures for date:', dateStr);
