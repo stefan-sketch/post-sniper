@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type } from "lucide-react";
+import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -61,6 +61,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [isResizingTextBox, setIsResizingTextBox] = useState(false);
   const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
   const [isEditingText, setIsEditingText] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawingEnabled, setDrawingEnabled] = useState(false);
+  const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
+  const [drawingPaths, setDrawingPaths] = useState<Array<{color: string, points: {x: number, y: number}[]}>>([]);
+  const [currentPath, setCurrentPath] = useState<{x: number, y: number}[]>([]);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
   const imgRef = useRef<HTMLImageElement>(null);
@@ -315,13 +320,40 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           });
         }
 
+        // Add drawing paths if any
+        if (drawingPaths.length > 0 && imgRef.current) {
+          const imgWidth = imgRef.current.clientWidth;
+          const imgHeight = imgRef.current.clientHeight;
+          
+          drawingPaths.forEach(path => {
+            if (path.points.length > 1) {
+              ctx.strokeStyle = path.color;
+              ctx.lineWidth = 8; // Thick line
+              ctx.lineCap = 'round';
+              ctx.lineJoin = 'round';
+              
+              ctx.beginPath();
+              path.points.forEach((point, i) => {
+                const x = (point.x / imgWidth) * canvas.width;
+                const y = (point.y / imgHeight) * canvas.height;
+                if (i === 0) {
+                  ctx.moveTo(x, y);
+                } else {
+                  ctx.lineTo(x, y);
+                }
+              });
+              ctx.stroke();
+            }
+          });
+        }
+
         // Use JPEG with high quality
         resolve(canvas.toDataURL("image/jpeg", 0.95));
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, drawingPaths]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -458,18 +490,21 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current || !imgRef.current) return;
     const rect = imgRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
     
-    if (isDraggingTextBox) {
+    if (isDrawing && drawingEnabled) {
+      setCurrentPath(prev => [...prev, { x, y }]);
+    } else if (isDraggingTextBox) {
       setTextBoxPosition({ 
-        x: Math.max(0, Math.min(100, x)), 
-        y: Math.max(0, Math.min(100, y)) 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
       });
     } else if (isResizingTextBox) {
-      // Calculate new size based on drag distance
-      const deltaX = x - resizeStartState.x;
-      const deltaY = y - resizeStartState.y;
+      const deltaX = xPercent - resizeStartState.x;
+      const deltaY = yPercent - resizeStartState.y;
       // Use diagonal distance to scale both fontSize and width proportionally
       const delta = (deltaX + deltaY) / 2;
       const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
@@ -478,8 +513,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       setTextBoxWidth(newWidth);
     } else if (isDraggingWatermark) {
       setWatermarkPosition({ 
-        x: Math.max(0, Math.min(100, x)), 
-        y: Math.max(0, Math.min(100, y)) 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
       });
     }
   };
@@ -488,19 +523,24 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     if (!containerRef.current || !imgRef.current || e.touches.length === 0) return;
     const rect = imgRef.current.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = ((touch.clientX - rect.left) / rect.width) * 100;
-    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
     
-    if (isDraggingTextBox) {
+    if (isDrawing && drawingEnabled) {
+      e.preventDefault();
+      setCurrentPath(prev => [...prev, { x, y }]);
+    } else if (isDraggingTextBox) {
       e.preventDefault();
       setTextBoxPosition({ 
-        x: Math.max(0, Math.min(100, x)), 
-        y: Math.max(0, Math.min(100, y)) 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
       });
     } else if (isResizingTextBox) {
       e.preventDefault();
-      const deltaX = x - resizeStartState.x;
-      const deltaY = y - resizeStartState.y;
+      const deltaX = xPercent - resizeStartState.x;
+      const deltaY = yPercent - resizeStartState.y;
       // Use diagonal distance to scale both fontSize and width proportionally
       const delta = (deltaX + deltaY) / 2;
       const newFontSize = Math.max(24, Math.min(120, resizeStartState.fontSize + delta * 2));
@@ -510,13 +550,24 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     } else if (isDraggingWatermark) {
       e.preventDefault();
       setWatermarkPosition({ 
-        x: Math.max(0, Math.min(100, x)), 
-        y: Math.max(0, Math.min(100, y)) 
+        x: Math.max(0, Math.min(100, xPercent)), 
+        y: Math.max(0, Math.min(100, yPercent)) 
       });
     }
   };
 
   const handleMouseUp = () => {
+    if (isDrawing && currentPath.length > 1) {
+      // Save the completed path
+      const colorMap = {
+        'yellow': '#FFD700',
+        'black': '#000000',
+        'burgundy': '#800020'
+      };
+      setDrawingPaths(prev => [...prev, { color: colorMap[drawingColor], points: currentPath }]);
+      setCurrentPath([]);
+    }
+    setIsDrawing(false);
     setIsDraggingTextBox(false);
     setIsResizingTextBox(false);
     setIsDraggingWatermark(false);
@@ -681,7 +732,76 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               >
                 <Type className="h-4 w-4" />
               </Button>
+
+              {/* Drawing Tool Button */}
+              <Button
+                type="button"
+                variant={drawingEnabled ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setDrawingEnabled(!drawingEnabled);
+                  if (!drawingEnabled) {
+                    setIsEditingText(false); // Exit text editing when starting to draw
+                  }
+                }}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : drawingEnabled
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+                title="Draw on image"
+              >
+                <Pen className="h-4 w-4" />
+              </Button>
             </div>
+
+            {/* Drawing Color Picker - Show when drawing is enabled */}
+            {drawingEnabled && image && !cropMode && (
+              <div className="flex gap-2 items-center justify-center">
+                <span className="text-sm text-gray-400">Color:</span>
+                <button
+                  type="button"
+                  onClick={() => setDrawingColor('yellow')}
+                  className={`w-8 h-8 rounded-full border-2 ${
+                    drawingColor === 'yellow' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                  }`}
+                  style={{ backgroundColor: '#FFD700' }}
+                  title="Yellow"
+                />
+                <button
+                  type="button"
+                  onClick={() => setDrawingColor('black')}
+                  className={`w-8 h-8 rounded-full border-2 ${
+                    drawingColor === 'black' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                  }`}
+                  style={{ backgroundColor: '#000000' }}
+                  title="Black"
+                />
+                <button
+                  type="button"
+                  onClick={() => setDrawingColor('burgundy')}
+                  className={`w-8 h-8 rounded-full border-2 ${
+                    drawingColor === 'burgundy' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
+                  }`}
+                  style={{ backgroundColor: '#800020' }}
+                  title="Burgundy"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDrawingPaths([])}
+                  disabled={drawingPaths.length === 0}
+                  className="ml-2 text-xs"
+                  title="Clear drawings"
+                >
+                  Clear
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Image Upload/Preview */}
@@ -745,6 +865,25 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   onMouseUp={handleMouseUp}
                   onTouchEnd={handleMouseUp}
                   onMouseLeave={handleMouseUp}
+                  onMouseDown={(e) => {
+                    if (drawingEnabled && imgRef.current) {
+                      const rect = imgRef.current.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      setIsDrawing(true);
+                      setCurrentPath([{ x, y }]);
+                    }
+                  }}
+                  onTouchStart={(e) => {
+                    if (drawingEnabled && imgRef.current && e.touches.length > 0) {
+                      const rect = imgRef.current.getBoundingClientRect();
+                      const touch = e.touches[0];
+                      const x = touch.clientX - rect.left;
+                      const y = touch.clientY - rect.top;
+                      setIsDrawing(true);
+                      setCurrentPath([{ x, y }]);
+                    }
+                  }}
                 >
                   {/* Show the cropped image */}
                   <img 
@@ -793,6 +932,44 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)',
                       }}
                     />
+                  )}
+
+                  {/* Drawing Canvas Overlay */}
+                  {imgRef.current && (
+                    <svg
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: '50%',
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: imgRef.current.clientWidth,
+                        height: imgRef.current.clientHeight,
+                      }}
+                    >
+                      {/* Render completed paths */}
+                      {drawingPaths.map((path, i) => (
+                        <polyline
+                          key={i}
+                          points={path.points.map(p => `${p.x},${p.y}`).join(' ')}
+                          fill="none"
+                          stroke={path.color}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      ))}
+                      {/* Render current path being drawn */}
+                      {currentPath.length > 1 && (
+                        <polyline
+                          points={currentPath.map(p => `${p.x},${p.y}`).join(' ')}
+                          fill="none"
+                          stroke={drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020'}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      )}
+                    </svg>
                   )}
 
                   {/* Text Box Overlay - Draggable and Resizable */}
