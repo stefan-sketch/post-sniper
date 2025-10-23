@@ -143,7 +143,11 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
     const data = await response.json();
 
     console.log('[Livescores] API Response status:', response.status);
-    console.log('[Livescores] Fixtures found:', data.data?.length || 0);
+    console.log('[Livescores] Raw fixtures from API:', data.data?.length || 0);
+    
+    if (data.data && data.data.length > 0) {
+      console.log('[Livescores] Sample fixture:', JSON.stringify(data.data[0], null, 2));
+    }
 
     if (!data.data || data.data.length === 0) {
       console.log('[Livescores] No fixtures returned from API');
@@ -234,6 +238,11 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
       })
       .filter((match): match is Match => match !== null);
 
+    console.log('[Livescores] Processed matches:', matches.length);
+    if (matches.length > 0) {
+      console.log('[Livescores] Sample match:', JSON.stringify(matches[0], null, 2));
+    }
+    
     return matches;
   } catch (error) {
     console.error('Error fetching fixtures:', error);
