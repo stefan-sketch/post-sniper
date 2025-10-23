@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { publicProcedure, router } from '../_core/trpc';
 
 const SPORTMONKS_API_TOKEN = process.env.SPORTMONKS_API_TOKEN || '';
+const USE_MOCK_DATA = process.env.USE_MOCK_LIVESCORES === 'true';
 const SPORTMONKS_BASE_URL = 'https://api.sportmonks.com/v3/football';
 
 // League IDs
@@ -223,8 +224,181 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
   }
 }
 
+function getMockMatches(): Match[] {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  
+  return [
+    // Champions League - Live match with goals
+    {
+      id: '1',
+      homeTeam: 'Real Madrid',
+      awayTeam: 'Bayern Munich',
+      homeScore: 2,
+      awayScore: 1,
+      minute: 67,
+      status: 'live',
+      competition: 'Champions League',
+      goalScorers: [
+        { player: 'Vinícius Jr', minute: 23, team: 'home' },
+        { player: 'Bellingham', minute: 45, team: 'home' },
+        { player: 'Kane', minute: 58, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 67 * 60 * 1000).toISOString(),
+    },
+    // Champions League - Half time
+    {
+      id: '2',
+      homeTeam: 'Barcelona',
+      awayTeam: 'PSG',
+      homeScore: 1,
+      awayScore: 1,
+      minute: 45,
+      status: 'ht',
+      competition: 'Champions League',
+      goalScorers: [
+        { player: 'Lewandowski', minute: 12, team: 'home' },
+        { player: 'Mbappé', minute: 34, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 50 * 60 * 1000).toISOString(),
+    },
+    // Europa League - Live match
+    {
+      id: '3',
+      homeTeam: 'Arsenal',
+      awayTeam: 'Roma',
+      homeScore: 3,
+      awayScore: 0,
+      minute: 78,
+      status: 'live',
+      competition: 'Europa League',
+      goalScorers: [
+        { player: 'Saka', minute: 15, team: 'home' },
+        { player: 'Ødegaard', minute: 42, team: 'home' },
+        { player: 'Jesus', minute: 71, team: 'home' },
+      ],
+      kickoffTime: new Date(now.getTime() - 78 * 60 * 1000).toISOString(),
+    },
+    // Europa League - Finished
+    {
+      id: '4',
+      homeTeam: 'Sevilla',
+      awayTeam: 'Ajax',
+      homeScore: 2,
+      awayScore: 2,
+      minute: 90,
+      status: 'ft',
+      competition: 'Europa League',
+      goalScorers: [
+        { player: 'En-Nesyri', minute: 8, team: 'home' },
+        { player: 'Tadic', minute: 23, team: 'away' },
+        { player: 'Ocampos', minute: 67, team: 'home' },
+        { player: 'Brobbey', minute: 89, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 105 * 60 * 1000).toISOString(),
+    },
+    // Premier League - Live match
+    {
+      id: '5',
+      homeTeam: 'Liverpool',
+      awayTeam: 'Man City',
+      homeScore: 1,
+      awayScore: 2,
+      minute: 54,
+      status: 'live',
+      competition: 'Premier League',
+      goalScorers: [
+        { player: 'Salah', minute: 18, team: 'home' },
+        { player: 'Haaland', minute: 31, team: 'away' },
+        { player: 'De Bruyne', minute: 49, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 54 * 60 * 1000).toISOString(),
+    },
+    // Premier League - Upcoming
+    {
+      id: '6',
+      homeTeam: 'Chelsea',
+      awayTeam: 'Tottenham',
+      homeScore: 0,
+      awayScore: 0,
+      minute: 0,
+      status: 'upcoming',
+      competition: 'Premier League',
+      goalScorers: [],
+      kickoffTime: new Date(now.getTime() + 45 * 60 * 1000).toISOString(),
+    },
+    // Premier League - Finished
+    {
+      id: '7',
+      homeTeam: 'Man United',
+      awayTeam: 'Newcastle',
+      homeScore: 0,
+      awayScore: 1,
+      minute: 90,
+      status: 'ft',
+      competition: 'Premier League',
+      goalScorers: [
+        { player: 'Isak', minute: 76, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 120 * 60 * 1000).toISOString(),
+    },
+    // Championship - Live
+    {
+      id: '8',
+      homeTeam: 'Leeds United',
+      awayTeam: 'Southampton',
+      homeScore: 2,
+      awayScore: 2,
+      minute: 82,
+      status: 'live',
+      competition: 'Championship',
+      goalScorers: [
+        { player: 'Rutter', minute: 12, team: 'home' },
+        { player: 'Adams', minute: 28, team: 'away' },
+        { player: 'Gnonto', minute: 56, team: 'home' },
+        { player: 'Armstrong', minute: 79, team: 'away' },
+      ],
+      kickoffTime: new Date(now.getTime() - 82 * 60 * 1000).toISOString(),
+    },
+    // Championship - Upcoming
+    {
+      id: '9',
+      homeTeam: 'Leicester City',
+      awayTeam: 'Ipswich Town',
+      homeScore: 0,
+      awayScore: 0,
+      minute: 0,
+      status: 'upcoming',
+      competition: 'Championship',
+      goalScorers: [],
+      kickoffTime: new Date(now.getTime() + 90 * 60 * 1000).toISOString(),
+    },
+    // Championship - Finished
+    {
+      id: '10',
+      homeTeam: 'Burnley',
+      awayTeam: 'Sheffield United',
+      homeScore: 3,
+      awayScore: 1,
+      minute: 90,
+      status: 'ft',
+      competition: 'Championship',
+      goalScorers: [
+        { player: 'Foster', minute: 15, team: 'home' },
+        { player: 'McBurnie', minute: 34, team: 'away' },
+        { player: 'Brownhill', minute: 67, team: 'home' },
+        { player: 'Zaroury', minute: 88, team: 'home' },
+      ],
+      kickoffTime: new Date(now.getTime() - 110 * 60 * 1000).toISOString(),
+    },
+  ];
+}
+
 export const livescoresRouter = router({
   getLivescores: publicProcedure.query(async () => {
+    if (USE_MOCK_DATA) {
+      return { matches: getMockMatches() };
+    }
     const matches = await fetchTodaysFixtures();
     return { matches };
   }),
