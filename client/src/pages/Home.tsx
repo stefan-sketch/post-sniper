@@ -678,7 +678,7 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
           style={{
-            transform: feedColumns === 3 || isAnimatingOut ? 'translateX(20px) scale(0.98)' : 'translateX(0) scale(1)',
+            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >
@@ -794,7 +794,7 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
           style={{
-            transform: feedColumns === 3 || isAnimatingOut ? 'translateX(20px) scale(0.98)' : 'translateX(0) scale(1)',
+            transform: feedColumns === 3 || isAnimatingOut ? 'scale(0.98)' : 'scale(1)',
             opacity: feedColumns === 3 || isAnimatingOut ? 0.95 : 1
           }}
         >

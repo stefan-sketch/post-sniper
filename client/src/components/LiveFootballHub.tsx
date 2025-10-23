@@ -67,12 +67,14 @@ export default function LiveFootballHub() {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2 flex-1 justify-center">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" className="animate-pulse" />
-          </svg>
-          LIVE FOOTBALL HUB
-        </h2>
+        <div className="flex items-center justify-center gap-2 flex-1">
+          <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" className="animate-pulse" />
+            </svg>
+            LIVE FOOTBALL HUB
+          </h2>
+        </div>
       </div>
 
       {/* Separator line */}
