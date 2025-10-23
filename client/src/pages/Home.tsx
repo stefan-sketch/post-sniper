@@ -30,7 +30,6 @@ export default function Home() {
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
   const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track when Football Hub is sliding out
-  const [footballPressed, setFootballPressed] = useState(false);
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -488,7 +487,7 @@ export default function Home() {
               </svg>
             </button>
 
-            {/* Column Toggle - Desktop only, Feed view only */}
+            {/* Football Toggle - Desktop only, Feed view only */}
             {currentView === 'feed' && (
               <button
                 onClick={() => {
@@ -505,38 +504,31 @@ export default function Home() {
                   }
                 }}
                 className="hidden md:block group relative p-2 rounded-lg bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-500/20 active:scale-95"
-                title={feedColumns === 2 ? 'Show Live Football Hub (3 columns)' : 'Hide Live Football Hub (2 columns)'}
+                title={feedColumns === 2 ? 'Show Live Football Hub' : 'Hide Live Football Hub'}
               >
                 {/* Animated glow ring */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-500/0 via-green-500/50 to-green-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
+                <div className={`absolute inset-0 rounded-lg bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 ${
+                  feedColumns === 3 || isAnimatingOut
+                    ? 'from-green-500/50 via-green-500/80 to-green-500/50 opacity-100 animate-pulse'
+                    : 'from-green-500/0 via-green-500/50 to-green-500/0 group-hover:opacity-100'
+                }`}></div>
                 
-                {/* Icon - Grid layout */}
+                {/* Football Icon */}
                 <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
+                  className={`relative z-10 transition-all duration-300 ${
+                    feedColumns === 3 || isAnimatingOut
+                      ? 'text-green-400 animate-spin'
+                      : 'text-gray-400 group-hover:text-green-400'
+                  }`}
                   width="20" 
                   height="20" 
                   viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  className="relative z-10 transition-all duration-300"
+                  fill="currentColor"
                 >
-                  {feedColumns === 2 ? (
-                    // 2 columns icon
-                    <>
-                      <rect x="3" y="3" width="7" height="18" />
-                      <rect x="14" y="3" width="7" height="18" />
-                    </>
-                  ) : (
-                    // 3 columns icon
-                    <>
-                      <rect x="3" y="3" width="5" height="18" />
-                      <rect x="10" y="3" width="4" height="18" />
-                      <rect x="16" y="3" width="5" height="18" />
-                    </>
-                  )}
+                  {/* Football/Soccer ball icon */}
+                  <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                  <path d="M12 6l1.5 4.5h4.5l-3.5 2.5 1.5 4.5-3.5-2.5-3.5 2.5 1.5-4.5-3.5-2.5h4.5z" opacity="0.7" />
                 </svg>
               </button>
             )}
@@ -553,42 +545,9 @@ export default function Home() {
             >
               <Settings className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
-            {/* Football Icon + Title */}
-            <button
-              onMouseDown={() => setFootballPressed(true)}
-              onMouseUp={() => setFootballPressed(false)}
-              onMouseLeave={() => setFootballPressed(false)}
-              onTouchStart={() => setFootballPressed(true)}
-              onTouchEnd={() => setFootballPressed(false)}
-              className="flex items-center gap-2 group cursor-pointer transition-transform active:scale-95"
-            >
-              {/* Football Icon */}
-              <svg 
-                className={`w-6 h-6 md:w-8 md:h-8 transition-all duration-300 ${
-                  footballPressed 
-                    ? 'text-red-500 animate-spin' 
-                    : 'text-white group-hover:text-green-400'
-                }`}
-                viewBox="0 0 24 24" 
-                fill="currentColor"
-              >
-                {/* Football/Soccer ball icon */}
-                <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                <path d="M12 6l1.5 4.5h4.5l-3.5 2.5 1.5 4.5-3.5-2.5-3.5 2.5 1.5-4.5-3.5-2.5h4.5z" opacity="0.7" />
-              </svg>
-              
-              <h1 
-                className={`text-xl md:text-2xl font-bold tracking-wider transition-colors duration-300 ${
-                  footballPressed 
-                    ? 'text-red-500' 
-                    : 'text-white'
-                }`}
-                style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}
-              >
-                SDL MEDIA
-              </h1>
-            </button>
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+              SDL MEDIA
+            </h1>
             {/* Create post button - desktop only */}
             <Button
               variant="ghost"
