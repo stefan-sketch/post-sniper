@@ -120,6 +120,32 @@ interface Match {
   kickoffTime: string;
 }
 
+async function fetchInplayMatches(): Promise<Match[]> {
+  if (!SPORTMONKS_API_TOKEN) {
+    return [];
+  }
+
+  const leagueIds = Object.values(LEAGUE_IDS).join(',');
+  const url = `${SPORTMONKS_BASE_URL}/livescores/inplay?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds}`;
+
+  try {
+    console.log('[Livescores] Fetching inplay matches');
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data.data || data.data.length === 0) {
+      console.log('[Livescores] No inplay matches');
+      return [];
+    }
+
+    console.log('[Livescores] Inplay matches:', data.data.length);
+    return processFixtures(data.data);
+  } catch (error) {
+    console.error('[Livescores] Error fetching inplay matches:', error);
+    return [];
+  }
+}
+
 async function fetchTodaysFixtures(): Promise<Match[]> {
   if (!SPORTMONKS_API_TOKEN) {
     console.error('SPORTMONKS_API_TOKEN not set');
@@ -157,8 +183,16 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
       return [];
     }
 
-    const matches: Match[] = data.data
-      .map((fixture: SportmonksFixture) => {
+    return processFixtures(data.data);
+  } catch (error) {
+    console.error('Error fetching fixtures:', error);
+    return [];
+  }
+}
+
+function processFixtures(fixtures: SportmonksFixture[]): Match[] {
+  return fixtures
+    .map((fixture: SportmonksFixture) => {
         try {
           // Get participants
           const homeParticipant = fixture.participants?.find(p => p.meta.location === 'home');
@@ -237,17 +271,6 @@ async function fetchTodaysFixtures(): Promise<Match[]> {
         }
       })
       .filter((match): match is Match => match !== null);
-
-    console.log('[Livescores] Processed matches:', matches.length);
-    if (matches.length > 0) {
-      console.log('[Livescores] Sample match:', JSON.stringify(matches[0], null, 2));
-    }
-    
-    return matches;
-  } catch (error) {
-    console.error('Error fetching fixtures:', error);
-    return [];
-  }
 }
 
 function getMockMatches(): Match[] {
@@ -425,7 +448,26 @@ export const livescoresRouter = router({
     if (USE_MOCK_DATA) {
       return { matches: getMockMatches() };
     }
-    const matches = await fetchTodaysFixtures();
+    
+    // Fetch both inplay matches and today's fixtures
+    const [inplayMatches, todaysFixtures] = await Promise.all([
+      fetchInplayMatches(),
+      fetchTodaysFixtures(),
+    ]);
+    
+    // Merge matches, preferring inplay data for live matches
+    const matchMap = new Map<string, Match>();
+    
+    // Add all fixtures first
+    todaysFixtures.forEach(match => matchMap.set(match.id, match));
+    
+    // Override with inplay data (more up-to-date)
+    inplayMatches.forEach(match => matchMap.set(match.id, match));
+    
+    const matches = Array.from(matchMap.values());
+    console.log('[Livescores] Total matches after merge:', matches.length);
+    console.log('[Livescores] Live matches:', matches.filter(m => m.status === 'live').length);
+    
     return { matches };
   }),
 });
