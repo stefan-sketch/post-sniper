@@ -1091,17 +1091,6 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        {tweet.image && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                            onClick={() => handleDownload(tweet.image)}
-                            title="Download image"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
                         {tweet.text && (
                           <Button
                             size="sm"
@@ -1110,9 +1099,9 @@ export default function Home() {
                             onClick={() => {
                               const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
                               navigator.clipboard.writeText(cleanText);
-                              toast.success('Tweet copied to clipboard');
+                              toast.success('Caption copied to clipboard');
                             }}
-                            title="Copy tweet"
+                            title="Copy caption"
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -1166,34 +1155,16 @@ export default function Home() {
                         {/* Overlay buttons in 3-column mode */}
                         {(feedColumns === 3 || isAnimatingOut) && (
                           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDownload(tweet.image);
+                                handleCopyImage(tweet.image);
                               }}
-                              title="Download image"
+                              className="h-8 w-8 rounded bg-pink-500/80 hover:bg-pink-600 text-white flex items-center justify-center transition-all hover:scale-110"
+                              title="Copy image to clipboard"
                             >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            {tweet.text && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0 bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                                  navigator.clipboard.writeText(cleanText);
-                                  toast.success('Tweet copied to clipboard');
-                                }}
-                                title="Copy tweet"
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            )}
+                              <Copy className="h-4 w-4" />
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1556,17 +1527,6 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      {tweet.image && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                          onClick={() => handleDownload(tweet.image)}
-                          title="Download image"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      )}
                       {tweet.text && (
                         <Button
                           size="sm"
@@ -1575,9 +1535,9 @@ export default function Home() {
                           onClick={() => {
                             const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
                             navigator.clipboard.writeText(cleanText);
-                            toast.success('Tweet copied to clipboard');
+                            toast.success('Caption copied to clipboard');
                           }}
-                          title="Copy tweet"
+                          title="Copy caption"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
