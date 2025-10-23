@@ -57,6 +57,7 @@ export default function Home() {
   const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
   const [twitterPlaying, setTwitterPlaying] = useState(true); // Control Twitter API polling
   const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
+  const [showAllPopularPosts, setShowAllPopularPosts] = useState(false); // Track if "SEE MORE" clicked for Popular posts
   const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
@@ -1050,7 +1051,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1877F2] to-transparent animate-pulse"></div>
                   </div>
                 )}
-                {popularPosts.map((post, index) => {
+                {(showAllPopularPosts ? popularPosts : popularPosts.slice(0, 25)).map((post, index) => {
                   const currentRank = index + 1;
                   const previousRank = previousPopularRankings.get(post.id);
                   const rankingChange = previousRank ? previousRank - currentRank : undefined;
@@ -1075,6 +1076,14 @@ export default function Home() {
                     </div>
                   );
                 })}
+                {!showAllPopularPosts && popularPosts.length > 25 && (
+                  <button
+                    onClick={() => setShowAllPopularPosts(true)}
+                    className="w-full py-3 px-4 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] font-semibold rounded-lg transition-all"
+                  >
+                    SEE MORE ({popularPosts.length - 25} more posts)
+                  </button>
+                )}
               </>
             ) : (
               <>
