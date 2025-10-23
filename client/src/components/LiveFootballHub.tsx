@@ -165,39 +165,13 @@ export default function LiveFootballHub() {
     return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
   };
 
-  // Helper function to format kickoff time in UK timezone (BST/GMT)
+  // Helper function to format kickoff time
+  // API returns time in Europe/London timezone (BST/GMT) based on timezone parameter
   const formatKickoffTime = (kickoffTime: string) => {
-    // Parse the UTC time from API
-    const utcDate = new Date(kickoffTime);
-    
-    // Check if we're in BST (British Summer Time) - last Sunday of March to last Sunday of October
-    const year = utcDate.getUTCFullYear();
-    const month = utcDate.getUTCMonth();
-    
-    // Simple BST check: BST runs from late March to late October
-    // For now, assume BST (UTC+1) during this period
-    const isBST = month >= 2 && month <= 9; // March (2) through October (9)
-    const offset = isBST ? 1 : 0; // BST is UTC+1, GMT is UTC+0
-    
-    console.log('Timezone conversion:', {
-      kickoffTime,
-      utcDate: utcDate.toISOString(),
-      month,
-      isBST,
-      offset
-    });
-    
-    // Add offset to UTC time
-    const localDate = new Date(utcDate.getTime() + (offset * 60 * 60 * 1000));
-    
-    // Format as HH:MM
-    const hours = localDate.getUTCHours().toString().padStart(2, '0');
-    const minutes = localDate.getUTCMinutes().toString().padStart(2, '0');
-    
-    const result = `${hours}:${minutes}`;
-    console.log('Formatted time:', result);
-    
-    return result;
+    const date = new Date(kickoffTime);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   };
 
   // Helper function to get time until kickoff
