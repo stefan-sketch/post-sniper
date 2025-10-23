@@ -356,22 +356,9 @@ export default function LiveFootballHub() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {/* Status Badge */}
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                      leagueStatus.status === 'live' 
-                        ? 'bg-red-500 text-white animate-pulse' 
-                        : leagueStatus.status === 'ht'
-                        ? 'bg-orange-500 text-white'
-                        : leagueStatus.status === 'upcoming'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-600 text-gray-300'
-                    }`}>
-                      {leagueStatus.status === 'live' ? `${leagueStatus.minute}'` : leagueStatus.status === 'ht' ? 'HT' : leagueStatus.status === 'upcoming' ? 'UPCOMING' : 'FT'}
-                    </span>
-                    
-                    {/* Competition Name */}
+                    {/* Competition Name with Match Count */}
                     <span className={`text-xs font-semibold ${competitionColors[competition]}`}>
-                      {competition}
+                      {competition} ({leagueMatches.length})
                     </span>
                   </div>
                   
