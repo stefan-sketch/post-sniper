@@ -1063,7 +1063,7 @@ export default function Home() {
                       animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                     }}
                   >
-                    <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
+                    <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors" data-tweet-id={tweet.id}>
                     {/* Profile Header */}
                     <div className="p-4 flex items-center gap-3">
                       <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
@@ -1123,93 +1123,54 @@ export default function Home() {
                               className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
                               onClick={async () => {
                                 try {
-                                  // Create canvas for screenshot
-                                  const canvas = document.createElement('canvas');
-                                  const ctx = canvas.getContext('2d');
-                                  if (!ctx) return;
-
-                                  // Set canvas size (Twitter-like dimensions)
-                                  const width = 600;
-                                  const padding = 24;
-                                  const lineHeight = 24;
-                                  const avatarSize = 48;
-                                  const borderRadius = 16;
-
-                                  // Calculate text height
-                                  ctx.font = '15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                                  const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                                  const words = cleanText.split(' ');
-                                  const lines = [];
-                                  let currentLine = '';
-                                  const maxWidth = width - (padding * 2);
-
-                                  for (const word of words) {
-                                    const testLine = currentLine + (currentLine ? ' ' : '') + word;
-                                    const metrics = ctx.measureText(testLine);
-                                    if (metrics.width > maxWidth && currentLine) {
-                                      lines.push(currentLine);
-                                      currentLine = word;
-                                    } else {
-                                      currentLine = testLine;
-                                    }
-                                  }
-                                  if (currentLine) lines.push(currentLine);
-
-                                  const textHeight = lines.length * lineHeight;
-                                  const height = padding + avatarSize + 12 + textHeight + padding;
-
-                                  canvas.width = width;
-                                  canvas.height = height;
-
-                                  // Draw rounded rectangle background
-                                  ctx.fillStyle = '#15202B';
-                                  ctx.beginPath();
-                                  ctx.moveTo(borderRadius, 0);
-                                  ctx.lineTo(width - borderRadius, 0);
-                                  ctx.quadraticCurveTo(width, 0, width, borderRadius);
-                                  ctx.lineTo(width, height - borderRadius);
-                                  ctx.quadraticCurveTo(width, height, width - borderRadius, height);
-                                  ctx.lineTo(borderRadius, height);
-                                  ctx.quadraticCurveTo(0, height, 0, height - borderRadius);
-                                  ctx.lineTo(0, borderRadius);
-                                  ctx.quadraticCurveTo(0, 0, borderRadius, 0);
-                                  ctx.closePath();
-                                  ctx.fill();
-
-                                  // Load and draw avatar
-                                  const avatar = new Image();
-                                  avatar.crossOrigin = 'anonymous';
-                                  avatar.src = tweet.author.avatar;
-                                  await new Promise((resolve) => { avatar.onload = resolve; });
-
-                                  ctx.save();
-                                  ctx.beginPath();
-                                  ctx.arc(padding + avatarSize/2, padding + avatarSize/2, avatarSize/2, 0, Math.PI * 2);
-                                  ctx.closePath();
-                                  ctx.clip();
-                                  ctx.drawImage(avatar, padding, padding, avatarSize, avatarSize);
-                                  ctx.restore();
-
-                                  // Draw author name
-                                  ctx.fillStyle = '#FFFFFF';
-                                  ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                                  ctx.fillText(tweet.author.name, padding + avatarSize + 12, padding + 20);
-
-                                  // Draw username
-                                  ctx.fillStyle = '#8B98A5';
-                                  ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                                  ctx.fillText(`@${tweet.author.username}`, padding + avatarSize + 12, padding + 40);
-
-                                  // Draw tweet text
-                                  ctx.fillStyle = '#FFFFFF';
-                                  ctx.font = '15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                                  let y = padding + avatarSize + 12 + 8;
-                                  for (const line of lines) {
-                                    ctx.fillText(line, padding, y);
-                                    y += lineHeight;
+                                  const html2canvas = (await import('html2canvas')).default;
+                                  
+                                  // Find the tweet card element
+                                  const tweetCard = document.querySelector(`[data-tweet-id="${tweet.id}"]`);
+                                  if (!tweetCard) {
+                                    toast.error('Tweet element not found');
+                                    return;
                                   }
 
-                                  // Download screenshot
+                                  // Create a temporary container with just header + text
+                                  const tempContainer = document.createElement('div');
+                                  tempContainer.style.position = 'absolute';
+                                  tempContainer.style.left = '-9999px';
+                                  tempContainer.style.top = '0';
+                                  tempContainer.style.width = '600px';
+                                  tempContainer.style.background = 'rgb(21, 32, 43)';
+                                  tempContainer.style.borderRadius = '16px';
+                                  tempContainer.style.overflow = 'hidden';
+                                  tempContainer.style.padding = '0';
+                                  document.body.appendChild(tempContainer);
+
+                                  // Clone header and text sections
+                                  const header = tweetCard.querySelector('.p-4.flex.items-center.gap-3');
+                                  const textSection = tweetCard.querySelector('.px-4.pb-2');
+                                  
+                                  if (header) {
+                                    const headerClone = header.cloneNode(true) as HTMLElement;
+                                    tempContainer.appendChild(headerClone);
+                                  }
+                                  
+                                  if (textSection) {
+                                    const textClone = textSection.cloneNode(true) as HTMLElement;
+                                    tempContainer.appendChild(textClone);
+                                  }
+
+                                  // Capture with html2canvas
+                                  const canvas = await html2canvas(tempContainer, {
+                                    backgroundColor: 'rgb(21, 32, 43)',
+                                    scale: 2, // Higher quality
+                                    logging: false,
+                                    useCORS: true,
+                                    allowTaint: true
+                                  });
+
+                                  // Clean up temp container
+                                  document.body.removeChild(tempContainer);
+
+                                  // Download
                                   canvas.toBlob((blob) => {
                                     if (!blob) return;
                                     const url = URL.createObjectURL(blob);
