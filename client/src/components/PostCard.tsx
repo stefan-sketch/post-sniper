@@ -72,10 +72,14 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
     e.stopPropagation();
     if (post.image) {
       try {
-        // Check if clipboard API is available (not available in iOS PWA)
+        // Detect iOS devices specifically (iPhone, iPad, iPod)
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        // Check if clipboard API is available
         const isClipboardAvailable = navigator.clipboard && typeof ClipboardItem !== 'undefined';
         
-        if (!isClipboardAvailable) {
+        // Only use download fallback on iOS devices where clipboard might not work in PWA
+        if (isIOS && !isClipboardAvailable) {
           // Fallback for iOS PWA: Download the image instead
           const response = await fetch(post.image);
           const blob = await response.blob();
