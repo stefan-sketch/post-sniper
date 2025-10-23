@@ -95,15 +95,27 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           return;
         }
         
-        // Fetch the image
-        const response = await fetch(post.image);
-        const blob = await response.blob();
-        
-        // Copy image blob directly to clipboard
-        // Safari supports both image/png and image/jpeg
+        // Safari PWA requires clipboard.write() to be called synchronously in the user gesture
+        // We pass a Promise to ClipboardItem to maintain the gesture chain
         await navigator.clipboard.write([
           new ClipboardItem({
-            [blob.type]: blob
+            'image/png': fetch(post.image)
+              .then(response => response.blob())
+              .then(blob => {
+                // Convert to PNG for better compatibility
+                return new Promise<Blob>((resolve) => {
+                  const img = new Image();
+                  img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0);
+                    canvas.toBlob((pngBlob) => resolve(pngBlob!), 'image/png');
+                  };
+                  img.src = URL.createObjectURL(blob);
+                });
+              })
           })
         ]);
         
