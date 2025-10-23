@@ -589,7 +589,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   }
                 }}
                 disabled={!image}
-                className={`flex-1 transition-all duration-200 ${
+                className={`flex-1 transition-all duration-200 relative z-50 ${
                   !image
                     ? "opacity-50 cursor-not-allowed"
                     : cropMode

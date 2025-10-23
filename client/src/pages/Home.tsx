@@ -692,7 +692,7 @@ export default function Home() {
           <div 
             className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: isViewSwitching ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
+              animation: (isViewSwitching || viewTransition === 'to-feed') ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
             }}
           >
             <LiveFootballHub />
