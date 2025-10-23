@@ -1085,7 +1085,10 @@ export default function Home() {
                     {/* Tweet Image (if available) */}
                     {tweet.image && (
                       <div 
-                        className={`w-full overflow-hidden cursor-pointer relative group ${feedColumns === 3 || isAnimatingOut ? '' : 'mt-2'}`}
+                        className={`w-full overflow-hidden cursor-pointer relative group ${feedColumns === 3 || isAnimatingOut ? '-mx-2 mt-2' : 'mt-2'}`}
+                        style={{
+                          width: feedColumns === 3 || isAnimatingOut ? 'calc(100% + 1rem)' : '100%'
+                        }}
                         onClick={() => {
                           // Deep link to X app on mobile, fallback to web on desktop
                           const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;

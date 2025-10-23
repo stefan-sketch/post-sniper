@@ -379,6 +379,19 @@
   font-size: 0.7rem;
 }
 
+/* Make tweet images fill edge-to-edge */
+.compact-posts .glass-card > div:last-child {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.compact-posts .glass-card img:not(.rounded-full) {
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
 /* Enhanced react-image-crop styling */
 .ReactCrop {
   position: relative;
