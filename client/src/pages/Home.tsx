@@ -55,6 +55,8 @@ export default function Home() {
   const [showLiveScrollTop, setShowLiveScrollTop] = useState(false);
   const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
   const [twitterPlaying, setTwitterPlaying] = useState(true); // Control Twitter API polling
+  const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
+  const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -801,7 +803,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
               </div>
             )}
-            {livePosts.map((post) => {
+            {(showAllLivePosts ? livePosts : livePosts.slice(0, 25)).map((post) => {
               const isNew = newPostIds.has(post.id);
               const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
                 ? post.reactions - post.previousReactions 
@@ -820,6 +822,14 @@ export default function Home() {
                 </div>
               );
             })}
+            {!showAllLivePosts && livePosts.length > 25 && (
+              <button
+                onClick={() => setShowAllLivePosts(true)}
+                className="w-full py-3 px-4 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] font-semibold rounded-lg transition-all"
+              >
+                SEE MORE ({livePosts.length - 25} more posts)
+              </button>
+            )}
           </div>
         </div>
 
@@ -994,7 +1004,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
                   </div>
                 )}
-                {twitterQuery.data?.tweets?.map((tweet: any) => {
+                {(showAllTwitterPosts ? twitterQuery.data?.tweets : twitterQuery.data?.tweets?.slice(0, 25))?.map((tweet: any) => {
                   const isNew = newTweetIds.has(tweet.id);
                   
                   // Format timestamp using the same logic as PostCard
@@ -1167,7 +1177,15 @@ export default function Home() {
                     </div>
                   </div>
                   );
-                })}
+                 })}
+                {!showAllTwitterPosts && twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 25 && (
+                  <button
+                    onClick={() => setShowAllTwitterPosts(true)}
+                    className="w-full py-3 px-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-all"
+                  >
+                    SEE MORE ({twitterQuery.data.tweets.length - 25} more tweets)
+                  </button>
+                )}
               </>
             )}
           </div>
