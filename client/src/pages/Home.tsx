@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2 } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 import PagesSettingsDialog from "@/components/PagesSettingsDialog";
 import AlertsDialog from "@/components/AlertsDialog";
@@ -210,6 +210,78 @@ export default function Home() {
       utils.alerts.unreadCount.invalidate();
     },
   });
+
+  // Handle copy image to clipboard for tweets
+  const handleCopyTweetImage = async (imageUrl: string) => {
+    try {
+      // Detect iOS devices specifically (iPhone, iPad, iPod)
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      
+      // Check if clipboard API is available
+      const isClipboardAvailable = navigator.clipboard && typeof ClipboardItem !== 'undefined';
+      
+      // Only use download fallback on iOS devices where clipboard might not work in PWA
+      if (isIOS && !isClipboardAvailable) {
+        // Fallback for iOS PWA: Download the image instead
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tweet-image.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("Image downloaded! (Clipboard not available in PWA)");
+        return;
+      }
+      
+      // Safari PWA requires clipboard.write() to be called synchronously in the user gesture
+      // We pass a Promise to ClipboardItem to maintain the gesture chain
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'image/png': fetch(imageUrl)
+            .then(response => response.blob())
+            .then(blob => {
+              // Convert to PNG for better compatibility
+              return new Promise<Blob>((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  const ctx = canvas.getContext('2d');
+                  ctx?.drawImage(img, 0, 0);
+                  canvas.toBlob((pngBlob) => resolve(pngBlob!), 'image/png');
+                };
+                img.src = URL.createObjectURL(blob);
+              });
+            })
+        })
+      ]);
+      
+      toast.success("Image copied to clipboard!");
+    } catch (error) {
+      console.error('Copy failed:', error);
+      // Fallback: Try to download instead
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tweet-image.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("Image downloaded! (Copy to clipboard failed)");
+      } catch (downloadError) {
+        toast.error("Failed to copy or download image");
+      }
+    }
+  };
 
   // Process and organize posts (now from cached server data)
   const { livePosts, popularPosts } = useMemo(() => {
@@ -1295,21 +1367,19 @@ export default function Home() {
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
                         />
-                        {/* Overlay buttons in 3-column mode */}
-                        {(feedColumns === 3 || isAnimatingOut) && (
-                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCopyImage(tweet.image);
-                              }}
-                              className="h-8 w-8 rounded bg-pink-500/80 hover:bg-pink-600 text-white flex items-center justify-center transition-all hover:scale-110"
-                              title="Copy image to clipboard"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
+                        {/* Copy image button overlay - always visible on hover */}
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyTweetImage(tweet.image);
+                            }}
+                            className="h-8 w-8 rounded bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
+                            title="Copy image to clipboard"
+                          >
+                            <ImageIcon className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     )}
                     </div>
