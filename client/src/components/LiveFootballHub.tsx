@@ -282,7 +282,7 @@ export default function LiveFootballHub() {
                     </span>
                     
                     {/* Competition Name */}
-                    <span className={`text-base font-semibold ${competitionColors[competition]}`}>
+                    <span className={`text-xs font-semibold ${competitionColors[competition]}`}>
                       {competition}
                     </span>
                   </div>
@@ -329,7 +329,10 @@ export default function LiveFootballHub() {
 
                         {/* Star Button */}
                         <button
-                          onClick={() => toggleFavorite(match.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(match.id);
+                          }}
                           className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded transition-colors z-10"
                           title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
                         >
@@ -345,14 +348,9 @@ export default function LiveFootballHub() {
                           {/* Home Team */}
                           <div>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1">
-                                <span className="text-base font-semibold text-white truncate">
-                                  {match.homeTeam}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  ({match.homeXg})
-                                </span>
-                              </div>
+                              <span className="text-sm font-semibold text-white truncate flex-1">
+                                {match.homeTeam}
+                              </span>
                               <span className={`text-2xl font-bold ml-2 ${
                                 match.justScored ? 'text-red-400' : 'text-white'
                               }`}>
@@ -369,14 +367,9 @@ export default function LiveFootballHub() {
                           {/* Away Team */}
                           <div>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1">
-                                <span className="text-base font-medium text-gray-400 truncate">
-                                  {match.awayTeam}
-                                </span>
-                                <span className="text-xs text-gray-600">
-                                  ({match.awayXg})
-                                </span>
-                              </div>
+                              <span className="text-sm font-medium text-gray-400 truncate flex-1">
+                                {match.awayTeam}
+                              </span>
                               <span className={`text-2xl font-bold ml-2 ${
                                 match.justScored ? 'text-red-400' : 'text-gray-400'
                               }`}>
