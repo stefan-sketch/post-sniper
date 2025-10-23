@@ -59,6 +59,7 @@ export default function Home() {
   const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
   const [showAllPopularPosts, setShowAllPopularPosts] = useState(false); // Track if "SEE MORE" clicked for Popular posts
   const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
+  const [screenshotLoading, setScreenshotLoading] = useState<string | null>(null); // Track which tweet is being screenshot
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -1216,9 +1217,19 @@ export default function Home() {
                               size="sm"
                               variant="ghost"
                               className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                              disabled={screenshotLoading === tweet.id}
                               onClick={async () => {
+                                if (screenshotLoading) return; // Prevent multiple clicks
+                                setScreenshotLoading(tweet.id);
+                                
                                 try {
-                                  const html2canvas = (await import('html2canvas')).default;
+                                  // Set a timeout for the entire operation
+                                  const timeoutPromise = new Promise((_, reject) => 
+                                    setTimeout(() => reject(new Error('Screenshot timeout')), 10000)
+                                  );
+                                  
+                                  const screenshotPromise = (async () => {
+                                    const html2canvas = (await import('html2canvas')).default;
                                   
                                   // Clean tweet text (remove t.co links)
                                   const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
@@ -1288,11 +1299,17 @@ export default function Home() {
                                   text.style.wordWrap = 'break-word';
                                   tempContainer.appendChild(text);
 
-                                  // Wait for avatar to load
-                                  await new Promise((resolve) => {
-                                    if (avatar.complete) resolve(null);
-                                    else avatar.onload = () => resolve(null);
-                                  });
+                                  // Wait for avatar to load with timeout
+                                  await Promise.race([
+                                    new Promise((resolve) => {
+                                      if (avatar.complete) resolve(null);
+                                      else {
+                                        avatar.onload = () => resolve(null);
+                                        avatar.onerror = () => resolve(null); // Continue even if avatar fails
+                                      }
+                                    }),
+                                    new Promise((resolve) => setTimeout(resolve, 3000)) // 3 second timeout
+                                  ]);
 
                                   // Capture with html2canvas at high quality
                                   const canvas = await html2canvas(tempContainer, {
@@ -1321,9 +1338,17 @@ export default function Home() {
                                     URL.revokeObjectURL(url);
                                     toast.success('Screenshot downloaded');
                                   }, 'image/png', 1.0);
+                                  })();
+                                  
+                                  // Race between screenshot and timeout
+                                  await Promise.race([screenshotPromise, timeoutPromise]);
                                 } catch (error) {
                                   console.error('Screenshot failed:', error);
-                                  toast.error('Screenshot failed');
+                                  toast.error(error instanceof Error && error.message === 'Screenshot timeout' 
+                                    ? 'Screenshot timed out' 
+                                    : 'Screenshot failed');
+                                } finally {
+                                  setScreenshotLoading(null);
                                 }
                               }}
                               title="Screenshot tweet"
