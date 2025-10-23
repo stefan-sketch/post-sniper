@@ -148,6 +148,7 @@ export class BackgroundJobService {
       }
       
       console.log(`[BackgroundJob] Fetching posts for ${monitoredPages.length} monitored pages and ${managedPages.length} managed pages`);
+      console.log(`[BackgroundJob] Managed pages:`, managedPages.map(p => ({ id: p.id, name: p.profileName, profileId: p.profileId })));
 
       const db = await getDb();
       if (!db) {
@@ -157,10 +158,16 @@ export class BackgroundJobService {
 
       // Collect all fetched posts to calculate hash BEFORE caching
       const allFetchedPosts: any[] = [];
+      let totalNewPosts = 0;
+      let totalUpdatedPosts = 0;
 
       // Fetch posts for each page (both monitored and managed)
       for (const page of allPages) {
         try {
+          const isManaged = managedPages.some(mp => mp.id === page.id);
+          const pageType = isManaged ? 'MANAGED' : 'MONITORED';
+          console.log(`[BackgroundJob] Fetching ${pageType} page: ${page.profileName} (${page.profileId})`);
+          
           const posts = await this.fetchPostsForPage(
             page.profileId,
             apiToken
@@ -169,12 +176,14 @@ export class BackgroundJobService {
           // Log sample post data to debug stale data issue
           if (posts.length > 0) {
             const samplePost = posts[0];
-            console.log(`[BackgroundJob] Sample post from ${page.profileName}:`, {
+            console.log(`[BackgroundJob] [${pageType}] Sample post from ${page.profileName}:`, {
               id: samplePost.id,
               message: samplePost.message?.substring(0, 50),
               reactions: samplePost.kpi?.page_posts_reactions?.value || samplePost.reactions,
               timestamp: new Date().toISOString()
             });
+          } else {
+            console.log(`[BackgroundJob] [${pageType}] No posts found for ${page.profileName}`);
           }
 
           // Store posts for hash calculation
@@ -210,6 +219,23 @@ export class BackgroundJobService {
             const previousReactions = existingPost[0]?.reactions || cachedPost.reactions;
 
             // Upsert cached post with previousReactions tracking
+            const wasUpdated = existingPost.length > 0;
+            const metricsChanged = wasUpdated && (
+              existingPost[0].reactions !== cachedPost.reactions ||
+              existingPost[0].comments !== cachedPost.comments ||
+              existingPost[0].shares !== cachedPost.shares
+            );
+            
+            if (!wasUpdated) {
+              totalNewPosts++;
+            } else if (metricsChanged) {
+              totalUpdatedPosts++;
+              console.log(`[BackgroundJob] [${pageType}] Metrics updated for post ${cachedPost.id.substring(0, 20)}:`, {
+                old: { reactions: existingPost[0].reactions, comments: existingPost[0].comments, shares: existingPost[0].shares },
+                new: { reactions: cachedPost.reactions, comments: cachedPost.comments, shares: cachedPost.shares }
+              });
+            }
+            
             await db
               .insert(cachedPosts)
               .values({ ...cachedPost, previousReactions })
@@ -300,6 +326,7 @@ export class BackgroundJobService {
       }
       
       console.log("[BackgroundJob] Successfully fetched and cached all posts");
+      console.log(`[BackgroundJob] Summary: ${totalNewPosts} new posts, ${totalUpdatedPosts} updated posts, ${allFetchedPosts.length - totalNewPosts - totalUpdatedPosts} unchanged posts`);
       
       // Set isFetchingFromAPI to false when done
       // TEMPORARILY DISABLED until migration runs
@@ -331,8 +358,9 @@ export class BackgroundJobService {
     const endDate = formatDate(nowUK);
     const period = `${startDate}_${endDate}`;
 
-    // Use the correct Fanpage Karma API endpoint (same as original working code)
-    const url = `https://app.fanpagekarma.com/api/v1/facebook/${profileId}/posts?token=${apiToken}&period=${period}`;
+    // Use the correct Fanpage Karma API endpoint with cache-busting timestamp
+    const timestamp = Date.now();
+    const url = `https://app.fanpagekarma.com/api/v1/facebook/${profileId}/posts?token=${apiToken}&period=${period}&_t=${timestamp}`;
     
     const response = await axios.get(url);
     
