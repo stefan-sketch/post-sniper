@@ -593,7 +593,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   !image
                     ? "opacity-50 cursor-not-allowed"
                     : cropMode
-                    ? "bg-green-500 hover:bg-green-600 text-white"
+                    ? "bg-green-500 hover:bg-green-400 text-white shadow-lg shadow-green-500/50 ring-2 ring-green-400/50 hover:shadow-green-400/60 hover:scale-105"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
                 title={cropMode ? "Confirm crop" : "Crop image"}
