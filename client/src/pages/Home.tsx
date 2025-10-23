@@ -1708,19 +1708,74 @@ export default function Home() {
       </div>
       </div>
 
-      {/* Bottom Navigation Bar - Rendered via Portal directly into body to bypass all container constraints */}
+      {/* Floating Action Buttons - Feed View */}
       {currentView === 'feed' && createPortal(
-        <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-          <div className="flex items-center justify-between px-4" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-            {/* Left side: Facebook + TrendingUp */}
-            <div className="flex items-center gap-1">
+        <>
+          {/* Create Post Button - Floating */}
+          <button
+            onClick={() => {
+              setDroppedImage(null);
+              setShowCreatePost(true);
+            }}
+            className="md:hidden fixed flex items-center justify-center p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
+            style={{ 
+              bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10000
+            }}
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+          
+          {/* Switch Button - Floating */}
+          <button
+            onClick={() => {
+              setIsViewSwitching(true);
+              setViewTransition('to-pages');
+              setTimeout(() => {
+                setCurrentView('pages');
+                setViewTransition('none');
+                setTimeout(() => {
+                  setIsViewSwitching(false);
+                }, 600);
+              }, 500);
+            }}
+            className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
+            style={{ 
+              bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
+              right: '20px',
+              zIndex: 10000
+            }}
+            title="Switch to Pages"
+          >
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <polyline points="17 1 21 5 17 9"/>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+              <polyline points="7 23 3 19 7 15"/>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            </svg>
+          </button>
+          
+          {/* Bottom Navigation Bar - 3 items centered */}
+          <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+            <div className="flex items-center justify-center gap-8 px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
               <button
                 onClick={() => setMobileView('live')}
                 className={`flex items-center justify-center transition-all p-2 ${
                   mobileView === 'live' ? 'text-[#1877F2]' : 'text-gray-400'
                 }`}
               >
-                <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
               </button>
@@ -1731,72 +1786,26 @@ export default function Home() {
                   mobileView === 'popular' ? 'text-green-500' : 'text-gray-400'
                 }`}
               >
-                <TrendingUp className="w-7 h-7" />
+                <TrendingUp className="w-8 h-8" />
               </button>
-            </div>
-            
-            {/* Center: Create Post Button */}
-            <button
-              onClick={() => {
-                setDroppedImage(null);
-                setShowCreatePost(true);
-              }}
-              className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
-            >
-              <Plus className="w-6 h-6" />
-            </button>
-            
-            {/* Right side: Twitter + Switch */}
-            <div className="flex items-center gap-1">
+              
               <button
                 onClick={() => setMobileView('twitter')}
                 className={`flex items-center justify-center transition-all p-2 ${
                   mobileView === 'twitter' ? 'text-white' : 'text-gray-400'
                 }`}
               >
-                <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </button>
-              
-              <button
-                onClick={() => {
-                  setIsViewSwitching(true);
-                  setViewTransition('to-pages');
-                  setTimeout(() => {
-                    setCurrentView('pages');
-                    setViewTransition('none');
-                    setTimeout(() => {
-                      setIsViewSwitching(false);
-                    }, 600);
-                  }, 500);
-                }}
-                className="flex items-center justify-center transition-all p-2 text-gray-400"
-                title="Switch to Pages"
-              >
-                <svg 
-                  width="28" 
-                  height="28" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <polyline points="17 1 21 5 17 9"/>
-                  <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                  <polyline points="7 23 3 19 7 15"/>
-                  <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
                 </svg>
               </button>
             </div>
           </div>
-        </div>,
+        </>,
         document.body
       )}
 
-      {/* Pages View Footer - Mobile only */}
+      {/* Floating Action Buttons - Pages View */}
       {currentView === 'pages' && (() => {
         const activePage = managedPagesQuery.data?.find((page: any, index: number) => 
           (index === 0 && pagesView === 'away-days') || 
@@ -1806,35 +1815,73 @@ export default function Home() {
         const tintColor = activePage?.borderColor || '#1F2937';
         
         return createPortal(
-          <div 
-            className="md:hidden fixed left-0 right-0 backdrop-blur-md border-t border-white/10" 
-            style={{ 
-              bottom: 0, 
-              zIndex: 9999, 
-              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-              backgroundColor: `${tintColor}15` // 15 is ~8% opacity in hex
-            }}
-          >
-            <div className="flex items-center justify-between px-4" style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-              {/* Left side: Empty for symmetry */}
-              <div className="flex items-center gap-1">
-                <div className="w-7 h-7"></div>
-                <div className="w-7 h-7"></div>
-              </div>
-              
-              {/* Center: Create Post Button */}
-              <button
-                onClick={() => {
-                  setDroppedImage(null);
-                  setShowCreatePost(true);
-                }}
-                className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
+          <>
+            {/* Create Post Button - Floating */}
+            <button
+              onClick={() => {
+                setDroppedImage(null);
+                setShowCreatePost(true);
+              }}
+              className="md:hidden fixed flex items-center justify-center p-4 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg transition-all"
+              style={{ 
+                bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 10000
+              }}
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+            
+            {/* Switch Button - Floating */}
+            <button
+              onClick={() => {
+                setIsViewSwitching(true);
+                setViewTransition('to-feed');
+                setTimeout(() => {
+                  setCurrentView('feed');
+                  setViewTransition('none');
+                  setTimeout(() => {
+                    setIsViewSwitching(false);
+                  }, 600);
+                }, 500);
+              }}
+              className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
+              style={{ 
+                bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
+                right: '20px',
+                zIndex: 10000
+              }}
+              title="Switch to Feed"
+            >
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
               >
-                <Plus className="w-6 h-6" />
-              </button>
-              
-              {/* Right side: Page Selectors + Switch */}
-              <div className="flex items-center gap-1">
+                <polyline points="17 1 21 5 17 9"/>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                <polyline points="7 23 3 19 7 15"/>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+              </svg>
+            </button>
+            
+            {/* Bottom Navigation Bar - 3 page selectors centered */}
+            <div 
+              className="md:hidden fixed left-0 right-0 backdrop-blur-md border-t border-white/10" 
+              style={{ 
+                bottom: 0, 
+                zIndex: 9999, 
+                paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                backgroundColor: `${tintColor}15` // 15 is ~8% opacity in hex
+              }}
+            >
+              <div className="flex items-center justify-center gap-8 px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
                 {/* Page Selector Buttons */}
                 {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
                   const isActive = (index === 0 && pagesView === 'away-days') || 
@@ -1849,12 +1896,12 @@ export default function Home() {
                         console.log('Switching to page:', viewName);
                         setPagesView(viewName as any);
                       }}
-                      className="flex items-center justify-center transition-all p-1"
+                      className="flex items-center justify-center transition-all p-2"
                     >
                       <div 
-                        className={`h-7 w-7 rounded-full overflow-hidden flex-shrink-0 transition-all ${
+                        className={`h-10 w-10 rounded-full overflow-hidden flex-shrink-0 transition-all ${
                           isActive 
-                            ? 'ring-1 ring-white/40 scale-105' 
+                            ? 'ring-2 ring-white/50 scale-110' 
                             : 'opacity-60'
                         }`}
                         style={{ 
@@ -1877,42 +1924,9 @@ export default function Home() {
                     </button>
                   );
                 })}
-                
-                {/* Switch Button */}
-                <button
-                  onClick={() => {
-                    setIsViewSwitching(true);
-                    setViewTransition('to-feed');
-                    setTimeout(() => {
-                      setCurrentView('feed');
-                      setViewTransition('none');
-                      setTimeout(() => {
-                        setIsViewSwitching(false);
-                      }, 600);
-                    }, 500);
-                  }}
-                  className="flex items-center justify-center transition-all p-2 text-gray-400"
-                  title="Switch to Feed"
-                >
-                  <svg 
-                    width="28" 
-                    height="28" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="17 1 21 5 17 9"/>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                  </svg>
-                </button>
               </div>
             </div>
-          </div>,
+          </>,
           document.body
         );
       })()}
