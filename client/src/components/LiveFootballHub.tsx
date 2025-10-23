@@ -17,9 +17,10 @@ interface Match {
   homeScore: number;
   awayScore: number;
   minute: number;
-  status: 'live' | 'ft' | 'ht';
+  status: 'upcoming' | 'live' | 'ft' | 'ht';
   competition: Competition;
   goalScorers: GoalScorer[];
+  kickoffTime: string;
   isFavorite: boolean;
   justScored?: boolean;
 }
@@ -67,8 +68,8 @@ export default function LiveFootballHub() {
         const prevTotal = previousScoresRef.current.get(newMatch.id) || 0;
         const newTotal = newMatch.homeScore + newMatch.awayScore;
 
-        // Check if there's a new goal
-        const justScored = prevMatch && newTotal > prevTotal;
+        // Check if there's a new goal (only for live/ht/ft matches, not upcoming)
+        const justScored = prevMatch && newMatch.status !== 'upcoming' && newTotal > prevTotal;
 
         if (justScored) {
           previousScoresRef.current.set(newMatch.id, newTotal);
@@ -124,14 +125,19 @@ export default function LiveFootballHub() {
     });
   };
 
-  // Group matches by competition
-  const matchesByCompetition = matches.reduce((acc, match) => {
-    if (!acc[match.competition]) {
-      acc[match.competition] = [];
-    }
-    acc[match.competition].push(match);
-    return acc;
-  }, {} as Record<Competition, Match[]>);
+  // Get favorited matches
+  const favoritedMatches = matches.filter(m => m.isFavorite);
+
+  // Group non-favorited matches by competition
+  const matchesByCompetition = matches
+    .filter(m => !m.isFavorite)
+    .reduce((acc, match) => {
+      if (!acc[match.competition]) {
+        acc[match.competition] = [];
+      }
+      acc[match.competition].push(match);
+      return acc;
+    }, {} as Record<Competition, Match[]>);
 
   // Sort competitions by priority
   const sortedCompetitions = Object.keys(matchesByCompetition).sort(
@@ -147,6 +153,9 @@ export default function LiveFootballHub() {
     const htMatch = leagueMatches.find(m => m.status === 'ht');
     if (htMatch) return { status: 'ht', minute: 45 };
     
+    const upcomingMatch = leagueMatches.find(m => m.status === 'upcoming');
+    if (upcomingMatch) return { status: 'upcoming', minute: 0 };
+    
     return { status: 'ft', minute: 90 };
   };
 
@@ -155,6 +164,119 @@ export default function LiveFootballHub() {
     const scorers = match.goalScorers.filter(s => s.team === team);
     if (scorers.length === 0) return null;
     return scorers.map(s => `${s.player} ${s.minute}'`).join(', ');
+  };
+
+  // Helper function to format kickoff time
+  const formatKickoffTime = (kickoffTime: string) => {
+    const date = new Date(kickoffTime);
+    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Render match card
+  const renderMatchCard = (match: Match, showCompetition: boolean = false) => {
+    const homeScorers = getTeamScorers(match, 'home');
+    const awayScorers = getTeamScorers(match, 'away');
+    const isFinished = match.status === 'ft';
+    const isLive = match.status === 'live';
+    const isUpcoming = match.status === 'upcoming';
+    
+    return (
+      <div
+        key={match.id}
+        className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border transition-all relative ${
+          isFinished ? 'p-2 opacity-60' : 'p-3'
+        } ${
+          match.justScored 
+            ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
+            : isLive
+            ? 'border-green-500/50 animate-pulse-border'
+            : match.isFavorite
+            ? 'border-yellow-500/50'
+            : 'border-white/10 hover:border-green-500/30'
+        }`}
+        style={{
+          animation: match.justScored ? 'shake-red 5s ease-in-out' : isLive ? 'pulse-border 2s ease-in-out infinite' : 'none'
+        }}
+      >
+        {/* Goal Animation Overlay */}
+        {match.justScored && (
+          <div className="absolute inset-0 bg-red-500/10 rounded-lg pointer-events-none animate-pulse-red" 
+               style={{ animation: 'pulse-red 5s ease-in-out' }} />
+        )}
+
+        {/* Competition Name (for favorites section) */}
+        {showCompetition && (
+          <div className={`text-[8px] font-semibold mb-1 ${competitionColors[match.competition]}`}>
+            {match.competition}
+          </div>
+        )}
+
+        {/* Star Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(match.id);
+          }}
+          className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded transition-colors z-10"
+          title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Star 
+            className={`w-4 h-4 transition-colors ${
+              match.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
+            }`}
+          />
+        </button>
+
+        {/* Teams and Scores */}
+        <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10 pr-8`}>
+          {/* Home Team */}
+          <div>
+            <div className="flex items-center justify-between">
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-semibold text-white truncate flex-1`}>
+                {match.homeTeam}
+              </span>
+              {isUpcoming ? (
+                <span className="text-sm text-gray-400 ml-2">
+                  {formatKickoffTime(match.kickoffTime)}
+                </span>
+              ) : (
+                <span className={`${isFinished ? 'text-xl' : 'text-2xl'} font-bold ml-2 ${
+                  match.justScored ? 'text-red-400' : 'text-white'
+                }`}>
+                  {match.homeScore}
+                </span>
+              )}
+            </div>
+            {homeScorers && !isUpcoming && (
+              <div className={`${isFinished ? 'text-[8px]' : 'text-[9px]'} text-gray-400 mt-1 truncate`}>
+                ⚽ {homeScorers}
+              </div>
+            )}
+          </div>
+
+          {/* Away Team */}
+          <div>
+            <div className="flex items-center justify-between">
+              <span className={`${isFinished ? 'text-xs' : 'text-sm'} font-medium text-gray-400 truncate flex-1`}>
+                {match.awayTeam}
+              </span>
+              {!isUpcoming && (
+                <span className={`${isFinished ? 'text-xl' : 'text-2xl'} font-bold ml-2 ${
+                  match.justScored ? 'text-red-400' : 'text-gray-400'
+                }`}>
+                  {match.awayScore}
+                </span>
+              )}
+            </div>
+            {awayScorers && !isUpcoming && (
+              <div className={`${isFinished ? 'text-[8px]' : 'text-[9px]'} text-gray-500 mt-1 truncate`}>
+                ⚽ {awayScorers}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Show loading or empty state
@@ -188,8 +310,8 @@ export default function LiveFootballHub() {
         <div className="flex-1 flex items-center justify-center text-gray-500">
           <div className="text-center">
             <div className="text-4xl mb-2">⚽</div>
-            <div>No live matches at the moment</div>
-            <div className="text-sm text-gray-600 mt-1">Check back during match days!</div>
+            <div>No matches today</div>
+            <div className="text-sm text-gray-600 mt-1">Check back on match days!</div>
           </div>
         </div>
       </div>
@@ -213,21 +335,35 @@ export default function LiveFootballHub() {
       {/* Separator line */}
       <div className="sticky top-0 z-10 h-[2px] bg-gradient-to-r from-transparent via-green-500 to-transparent mb-3 flex-shrink-0"></div>
 
-      {/* Leagues */}
+      {/* Content */}
       <div className="space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar">
+        {/* Favorites Section */}
+        {favoritedMatches.length > 0 && (
+          <div className="space-y-2">
+            <div className="bg-yellow-900/30 backdrop-blur-sm rounded-lg p-3 border border-yellow-500/50">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs font-semibold text-yellow-400">FAVORITES</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2 pl-2">
+              {favoritedMatches.map(match => renderMatchCard(match, true))}
+            </div>
+          </div>
+        )}
+
+        {/* League Sections */}
         {sortedCompetitions.map((competition) => {
           const leagueMatches = matchesByCompetition[competition];
           const isCollapsed = collapsedLeagues.has(competition);
           const leagueStatus = getLeagueStatus(competition);
-          const hasFavorite = leagueMatches.some(m => m.isFavorite);
           
           return (
             <div key={competition} className="space-y-2">
               {/* League Header */}
               <div 
-                className={`bg-gray-800/70 backdrop-blur-sm rounded-lg p-3 border ${
-                  hasFavorite ? 'border-yellow-500/50' : 'border-white/20'
-                } cursor-pointer hover:border-white/40 transition-all`}
+                className="bg-gray-800/70 backdrop-blur-sm rounded-lg p-3 border border-white/20 cursor-pointer hover:border-white/40 transition-all"
                 onClick={() => toggleLeague(competition)}
               >
                 <div className="flex items-center justify-between">
@@ -238,9 +374,11 @@ export default function LiveFootballHub() {
                         ? 'bg-red-500 text-white animate-pulse' 
                         : leagueStatus.status === 'ht'
                         ? 'bg-orange-500 text-white'
+                        : leagueStatus.status === 'upcoming'
+                        ? 'bg-blue-500 text-white'
                         : 'bg-gray-600 text-gray-300'
                     }`}>
-                      {leagueStatus.status === 'live' ? `${leagueStatus.minute}'` : leagueStatus.status === 'ht' ? 'HT' : 'FT'}
+                      {leagueStatus.status === 'live' ? `${leagueStatus.minute}'` : leagueStatus.status === 'ht' ? 'HT' : leagueStatus.status === 'upcoming' ? 'UPCOMING' : 'FT'}
                     </span>
                     
                     {/* Competition Name */}
@@ -250,9 +388,6 @@ export default function LiveFootballHub() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    {hasFavorite && (
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    )}
                     {isCollapsed ? (
                       <ChevronDown className="w-5 h-5 text-gray-400" />
                     ) : (
@@ -265,89 +400,7 @@ export default function LiveFootballHub() {
               {/* League Matches */}
               {!isCollapsed && (
                 <div className="space-y-2 pl-2">
-                  {leagueMatches.map((match) => {
-                    const homeScorers = getTeamScorers(match, 'home');
-                    const awayScorers = getTeamScorers(match, 'away');
-                    
-                    return (
-                      <div
-                        key={match.id}
-                        className={`bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 border transition-all relative ${
-                          match.justScored 
-                            ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
-                            : match.isFavorite
-                            ? 'border-yellow-500/50'
-                            : 'border-white/10 hover:border-green-500/30'
-                        }`}
-                        style={{
-                          animation: match.justScored ? 'shake-red 5s ease-in-out' : 'none'
-                        }}
-                      >
-                        {/* Goal Animation Overlay */}
-                        {match.justScored && (
-                          <div className="absolute inset-0 bg-red-500/10 rounded-lg pointer-events-none animate-pulse-red" 
-                               style={{ animation: 'pulse-red 5s ease-in-out' }} />
-                        )}
-
-                        {/* Star Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(match.id);
-                          }}
-                          className="absolute top-2 right-2 p-1 hover:bg-white/10 rounded transition-colors z-10"
-                          title={match.isFavorite ? "Remove from favorites" : "Add to favorites"}
-                        >
-                          <Star 
-                            className={`w-4 h-4 transition-colors ${
-                              match.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
-                            }`}
-                          />
-                        </button>
-
-                        {/* Teams and Scores */}
-                        <div className="space-y-3 relative z-10 pr-8">
-                          {/* Home Team */}
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-white truncate flex-1">
-                                {match.homeTeam}
-                              </span>
-                              <span className={`text-2xl font-bold ml-2 ${
-                                match.justScored ? 'text-red-400' : 'text-white'
-                              }`}>
-                                {match.homeScore}
-                              </span>
-                            </div>
-                            {homeScorers && (
-                              <div className="text-[9px] text-gray-400 mt-1 truncate">
-                                ⚽ {homeScorers}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Away Team */}
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-400 truncate flex-1">
-                                {match.awayTeam}
-                              </span>
-                              <span className={`text-2xl font-bold ml-2 ${
-                                match.justScored ? 'text-red-400' : 'text-gray-400'
-                              }`}>
-                                {match.awayScore}
-                              </span>
-                            </div>
-                            {awayScorers && (
-                              <div className="text-[9px] text-gray-500 mt-1 truncate">
-                                ⚽ {awayScorers}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {leagueMatches.map(match => renderMatchCard(match, false))}
                 </div>
               )}
             </div>
@@ -369,6 +422,17 @@ export default function LiveFootballHub() {
           10% { opacity: 0.25; }
           20% { opacity: 0; }
         }
+
+        @keyframes pulse-border {
+          0%, 100% { 
+            border-color: rgba(34, 197, 94, 0.3);
+            box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+          }
+          50% { 
+            border-color: rgba(34, 197, 94, 0.8);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+          }
+        }
         
         .animate-shake-red {
           animation: shake-red 5s ease-in-out;
@@ -376,6 +440,10 @@ export default function LiveFootballHub() {
         
         .animate-pulse-red {
           animation: pulse-red 5s ease-in-out;
+        }
+
+        .animate-pulse-border {
+          animation: pulse-border 2s ease-in-out infinite;
         }
       `}</style>
     </div>

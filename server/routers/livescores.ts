@@ -23,7 +23,8 @@ const LEAGUE_ID_TO_COMPETITION: Record<number, Competition> = {
 };
 
 // State mapping
-const STATE_MAPPING: Record<string, 'live' | 'ht' | 'ft'> = {
+const STATE_MAPPING: Record<string, 'upcoming' | 'live' | 'ht' | 'ft'> = {
+  'NS': 'upcoming',
   'LIVE': 'live',
   'INPLAY': 'live',
   'HT': 'ht',
@@ -86,6 +87,7 @@ interface SportmonksFixture {
   id: number;
   name: string;
   starting_at: string;
+  starting_at_timestamp: number;
   state_id: number;
   participants?: SportmonksParticipant[];
   scores?: SportmonksScore[];
@@ -107,19 +109,26 @@ interface Match {
   homeScore: number;
   awayScore: number;
   minute: number;
-  status: 'live' | 'ft' | 'ht';
+  status: 'upcoming' | 'live' | 'ft' | 'ht';
   competition: Competition;
   goalScorers: GoalScorer[];
+  kickoffTime: string;
 }
 
-async function fetchLivescores(): Promise<Match[]> {
+async function fetchTodaysFixtures(): Promise<Match[]> {
   if (!SPORTMONKS_API_TOKEN) {
     console.error('SPORTMONKS_API_TOKEN not set');
     return [];
   }
 
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0];
+
   const leagueIds = Object.values(LEAGUE_IDS).join(',');
-  const url = `${SPORTMONKS_BASE_URL}/livescores?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds}`;
+  
+  // Fetch fixtures for today from the specified leagues
+  const url = `${SPORTMONKS_BASE_URL}/fixtures?api_token=${SPORTMONKS_API_TOKEN}&include=participants;scores;events;state;league&filters=fixtureLeagues:${leagueIds};fixtureDate:${dateStr}`;
 
   try {
     const response = await fetch(url);
@@ -152,8 +161,8 @@ async function fetchLivescores(): Promise<Match[]> {
           const awayScore = awayScoreObj?.score.goals || 0;
 
           // Get state
-          const stateName = fixture.state?.developer_name || 'FT';
-          const status = STATE_MAPPING[stateName] || 'ft';
+          const stateName = fixture.state?.developer_name || 'NS';
+          const status = STATE_MAPPING[stateName] || 'upcoming';
 
           // Calculate minute (for live matches)
           let minute = 0;
@@ -161,10 +170,10 @@ async function fetchLivescores(): Promise<Match[]> {
             const startTime = new Date(fixture.starting_at).getTime();
             const now = Date.now();
             const elapsed = Math.floor((now - startTime) / 1000 / 60);
-            minute = Math.min(elapsed, 90);
+            minute = Math.min(Math.max(elapsed, 0), 90);
           } else if (status === 'ht') {
             minute = 45;
-          } else {
+          } else if (status === 'ft') {
             minute = 90;
           }
 
@@ -182,7 +191,7 @@ async function fetchLivescores(): Promise<Match[]> {
           // Get competition
           const competition = fixture.league?.id 
             ? LEAGUE_ID_TO_COMPETITION[fixture.league.id]
-            : 'Premier League';
+            : undefined;
 
           if (!competition) {
             return null;
@@ -198,6 +207,7 @@ async function fetchLivescores(): Promise<Match[]> {
             status,
             competition,
             goalScorers,
+            kickoffTime: fixture.starting_at,
           };
         } catch (error) {
           console.error('Error processing fixture:', error);
@@ -208,14 +218,14 @@ async function fetchLivescores(): Promise<Match[]> {
 
     return matches;
   } catch (error) {
-    console.error('Error fetching livescores:', error);
+    console.error('Error fetching fixtures:', error);
     return [];
   }
 }
 
 export const livescoresRouter = router({
   getLivescores: publicProcedure.query(async () => {
-    const matches = await fetchLivescores();
+    const matches = await fetchTodaysFixtures();
     return { matches };
   }),
 });
