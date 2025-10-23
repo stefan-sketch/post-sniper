@@ -202,7 +202,7 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             return null;
           }
 
-          // Get scores
+          // Get scores from API
           const homeScoreObj = fixture.scores?.find(
             s => s.participant_id === homeParticipant.participant_id && s.description === 'CURRENT'
           );
@@ -210,8 +210,21 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             s => s.participant_id === awayParticipant.participant_id && s.description === 'CURRENT'
           );
 
-          const homeScore = homeScoreObj?.score.goals || 0;
-          const awayScore = awayScoreObj?.score.goals || 0;
+          let homeScore = homeScoreObj?.score.goals || 0;
+          let awayScore = awayScoreObj?.score.goals || 0;
+          
+          // Fallback: Calculate scores from goal events if API scores are 0 but goals exist
+          const goalEvents = fixture.events?.filter(e => e.type_id === 14) || [];
+          if (goalEvents.length > 0 && homeScore === 0 && awayScore === 0) {
+            homeScore = goalEvents.filter(e => e.participant_id === homeParticipant.participant_id).length;
+            awayScore = goalEvents.filter(e => e.participant_id === awayParticipant.participant_id).length;
+            console.log('[Livescores] Calculated scores from events:', {
+              match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+              homeScore,
+              awayScore,
+              totalGoals: goalEvents.length
+            });
+          }
 
           // Get state
           const stateName = fixture.state?.developer_name || 'NS';
@@ -249,10 +262,22 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
           // Calculate minute (for live matches)
           let minute = 0;
           if (status === 'live') {
+            // Parse the starting time (API returns in Europe/London timezone)
             const startTime = new Date(fixture.starting_at).getTime();
             const now = Date.now();
             const elapsed = Math.floor((now - startTime) / 1000 / 60);
             minute = Math.min(Math.max(elapsed, 0), 90);
+            
+            if (fixture.id === 19568973 || fixture.id === '19568973') {
+              console.log('[Livescores] Minute calculation:', {
+                match: `${homeParticipant.name} vs ${awayParticipant.name}`,
+                starting_at: fixture.starting_at,
+                startTime: new Date(startTime).toISOString(),
+                now: new Date(now).toISOString(),
+                elapsed,
+                minute
+              });
+            }
           } else if (status === 'ht') {
             minute = 45;
           } else if (status === 'ft') {
