@@ -703,7 +703,13 @@ export default function Home() {
         )}
 
         {/* Live Posts Column */}
-        <div className="flex flex-col h-full overflow-hidden">
+        <div 
+          className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
+          style={{
+            transform: feedColumns === 3 ? 'scale(0.98)' : 'scale(1)',
+            opacity: feedColumns === 3 ? 0.95 : 1
+          }}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center justify-center gap-2 flex-1">
               <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
@@ -813,7 +819,13 @@ export default function Home() {
         </div>
 
         {/* Popular Posts Column */}
-        <div className="flex flex-col h-full overflow-hidden">
+        <div 
+          className="flex flex-col h-full overflow-hidden transition-all duration-500 ease-in-out"
+          style={{
+            transform: feedColumns === 3 ? 'scale(0.98)' : 'scale(1)',
+            opacity: feedColumns === 3 ? 0.95 : 1
+          }}
+        >
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center justify-center gap-3 flex-1">
               <div className="flex items-center gap-2">
