@@ -189,7 +189,7 @@ export default function LiveFootballHub() {
       <div
         key={match.id}
         className={`bg-gray-800/50 backdrop-blur-sm rounded-lg border transition-all relative ${
-          isFinished ? 'p-2 opacity-60' : 'p-3'
+          isFinished ? 'p-2 opacity-60' : isLive ? 'p-3 pb-6' : 'p-3'
         } ${
           match.justScored 
             ? 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] animate-shake-red' 
