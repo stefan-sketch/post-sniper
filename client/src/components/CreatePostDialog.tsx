@@ -337,8 +337,11 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   };
 
   const handlePost = async () => {
-    if (!croppedImage) {
-      toast.error("Please crop the image first");
+    // Use cropped image if available, otherwise use original image
+    const imageToPost = croppedImage || image;
+    
+    if (!imageToPost) {
+      toast.error("Please select an image first");
       return;
     }
 
@@ -355,8 +358,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setIsUploading(true);
 
     try {
-      // Start with the cropped image
-      let processedImage = croppedImage;
+      // Start with the cropped image (or original if not cropped)
+      let processedImage = imageToPost;
       
       // Apply overlays (gradient and text)
       processedImage = await applyOverlays(processedImage) || processedImage;
