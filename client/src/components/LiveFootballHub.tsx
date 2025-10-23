@@ -270,7 +270,7 @@ export default function LiveFootballHub() {
       >
         {/* Goal Celebration Overlay */}
         {isCelebrating && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 rounded-lg backdrop-blur-md animate-pulse">
+          <div className="absolute inset-0 flex items-center justify-center z-50 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 rounded-lg animate-pulse">
             <div className="text-center">
               <div className="text-6xl mb-2 animate-bounce">⚽</div>
               <div className="text-3xl font-bold text-white animate-pulse">GOAL!</div>
