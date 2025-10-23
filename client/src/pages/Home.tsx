@@ -954,6 +954,12 @@ export default function Home() {
                     <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
                   </div>
                 )}
+                {/* Printer line - thin white line where new tweets emerge from */}
+                {twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && (
+                  <div className="relative h-0.5 bg-white/30 mb-3 overflow-hidden flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
+                  </div>
+                )}
                 {twitterQuery.data?.tweets?.map((tweet: any) => {
                   const isNew = newTweetIds.has(tweet.id);
                   
