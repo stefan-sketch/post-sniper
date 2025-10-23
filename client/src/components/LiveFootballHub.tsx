@@ -168,7 +168,11 @@ export default function LiveFootballHub() {
   // Helper function to format kickoff time
   const formatKickoffTime = (kickoffTime: string) => {
     const date = new Date(kickoffTime);
-    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('en-GB', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      timeZone: 'Europe/London' // UK timezone (automatically handles BST/GMT)
+    });
   };
 
   // Helper function to get time until kickoff
