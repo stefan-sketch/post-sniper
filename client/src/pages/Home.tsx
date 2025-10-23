@@ -1708,50 +1708,46 @@ export default function Home() {
       </div>
       </div>
 
-      {/* Floating Action Buttons - Feed View */}
+      {/* Bottom Navigation Bar - Feed View */}
       {currentView === 'feed' && createPortal(
         <>
-          {/* Switch Button - Floating on bottom left */}
-          <button
-            onClick={() => {
-              setIsViewSwitching(true);
-              setViewTransition('to-pages');
-              setTimeout(() => {
-                setCurrentView('pages');
-                setViewTransition('none');
-                setTimeout(() => {
-                  setIsViewSwitching(false);
-                }, 600);
-              }, 500);
-            }}
-            className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
-            style={{ 
-              bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-              left: '20px',
-              zIndex: 10000
-            }}
-            title="Switch to Pages"
-          >
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <polyline points="17 1 21 5 17 9"/>
-              <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-              <polyline points="7 23 3 19 7 15"/>
-              <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-            </svg>
-          </button>
-          
-          {/* Bottom Navigation Bar - 3 items centered */}
           <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-            <div className="flex items-center justify-center gap-8 px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+            <div className="flex items-center justify-between px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+              {/* Switch Button - Left Corner */}
+              <button
+                onClick={() => {
+                  setIsViewSwitching(true);
+                  setViewTransition('to-pages');
+                  setTimeout(() => {
+                    setCurrentView('pages');
+                    setViewTransition('none');
+                    setTimeout(() => {
+                      setIsViewSwitching(false);
+                    }, 600);
+                  }, 500);
+                }}
+                className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all"
+                title="Switch to Pages"
+              >
+                <svg 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <polyline points="17 1 21 5 17 9"/>
+                  <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                  <polyline points="7 23 3 19 7 15"/>
+                  <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+              </button>
+              
+              {/* Center Navigation - 3 items */}
+              <div className="flex items-center justify-center gap-8">
               <button
                 onClick={() => setMobileView('live')}
                 className={`flex items-center justify-center transition-all p-2 ${
@@ -1782,6 +1778,18 @@ export default function Home() {
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </button>
+              </div>
+              
+              {/* Create Post Button - Right Corner */}
+              <button
+                onClick={() => {
+                  setDroppedImage(null);
+                  setShowCreatePost(true);
+                }}
+                className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all"
+              >
+                <Plus className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </>,
@@ -1799,45 +1807,7 @@ export default function Home() {
         
         return createPortal(
           <>
-            {/* Switch Button - Floating on bottom left */}
-            <button
-              onClick={() => {
-                setIsViewSwitching(true);
-                setViewTransition('to-feed');
-                setTimeout(() => {
-                  setCurrentView('feed');
-                  setViewTransition('none');
-                  setTimeout(() => {
-                    setIsViewSwitching(false);
-                  }, 600);
-                }, 500);
-              }}
-              className="md:hidden fixed flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white shadow-lg transition-all"
-              style={{ 
-                bottom: 'calc(70px + env(safe-area-inset-bottom, 0px))',
-                left: '20px',
-                zIndex: 10000
-              }}
-              title="Switch to Feed"
-            >
-              <svg 
-                width="24" 
-                height="24" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <polyline points="17 1 21 5 17 9"/>
-                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                <polyline points="7 23 3 19 7 15"/>
-                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-              </svg>
-            </button>
-            
-            {/* Bottom Navigation Bar - 3 page selectors centered */}
+            {/* Bottom Navigation Bar - Pages View */}
             <div 
               className="md:hidden fixed left-0 right-0 backdrop-blur-md border-t border-white/10" 
               style={{ 
@@ -1847,7 +1817,42 @@ export default function Home() {
                 backgroundColor: `${tintColor}15` // 15 is ~8% opacity in hex
               }}
             >
-              <div className="flex items-center justify-center gap-8 px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+              <div className="flex items-center justify-between px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+                {/* Switch Button - Left Corner */}
+                <button
+                  onClick={() => {
+                    setIsViewSwitching(true);
+                    setViewTransition('to-feed');
+                    setTimeout(() => {
+                      setCurrentView('feed');
+                      setViewTransition('none');
+                      setTimeout(() => {
+                        setIsViewSwitching(false);
+                      }, 600);
+                    }, 500);
+                  }}
+                  className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all"
+                  title="Switch to Feed"
+                >
+                  <svg 
+                    width="24" 
+                    height="24" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="17 1 21 5 17 9"/>
+                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                    <polyline points="7 23 3 19 7 15"/>
+                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                  </svg>
+                </button>
+                
+                {/* Center Navigation - 3 page selectors */}
+                <div className="flex items-center justify-center gap-8">
                 {/* Page Selector Buttons */}
                 {managedPagesQuery.data && managedPagesQuery.data.map((page: any, index: number) => {
                   const isActive = (index === 0 && pagesView === 'away-days') || 
@@ -1890,6 +1895,18 @@ export default function Home() {
                     </button>
                   );
                 })}
+                </div>
+                
+                {/* Create Post Button - Right Corner */}
+                <button
+                  onClick={() => {
+                    setDroppedImage(null);
+                    setShowCreatePost(true);
+                  }}
+                  className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all"
+                >
+                  <Plus className="w-6 h-6" />
+                </button>
               </div>
             </div>
           </>,
