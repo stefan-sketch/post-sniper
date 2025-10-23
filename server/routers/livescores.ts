@@ -279,20 +279,15 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
             });
           }
 
-          // Calculate minute (for live matches)
+          // Get minute from API state (most accurate)
           let minute = 0;
           if (status === 'live') {
-            // Try to get minute from periods data (most accurate)
-            const currentPeriod = fixture.periods?.find((p: any) => 
-              p.started === 1 && p.ended === 0
-            );
-            
-            if (currentPeriod && currentPeriod.minutes) {
-              minute = currentPeriod.minutes;
-              console.log('[Livescores] Using minute from periods:', {
+            // Use minute from state if available
+            if (fixture.state?.minute) {
+              minute = fixture.state.minute;
+              console.log('[Livescores] ✅ Using minute from state:', {
                 match: `${homeParticipant.name} vs ${awayParticipant.name}`,
-                minute,
-                periodName: currentPeriod.name
+                minute
               });
             } else {
               // Fallback: calculate from timestamp
@@ -302,9 +297,7 @@ function processFixtures(fixtures: SportmonksFixture[]): Match[] {
               minute = Math.min(Math.max(elapsed, 1), 90);
               console.log('[Livescores] Calculated minute from timestamp:', {
                 match: `${homeParticipant.name} vs ${awayParticipant.name}`,
-                minute,
-                hasPeriods: !!fixture.periods,
-                periodsCount: fixture.periods?.length || 0
+                minute
               });
             }
           } else if (status === 'ht') {

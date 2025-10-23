@@ -87,14 +87,14 @@ export default function LiveFootballHub() {
           previousScoresRef.current.set(newMatch.id, newTotal);
           // Trigger celebration animation
           setCelebratingGoals(prev => new Set(prev).add(newMatch.id));
-          // Remove from celebration after 3 seconds
+          // Remove from celebration after 5 seconds
           setTimeout(() => {
             setCelebratingGoals(prev => {
               const newSet = new Set(prev);
               newSet.delete(newMatch.id);
               return newSet;
             });
-          }, 3000);
+          }, 5000);
         } else if (!previousScoresRef.current.has(newMatch.id)) {
           // Initialize score tracking
           previousScoresRef.current.set(newMatch.id, newTotal);
