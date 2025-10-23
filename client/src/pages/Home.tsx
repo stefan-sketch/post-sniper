@@ -1561,7 +1561,7 @@ export default function Home() {
 
       {/* Bottom Navigation Bar - Rendered via Portal directly into body to bypass all container constraints */}
       {currentView === 'feed' && createPortal(
-        <div className="md:hidden fixed left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
+        <div className="md:hidden fixed left-0 right-0 bg-gray-900/70 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
           <div className="flex items-center justify-around px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
             <button
               onClick={() => setMobileView('live')}
