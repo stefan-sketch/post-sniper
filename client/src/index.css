@@ -309,6 +309,30 @@
   animation: slideInFromLeft 0.5s ease-out;
 }
 
+/* Slide in from right animation */
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide out to right animation */
+@keyframes slideOutToRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 /* Compact posts mode for 3-column layout */
 .compact-posts .glass-card {
   font-size: 0.85rem;

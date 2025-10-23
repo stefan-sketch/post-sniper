@@ -292,8 +292,8 @@ export default function LiveFootballHub() {
     return (
       <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center justify-center gap-2 flex-1">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center justify-center gap-3 flex-1">
           <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>
@@ -318,8 +318,8 @@ export default function LiveFootballHub() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center justify-center gap-2 flex-1">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center justify-center gap-3 flex-1">
           <h2 className="text-lg font-semibold text-white">
             MATCHDAY
           </h2>

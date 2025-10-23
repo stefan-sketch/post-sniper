@@ -31,6 +31,7 @@ export default function Home() {
   const [feedColumns, setFeedColumns] = useState<2 | 3>(2); // Toggle between 2 and 3 columns
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // Track when Football Hub is sliding out
   const [viewTransition, setViewTransition] = useState<'none' | 'to-pages' | 'to-feed'>('none'); // Track view transition direction
+  const [isViewSwitching, setIsViewSwitching] = useState(false); // Prevent post animations during view switch
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -281,7 +282,7 @@ export default function Home() {
 
   // Detect new posts for animation
   useEffect(() => {
-    if (livePosts.length > 0) {
+    if (livePosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(livePosts.map(p => p.id));
       
       // Find new posts that weren't in the previous set
@@ -301,12 +302,15 @@ export default function Home() {
       }
       
       setPreviousPostIds(currentPostIds);
+    } else if (livePosts.length > 0 && isViewSwitching) {
+      // Update previousPostIds without triggering animation during view switch
+      setPreviousPostIds(new Set(livePosts.map(p => p.id)));
     }
-  }, [livePosts]);
+  }, [livePosts, isViewSwitching]);
 
   // Detect new popular posts for animation
   useEffect(() => {
-    if (popularPosts.length > 0) {
+    if (popularPosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(popularPosts.map(p => p.id));
       
       // Find new posts that weren't in the previous set
@@ -326,12 +330,15 @@ export default function Home() {
       }
       
       setPreviousPopularPostIds(currentPostIds);
+    } else if (popularPosts.length > 0 && isViewSwitching) {
+      // Update previousPopularPostIds without triggering animation during view switch
+      setPreviousPopularPostIds(new Set(popularPosts.map(p => p.id)));
     }
-  }, [popularPosts]);
+  }, [popularPosts, isViewSwitching]);
 
   // Detect new tweets for animation
   useEffect(() => {
-    if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0) {
+    if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && !isViewSwitching) {
       const currentTweetIds = new Set(twitterQuery.data.tweets.map((t: any) => t.id));
       
       // Find new tweets that weren't in the previous set
@@ -351,8 +358,11 @@ export default function Home() {
       }
       
       setPreviousTweetIds(currentTweetIds);
+    } else if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && isViewSwitching) {
+      // Update previousTweetIds without triggering animation during view switch
+      setPreviousTweetIds(new Set(twitterQuery.data.tweets.map((t: any) => t.id)));
     }
-  }, [twitterQuery.data?.tweets]);
+  }, [twitterQuery.data?.tweets, isViewSwitching]);
 
   // Handle scroll to top button visibility
   useEffect(() => {
@@ -463,10 +473,15 @@ export default function Home() {
             <button
               onClick={() => {
                 const newView = currentView === 'feed' ? 'pages' : 'feed';
+                setIsViewSwitching(true);
                 setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
                 setTimeout(() => {
                   setCurrentView(newView);
                   setViewTransition('none');
+                  // Keep isViewSwitching true for a bit longer to prevent animations
+                  setTimeout(() => {
+                    setIsViewSwitching(false);
+                  }, 100);
                 }, 500);
               }}
               className="group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
@@ -767,10 +782,6 @@ export default function Home() {
               )}
             </div>
           </div>
-          {/* Printer line - thin red line where new posts emerge from */}
-          <div className="sticky top-0 z-10 relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
-          </div>
           <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
@@ -780,6 +791,12 @@ export default function Home() {
             {!postsQuery.isLoading && livePosts.length === 0 && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
+              </div>
+            )}
+            {/* Printer line - thin red line where new posts emerge from */}
+            {livePosts.length > 0 && (
+              <div className="sticky top-0 z-10 relative h-0.5 bg-red-500/30 mb-3 overflow-hidden flex-shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
               </div>
             )}
             {livePosts.map((post) => {
