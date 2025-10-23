@@ -25,7 +25,7 @@ interface CreatePostDialogProps {
 
 export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePostDialogProps) {
   const [image, setImage] = useState<string | null>(null);
-  const [cropMode, setCropMode] = useState(true); // Start in crop mode
+  const [cropMode, setCropMode] = useState(false); // Crop mode off by default
   const [croppedImage, setCroppedImage] = useState<string | null>(null); // Store the cropped result
 
   // Set image when initialImage is provided
@@ -79,15 +79,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             const reader = new FileReader();
             reader.onload = () => {
               setImage(reader.result as string);
-              setCropMode(true);
+              setCropMode(false); // Don't start in crop mode
               setCroppedImage(null);
-              setCrop({
-                unit: '%',
-                x: 0,
-                y: 0,
-                width: 100,
-                height: 100,
-              });
               toast.success("Image pasted from clipboard!");
             };
             reader.readAsDataURL(blob);
@@ -570,7 +563,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           {/* Image Upload/Preview */}
           <div className="space-y-2">
             {!image ? (
-              <div className="space-y-3">
+              <div className="relative">
                 <div
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
@@ -587,12 +580,17 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="hidden"
                   />
                 </div>
+                {/* Small Paste button in top-right */}
                 <Button
                   variant="outline"
-                  onClick={handlePasteFromClipboard}
-                  className="w-full"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePasteFromClipboard();
+                  }}
+                  className="absolute top-2 right-2 text-xs px-2 py-1 h-auto"
                 >
-                  Paste from Clipboard
+                  Paste
                 </Button>
               </div>
             ) : cropMode ? (
@@ -731,23 +729,32 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             setIsDraggingTextBox(true);
                           }}
                         >
-                          {/* Text Preview */}
-                          <div 
-                            className="absolute inset-0 flex items-center justify-center text-center pointer-events-none"
+                          {/* Editable Text - Click to edit */}
+                          <textarea
+                            value={overlayText}
+                            onChange={(e) => setOverlayText(e.target.value)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Select all text when clicked
+                              e.currentTarget.select();
+                            }}
+                            onMouseDown={(e) => {
+                              // Prevent dragging when clicking inside text
+                              e.stopPropagation();
+                            }}
+                            className="absolute inset-0 bg-transparent border-none outline-none resize-none text-center flex items-center justify-center"
                             style={{
                               fontSize: `${previewFontSize}px`,
                               fontFamily: 'Impact, "Arial Black", sans-serif',
                               fontWeight: 'bold',
                               color: 'white',
                               textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
-                              whiteSpace: 'pre-wrap',
-                              overflow: 'hidden',
                               padding: '8px',
-                              wordWrap: 'break-word',
+                              cursor: 'text',
+                              lineHeight: '1.2',
                             }}
-                          >
-                            {overlayText}
-                          </div>
+                            maxLength={200}
+                          />
                       
                       {/* Resize Handle - Bottom Right Corner */}
                       <div
@@ -846,81 +853,107 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             )}
           </div>
 
-          {/* Compact Overlay Controls - Only in overlay mode */}
-          {image && !cropMode && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Overlays</label>
-              <div className="flex gap-2">
-                {/* Text Button */}
-                <Button
-                  type="button"
-                  variant={overlayText ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    if (!overlayText) {
-                      setOverlayText("Your Text Here");
+          {/* Overlay Controls - Always visible, greyed out when no image */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Tools</label>
+            <div className="flex gap-2">
+              {/* Crop Button */}
+              <Button
+                type="button"
+                variant={cropMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (image) {
+                    if (!cropMode) {
+                      // Enter crop mode
+                      setCropMode(true);
+                      setCrop({
+                        unit: '%',
+                        x: 0,
+                        y: 0,
+                        width: 100,
+                        height: 100,
+                      });
                     } else {
-                      setOverlayText("");
+                      // Exit crop mode
+                      setCropMode(false);
                     }
-                  }}
-                  className={`flex-1 transition-all duration-200 ${
-                    overlayText
-                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                  }`}
-                >
-                  {overlayText ? "✓ Text" : "Text"}
-                </Button>
+                  }
+                }}
+                disabled={!image}
+                className={`flex-1 transition-all duration-200 ${
+                  !image
+                    ? "opacity-50 cursor-not-allowed"
+                    : cropMode
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {cropMode ? "✓ Crop" : "Crop"}
+              </Button>
 
-                {/* Watermark Button */}
-                <Button
-                  type="button"
-                  variant={useWatermark ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setUseWatermark(!useWatermark)}
-                  disabled={!selectedPage}
-                  className={`flex-1 transition-all duration-200 ${
-                    useWatermark
-                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                  }`}
-                  title={!selectedPage ? "Select a page first" : ""}
-                >
-                  {useWatermark ? "✓ Watermark" : "Watermark"}
-                </Button>
+              {/* Watermark Button */}
+              <Button
+                type="button"
+                variant={useWatermark ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseWatermark(!useWatermark)}
+                disabled={!image || !selectedPage || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || !selectedPage || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : useWatermark
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+                title={!selectedPage ? "Select a page first" : ""}
+              >
+                {useWatermark ? "✓ Watermark" : "Watermark"}
+              </Button>
 
-                {/* Gradient Button */}
-                <Button
-                  type="button"
-                  variant={useGradient ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setUseGradient(!useGradient)}
-                  className={`flex-1 transition-all duration-200 ${
-                    useGradient
-                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                  }`}
-                >
-                  {useGradient ? "✓ Gradient" : "Gradient"}
-                </Button>
-              </div>
-              
-              {/* Text Input - Only show when text is active */}
-              {overlayText && (
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-400">Text Content</label>
-                  <Textarea
-                    value={overlayText}
-                    onChange={(e) => setOverlayText(e.target.value)}
-                    placeholder="Enter your text..."
-                    className="min-h-20 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                    maxLength={200}
-                  />
-                  <p className="text-xs text-gray-500">Drag the box on the image to position. Drag the corner to resize.</p>
-                </div>
-              )}
+              {/* Gradient Button */}
+              <Button
+                type="button"
+                variant={useGradient ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseGradient(!useGradient)}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : useGradient
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {useGradient ? "✓ Gradient" : "Gradient"}
+              </Button>
+
+              {/* Text Button */}
+              <Button
+                type="button"
+                variant={overlayText ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (!overlayText) {
+                    setOverlayText("Your Text Here");
+                  } else {
+                    setOverlayText("");
+                  }
+                }}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : overlayText
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+              >
+                {overlayText ? "✓ Text" : "Text"}
+              </Button>
             </div>
-          )}
+          </div>
 
           {/* Caption */}
           <div className="space-y-2">
