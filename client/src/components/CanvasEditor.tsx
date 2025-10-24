@@ -299,9 +299,9 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
           {/* Complete Button - Top Right */}
           <button
             onClick={handleComplete}
-            className="absolute top-6 right-6 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow-xl transition-all hover:scale-105 z-10"
+            className="absolute top-6 right-6 bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 py-2 rounded-md font-medium transition-all duration-200 hover:scale-[1.02] z-10"
           >
-            ✓ Complete
+            Complete
           </button>
           
           <div className="space-y-3">
