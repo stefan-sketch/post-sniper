@@ -63,7 +63,15 @@ export default function Home() {
   const [indicatorTimestamps, setIndicatorTimestamps] = useState<Map<string, number>>(new Map());
   const [showLiveScrollTop, setShowLiveScrollTop] = useState(false);
   const [showPopularScrollTop, setShowPopularScrollTop] = useState(false);
-  const [twitterPlaying, setTwitterPlaying] = useState(true); // Control Twitter API polling
+  // Auto-pause Twitter between midnight and 8am UK time
+  const isTwitterActiveTime = () => {
+    const now = new Date();
+    const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const hour = ukTime.getHours();
+    return hour >= 8 || hour < 0; // Active from 8am to midnight (0-23, so >= 8)
+  };
+  
+  const [twitterPlaying, setTwitterPlaying] = useState(isTwitterActiveTime());
   const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
   const [showAllPopularPosts, setShowAllPopularPosts] = useState(false); // Track if "SEE MORE" clicked for Popular posts
   const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
@@ -141,20 +149,38 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentView, feedColumns]); // Re-bind when dependencies change
 
-  // Twitter: Periodically fetch from API when playing
+  // Twitter: Periodically fetch from API when in active time window
   useEffect(() => {
-    if (!twitterPlaying) return;
+    // Check if we're in active time window
+    const checkAndUpdate = () => {
+      const isActive = isTwitterActiveTime();
+      setTwitterPlaying(isActive);
+      return isActive;
+    };
+    
+    // Initial check
+    if (!checkAndUpdate()) return;
     
     // Fetch immediately when starting
-    twitterFetchMutation.mutate();
+    twitterQuery.refetch();
     
-    // Then fetch every 5 minutes
-    const interval = setInterval(() => {
-      twitterFetchMutation.mutate();
-    }, 300000); // 5 minutes
+    // Check every minute if we should still be active
+    const timeCheckInterval = setInterval(() => {
+      checkAndUpdate();
+    }, 60000); // Check every minute
     
-    return () => clearInterval(interval);
-  }, [twitterPlaying]);
+    // Fetch tweets every 30 seconds when active
+    const fetchInterval = setInterval(() => {
+      if (isTwitterActiveTime()) {
+        twitterQuery.refetch();
+      }
+    }, 30000);
+    
+    return () => {
+      clearInterval(timeCheckInterval);
+      clearInterval(fetchInterval);
+    };
+  }, []);
   
   const handleManualFetch = async () => {
     await manualFetchMutation.mutateAsync();
@@ -1003,20 +1029,7 @@ export default function Home() {
                     <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498 .056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
                   </svg>
                 </button>
-              {feedType === 'twitter' ? (
-              <button
-                onClick={() => setTwitterPlaying(!twitterPlaying)}
-                className="px-2 py-0.5 rounded-full transition-all flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white shadow-sm"
-                style={{ height: '20px', minWidth: '40px' }}
-                title={twitterPlaying ? 'Pause Twitter updates' : 'Resume Twitter updates'}
-              >
-                {twitterPlaying ? (
-                  <Pause className="h-2.5 w-2.5" />
-                ) : (
-                  <Play className="h-2.5 w-2.5" />
-                )}
-              </button>
-            ) : feedType === 'reddit' ? (
+              {feedType === 'reddit' ? (
               <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
@@ -1155,7 +1168,7 @@ export default function Home() {
                 )}
                 {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                   <div className="glass-card p-6 rounded-xl text-center">
-                    <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
+                    <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused (midnight-8am UK time).'}</p>
                   </div>
                 )}
                 {/* Printer line - thin white line where new tweets emerge from */}
@@ -1540,21 +1553,6 @@ export default function Home() {
                 <h2 className="text-lg font-semibold text-blue-400">
                   X Football Feed
                 </h2>
-                <button
-                  onClick={() => setTwitterPlaying(!twitterPlaying)}
-                  className={`p-1.5 rounded-full transition-all ${
-                    twitterPlaying
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/50'
-                      : 'bg-gray-600 hover:bg-gray-500 text-white shadow-lg'
-                  }`}
-                  title={twitterPlaying ? 'Pause Twitter updates' : 'Resume Twitter updates'}
-                >
-                  {twitterPlaying ? (
-                    <Pause className="h-3 w-3" />
-                  ) : (
-                    <Play className="h-3 w-3" />
-                  )}
-                </button>
               </div>
               {/* Blue pulsing underline */}
               <div className="w-full h-0.5 bg-blue-500 animate-pulse"></div>
@@ -1567,7 +1565,7 @@ export default function Home() {
               )}
               {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                 <div className="glass-card p-6 rounded-xl text-center">
-                  <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused. Click play to resume.'}</p>
+                  <p className="text-muted-foreground">{twitterPlaying ? 'No tweets found in your list.' : 'Twitter updates paused (midnight-8am UK time).'}</p>
                 </div>
               )}
               {twitterQuery.data?.tweets?.map((tweet: any) => {
