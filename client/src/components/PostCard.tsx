@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, ExternalLink, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ImageIcon, X } from "lucide-react";
 import React from "react";
 import { createPortal } from "react-dom";
 // Removed date-fns import - using custom time formatting
@@ -190,27 +190,20 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
         contentVisibility: 'auto',  // Render only when visible
       }}
     >
-      {/* Link button in top-right - hover only */}
-      {post.link && (
+
+      {/* Profile Header */}
+      {!hidePageHeader && (
+      <div className="p-4 flex items-center gap-3">
         <a
           href={post.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-2 right-2 z-10 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
-          title="Open on Facebook"
-        >
-          <ExternalLink className="w-3 h-3" />
-        </a>
-      )}
-      {/* Profile Header */}
-      {!hidePageHeader && (
-      <div className="p-4 flex items-center gap-3">
-        <div 
-          className="h-12 w-12 rounded-full overflow-hidden flex-shrink-0"
+          className="h-12 w-12 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
           style={{ 
             border: `2px solid ${post.borderColor}`,
             boxShadow: `0 0 10px ${post.borderColor}40`
           }}
+          title="Open post"
         >
           {post.profilePicture ? (
             <img 
@@ -225,7 +218,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
               {post.pageName.charAt(0).toUpperCase()}
             </div>
           )}
-        </div>
+        </a>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="font-semibold truncate">{post.pageName}</p>
@@ -258,7 +251,11 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
 
       {/* Post Message */}
       {post.message && (
-        <div className={`px-4 pb-3 ${hidePageHeader ? 'pt-1' : 'pt-3'}`}>
+        <div 
+          className={`px-4 pb-3 ${hidePageHeader ? 'pt-1' : 'pt-3'} cursor-pointer hover:bg-gray-800/30 transition-colors rounded-lg`}
+          onClick={handleCopyCaption}
+          title="Click to copy caption"
+        >
           <p className="text-sm line-clamp-3">{post.message}</p>
         </div>
       )}
@@ -284,19 +281,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
             <span className="text-gray-300 font-medium">{shares.toLocaleString()}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          {!hideActions && post.message && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-              onClick={handleCopyCaption}
-              title="Copy caption"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+
       </div>
 
       {/* Post Image */}
