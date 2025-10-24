@@ -75,7 +75,46 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [canvasMode, setCanvasMode] = useState(false);
   const [isEditingTweet, setIsEditingTweet] = useState(false);
 
+  // Load state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('createPostState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        if (state.image) setImage(state.image);
+        if (state.caption) setCaption(state.caption);
+        if (state.selectedPage) setSelectedPage(state.selectedPage);
+        if (state.useWatermark !== undefined) setUseWatermark(state.useWatermark);
+        if (state.overlayText) setOverlayText(state.overlayText);
+        if (state.useGradient !== undefined) setUseGradient(state.useGradient);
+        if (state.textBoxPosition) setTextBoxPosition(state.textBoxPosition);
+        if (state.textBoxWidth) setTextBoxWidth(state.textBoxWidth);
+        if (state.fontSize) setFontSize(state.fontSize);
+        if (state.watermarkPosition) setWatermarkPosition(state.watermarkPosition);
+        if (state.rectangles) setRectangles(state.rectangles);
+      } catch (e) {
+        console.error('Failed to load saved state:', e);
+      }
+    }
+  }, []);
 
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const state = {
+      image,
+      caption,
+      selectedPage,
+      useWatermark,
+      overlayText,
+      useGradient,
+      textBoxPosition,
+      textBoxWidth,
+      fontSize,
+      watermarkPosition,
+      rectangles,
+    };
+    localStorage.setItem('createPostState', JSON.stringify(state));
+  }, [image, caption, selectedPage, useWatermark, overlayText, useGradient, textBoxPosition, textBoxWidth, fontSize, watermarkPosition, rectangles]);
 
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -568,6 +607,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
   // Handle X button - close and reset
   const handleClose = () => {
+    // Clear localStorage
+    localStorage.removeItem('createPostState');
     // Reset all form state
     setImage(null);
     setCrop(undefined);
@@ -740,7 +781,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     </button>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
+
               </div>
               <div className="flex gap-2 flex-wrap relative">
                 {PAGES.map((page) => {
