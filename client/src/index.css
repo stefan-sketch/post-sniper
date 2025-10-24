@@ -627,3 +627,211 @@
   }
 }
 
+
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* iOS momentum scrolling for all scrollable containers */
+.hide-scrollbar,
+.scrollbar-hide,
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Optimize scroll containers */
+.overflow-y-auto {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Prevent iOS rubber band effect */
+body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize touch targets for iOS (minimum 44x44px) */
+button,
+a,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Optimize animations with GPU acceleration */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%) translateZ(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateZ(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%) translateZ(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateZ(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0);
+  }
+}
+
+/* Optimize will-change for animated elements */
+.animate-pulse,
+.animate-spin,
+.animate-bounce {
+  will-change: transform, opacity;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize post cards with containment */
+.post-card,
+[data-post-card] {
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Optimize images with containment */
+img {
+  contain: layout style;
+  content-visibility: auto;
+}
+
+/* Optimize backdrop blur for mobile */
+@media (max-width: 768px) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Desktop: Full quality blur */
+@media (min-width: 769px) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+}
+
+/* Optimize hover effects (disable on touch devices) */
+@media (hover: none) {
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover {
+    transform: none;
+  }
+}
+
+/* Force hardware acceleration for transforms */
+.transform,
+[class*="translate"],
+[class*="scale"],
+[class*="rotate"] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Optimize transitions */
+.transition-all,
+.transition-opacity,
+.transition-transform {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after transition completes */
+.transition-all:not(:hover):not(:focus),
+.transition-opacity:not(:hover):not(:focus),
+.transition-transform:not(:hover):not(:focus) {
+  will-change: auto;
+}
+
+/* Optimize fixed/sticky elements */
+.fixed,
+.sticky {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Optimize text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Optimize input focus */
+input:focus,
+textarea:focus,
+select:focus {
+  outline-offset: 2px;
+}
+
+/* Prevent layout shifts from scrollbars */
+.prevent-layout-shift {
+  scrollbar-gutter: stable;
+}
+

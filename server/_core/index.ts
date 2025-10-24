@@ -11,6 +11,7 @@ import testSportmonksRouter from "../routers/test-sportmonks";
 import { serveStatic, setupVite } from "./vite";
 import { backgroundJobService } from "../backgroundJob";
 import { initializeDatabase } from "../initDb";
+import compression from "compression";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,6 +35,21 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  
+  // Enable gzip/brotli compression for all responses
+  app.use(compression({
+    level: 6, // Compression level (0-9)
+    threshold: 1024, // Only compress responses > 1KB
+    filter: (req, res) => {
+      // Don't compress if client doesn't support it
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      // Use default compression filter
+      return compression.filter(req, res);
+    },
+  }));
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

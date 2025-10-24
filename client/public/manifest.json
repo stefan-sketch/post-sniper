@@ -63,7 +63,22 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Live Feed View"
+    },
+    {
+      "src": "/screenshots/mobile-2.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Popular Posts"
+    }
+  ],
   "categories": ["social", "productivity", "business"],
   "shortcuts": [
     {
@@ -89,7 +104,22 @@
           "sizes": "192x192"
         }
       ]
+    },
+    {
+      "name": "MATCHDAY",
+      "short_name": "Matchday",
+      "description": "Live football hub",
+      "url": "/?view=matchday",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ]
+  ],
+  "scope": "/",
+  "display_override": ["standalone", "minimal-ui"],
+  "prefer_related_applications": false
 }
 

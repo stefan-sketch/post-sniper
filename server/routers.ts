@@ -12,6 +12,7 @@ import { twitterRouter } from "./routers/twitter";
 import { managedPagesRouter } from "./routers/managedPages";
 import { livescoresRouter } from "./routers/livescores";
 import { redditRouter } from "./routers/reddit";
+import { imageProxyRouter } from "./routers/imageProxy";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -25,6 +26,7 @@ export const appRouter = router({
   managedPages: managedPagesRouter,
   livescores: livescoresRouter,
   reddit: redditRouter,
+  imageProxy: imageProxyRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
