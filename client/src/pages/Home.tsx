@@ -1983,7 +1983,6 @@ export default function Home() {
                 
                 <div className="w-9" />
               </div>
-              <div className="w-full h-0.5 bg-[#FF4500] animate-pulse"></div>
             </div>
             <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               <RedditFeed sort={popularTimeFilter === 'today' ? 'top' : 'new'} />
