@@ -204,6 +204,17 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
             key={post.id}
             className="bg-gray-800/50 rounded-lg border border-gray-700 transition-all relative"
           >
+            {/* Timestamp in top-right corner */}
+            <a
+              href={post.permalink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute top-2 right-2 text-xs text-gray-400 hover:text-white hover:underline transition-colors z-10"
+              title="Open on Reddit"
+            >
+              {timeAgo}
+            </a>
+            
             <div className="p-4">
               <div className="flex gap-3">
                 {/* Upvote section */}
@@ -219,20 +230,8 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
                     <span className="font-semibold text-[#FF4500]">r/{post.subreddit}</span>
-                    <span>•</span>
-                    <span className="truncate">u/{post.author}</span>
-                    <span>•</span>
-                    <a
-                      href={post.permalink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white hover:underline transition-colors"
-                      title="Open on Reddit"
-                    >
-                      {timeAgo}
-                    </a>
                   </div>
                   <h3 className="text-white font-semibold mb-2 line-clamp-3">{post.title}</h3>
                   
