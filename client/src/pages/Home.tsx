@@ -17,6 +17,9 @@ import { toast } from "sonner";
 export default function Home() {
   // No authentication required - public access
   const utils = trpc.useUtils();
+  
+  // Detect iOS devices
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0); // seconds until next refresh
   const [showSettings, setShowSettings] = useState(false);
@@ -357,16 +360,20 @@ export default function Home() {
     }));
   }, [pagesQuery.data]);
 
-  // Detect new posts for animation
+  // Detect new posts for animation - only animate genuinely new posts (within last 30 seconds)
   useEffect(() => {
     if (livePosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(livePosts.map(p => p.id));
+      const now = Date.now();
       
-      // Find new posts that weren't in the previous set
+      // Find posts that are both: 1) not in previous set, AND 2) posted within last 30 seconds
       const newIds = new Set<string>();
-      currentPostIds.forEach(id => {
-        if (!previousPostIds.has(id)) {
-          newIds.add(id);
+      livePosts.forEach(post => {
+        const postAge = now - new Date(post.postDate).getTime();
+        const isRecentPost = postAge < 30000; // 30 seconds
+        
+        if (!previousPostIds.has(post.id) && isRecentPost) {
+          newIds.add(post.id);
         }
       });
       
@@ -385,16 +392,20 @@ export default function Home() {
     }
   }, [livePosts, isViewSwitching]);
 
-  // Detect new popular posts for animation
+  // Detect new popular posts for animation - only animate genuinely new posts (within last 30 seconds)
   useEffect(() => {
     if (popularPosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(popularPosts.map(p => p.id));
+      const now = Date.now();
       
-      // Find new posts that weren't in the previous set
+      // Find posts that are both: 1) not in previous set, AND 2) posted within last 30 seconds
       const newIds = new Set<string>();
-      currentPostIds.forEach(id => {
-        if (!previousPopularPostIds.has(id)) {
-          newIds.add(id);
+      popularPosts.forEach(post => {
+        const postAge = now - new Date(post.postDate).getTime();
+        const isRecentPost = postAge < 30000; // 30 seconds
+        
+        if (!previousPopularPostIds.has(post.id) && isRecentPost) {
+          newIds.add(post.id);
         }
       });
       
@@ -413,16 +424,20 @@ export default function Home() {
     }
   }, [popularPosts, isViewSwitching]);
 
-  // Detect new tweets for animation
+  // Detect new tweets for animation - only animate genuinely new tweets (within last 30 seconds)
   useEffect(() => {
     if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && !isViewSwitching) {
       const currentTweetIds = new Set(twitterQuery.data.tweets.map((t: any) => t.id));
+      const now = Date.now();
       
-      // Find new tweets that weren't in the previous set
+      // Find tweets that are both: 1) not in previous set, AND 2) posted within last 30 seconds
       const newIds = new Set<string>();
-      currentTweetIds.forEach(id => {
-        if (!previousTweetIds.has(id)) {
-          newIds.add(id);
+      twitterQuery.data.tweets.forEach((tweet: any) => {
+        const tweetAge = now - new Date(tweet.createdAt).getTime();
+        const isRecentTweet = tweetAge < 30000; // 30 seconds
+        
+        if (!previousTweetIds.has(tweet.id) && isRecentTweet) {
+          newIds.add(tweet.id);
         }
       });
       
@@ -900,7 +915,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-pulse"></div>
               </div>
             )}
-            {(showAllLivePosts ? livePosts : livePosts.slice(0, 25)).map((post) => {
+            {(showAllLivePosts || !isIOS ? livePosts : livePosts.slice(0, 25)).map((post) => {
               const isNew = newPostIds.has(post.id);
               const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
                 ? post.reactions - post.previousReactions 
@@ -919,7 +934,7 @@ export default function Home() {
                 </div>
               );
             })}
-            {!showAllLivePosts && livePosts.length > 25 && (
+            {(!showAllLivePosts && isIOS && livePosts.length > 25) && (
               <button
                 onClick={() => setShowAllLivePosts(true)}
                 className="w-full py-3 px-4 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] font-semibold rounded-lg transition-all"
@@ -1053,7 +1068,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1877F2] to-transparent animate-pulse"></div>
                   </div>
                 )}
-                {(showAllPopularPosts ? popularPosts : popularPosts.slice(0, 25)).map((post, index) => {
+                {(showAllPopularPosts || !isIOS ? popularPosts : popularPosts.slice(0, 25)).map((post, index) => {
                   const currentRank = index + 1;
                   const previousRank = previousPopularRankings.get(post.id);
                   const rankingChange = previousRank ? previousRank - currentRank : undefined;
@@ -1078,7 +1093,7 @@ export default function Home() {
                     </div>
                   );
                 })}
-                {!showAllPopularPosts && popularPosts.length > 25 && (
+                {(!showAllPopularPosts && isIOS && popularPosts.length > 25) && (
                   <button
                     onClick={() => setShowAllPopularPosts(true)}
                     className="w-full py-3 px-4 bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] font-semibold rounded-lg transition-all"
@@ -1105,7 +1120,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse"></div>
                   </div>
                 )}
-                {(showAllTwitterPosts ? twitterQuery.data?.tweets : twitterQuery.data?.tweets?.slice(0, 25))?.map((tweet: any) => {
+                {(showAllTwitterPosts || !isIOS ? twitterQuery.data?.tweets : twitterQuery.data?.tweets?.slice(0, 25))?.map((tweet: any) => {
                   const isNew = newTweetIds.has(tweet.id);
                   
                   // Format timestamp using the same logic as PostCard
@@ -1280,7 +1295,7 @@ export default function Home() {
                   </div>
                   );
                  })}
-                {!showAllTwitterPosts && twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 25 && (
+                {(!showAllTwitterPosts && isIOS && twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 25) && (
                   <button
                     onClick={() => setShowAllTwitterPosts(true)}
                     className="w-full py-3 px-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg transition-all"
