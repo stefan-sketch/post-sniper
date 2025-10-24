@@ -1392,6 +1392,9 @@ export default function Home() {
                           <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
                           <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
                         </div>
+                        {timeAgo && (
+                          <span className="text-gray-500 text-xs">{timeAgo}</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1">
                         {tweet.text && (
@@ -1789,6 +1792,9 @@ export default function Home() {
                         <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
                         <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
                       </div>
+                      {timeAgo && (
+                        <span className="text-gray-500 text-xs">{timeAgo}</span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       {tweet.text && (
