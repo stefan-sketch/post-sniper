@@ -1380,19 +1380,17 @@ export default function Home() {
                     }}
                   >
                     <div className="group glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative" data-tweet-id={tweet.id}>
-                    {/* Link button in top-right - hover only */}
-                    <a
-                      href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
-                      title="Open on X (Twitter)"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
                     {/* Profile Header */}
                     <div className="p-4 flex items-center gap-3">
-                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-12 h-12 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
+                      <a
+                        href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                        title="Open tweet on X"
+                      >
+                        <img src={tweet.author.avatar} alt={tweet.author.name} className="w-12 h-12 rounded-full" loading="lazy" decoding="async" />
+                      </a>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold text-white text-base">{tweet.author.name}</span>
@@ -1824,19 +1822,17 @@ export default function Home() {
                   }}
                 >
                   <div className="group glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative">
-                  {/* Link button in top-right - hover only */}
-                  <a
-                    href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
-                    title="Open on X (Twitter)"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
                   {/* Profile Header */}
                   <div className="p-4 flex items-center gap-3">
-                    <img src={tweet.author.avatar} alt={tweet.author.name} className="w-12 h-12 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
+                    <a
+                      href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                      title="Open tweet on X"
+                    >
+                      <img src={tweet.author.avatar} alt={tweet.author.name} className="w-12 h-12 rounded-full" loading="lazy" decoding="async" />
+                    </a>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-white text-base">{tweet.author.name}</span>
