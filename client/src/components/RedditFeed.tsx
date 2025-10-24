@@ -15,6 +15,8 @@ interface RedditPost {
   permalink: string;
   thumbnail: string | null;
   isVideo: boolean;
+  postType: 'image' | 'link' | 'text';
+  domain?: string;
 }
 
 interface RedditComment {
@@ -71,7 +73,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
             const data = await response.json();
         
-            // Transform Reddit data and filter out videos
+            // Transform Reddit data - include all posts except videos
             const redditPosts: RedditPost[] = data.data.children
               .filter((child: any) => !child.data.is_video && child.data.post_hint !== 'hosted:video')
               .map((child: any) => {
@@ -96,6 +98,23 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
             imageUrl = post.thumbnail;
           }
           
+          // Determine post type and extract domain for links
+          let postType: 'image' | 'link' | 'text' = 'text';
+          let domain: string | undefined;
+          
+          if (imageUrl) {
+            postType = 'image';
+          } else if (post.url && !post.url.includes(`reddit.com/r/${post.subreddit}`)) {
+            // External link
+            postType = 'link';
+            try {
+              const urlObj = new URL(post.url);
+              domain = urlObj.hostname.replace('www.', '');
+            } catch (e) {
+              domain = post.domain || 'external link';
+            }
+          }
+          
               return {
                 id: post.id,
                 title: post.title,
@@ -108,6 +127,8 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                 permalink: post.permalink,
                 thumbnail: imageUrl,
                 isVideo: post.is_video || false,
+                postType,
+                domain,
               };
             });
 
@@ -236,7 +257,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                   <h3 className="text-white font-semibold mb-2 line-clamp-3">{post.title}</h3>
                   
                   {/* Image if available */}
-                  {post.thumbnail && (
+                  {post.postType === 'image' && post.thumbnail && (
                     <img 
                       src={post.thumbnail} 
                       alt=""
@@ -246,6 +267,19 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
+                  )}
+                  
+                  {/* Link preview for external links */}
+                  {post.postType === 'link' && post.domain && (
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-3 mb-2 bg-gray-900/50 border border-gray-700 rounded-lg hover:border-gray-600 hover:bg-gray-900/70 transition-all group"
+                    >
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#FF4500] transition-colors flex-shrink-0" />
+                      <span className="text-sm text-gray-300 group-hover:text-white transition-colors truncate">{post.domain}</span>
+                    </a>
                   )}
 
                   <div className="flex items-center gap-4 text-xs text-gray-400">
