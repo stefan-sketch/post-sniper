@@ -898,18 +898,6 @@ export default function Home() {
                 )}
               </div>
             </div>
-            <div className="flex-shrink-0">
-              {showLiveScrollTop && (
-                <button
-                  onClick={() => scrollToTop(liveScrollRef)}
-                  className="p-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 hover:text-cyan-300 transition-all"
-                  aria-label="Scroll to top"
-                  title="Back to top"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </button>
-              )}
-            </div>
           </div>
           <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {postsQuery.isLoading && (
@@ -1099,23 +1087,6 @@ export default function Home() {
                 )}
               </div>
             ) : null}
-            </div>
-            
-            <div className="flex-shrink-0">
-              {showPopularScrollTop && (
-                <button
-                  onClick={() => scrollToTop(popularScrollRef)}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    feedType === 'popular' 
-                      ? 'bg-[#1877F2]/20 hover:bg-[#1877F2]/30 text-[#1877F2] hover:text-[#1664D8]'
-                      : 'bg-white/20 hover:bg-white/30 text-white hover:text-gray-200'
-                  }`}
-                  aria-label="Scroll to top"
-                  title="Back to top"
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </button>
-              )}
             </div>
           </div>
           
