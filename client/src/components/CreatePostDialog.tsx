@@ -244,8 +244,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
             
-            // Use JPEG with high quality for better file size and quality
-            resolve(canvas.toDataURL("image/jpeg", 0.95));
+            // Use maximum quality JPEG for Facebook posting (1.0 = 100% quality)
+            resolve(canvas.toDataURL("image/jpeg", 1.0));
           };
           watermark.onerror = () => reject(new Error("Failed to load watermark"));
           watermark.src = watermarkPath;
@@ -289,8 +289,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       cropHeight
     );
 
-    // Use JPEG with high quality
-    return canvas.toDataURL("image/jpeg", 0.95);
+    // Use maximum quality JPEG for Facebook posting (1.0 = 100% quality)
+    return canvas.toDataURL("image/jpeg", 1.0);
   }, [completedCrop, image]);
 
   // Step 2: Apply overlays to the cropped image
@@ -482,8 +482,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
           });
         }
 
-        // Use JPEG with high quality
-        resolve(canvas.toDataURL("image/jpeg", 0.95));
+        // Use maximum quality JPEG for Facebook posting (1.0 = 100% quality)
+        resolve(canvas.toDataURL("image/jpeg", 1.0));
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;

@@ -278,7 +278,9 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
   const handleComplete = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      const dataUrl = canvas.toDataURL("image/png");
+      // Use maximum quality JPEG for Facebook posting (1.0 = 100% quality)
+      // JPEG is better for photos and Facebook's compression
+      const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
       onComplete(dataUrl);
     }
   }, [onComplete]);
