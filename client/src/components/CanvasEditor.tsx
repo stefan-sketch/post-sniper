@@ -19,12 +19,15 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
   const [outlineColor, setOutlineColor] = useState<string | null>(null);
+  const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const CANVAS_WIDTH = 1080;
   const CANVAS_HEIGHT = 1350;
   const OUTLINE_WIDTH = 8;
 
-  // Draw canvas whenever images or outline changes
+  // Draw canvas whenever images, outline, or position changes
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -62,24 +65,41 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
     // Draw tweet image ON TOP (if exists)
     if (tweetImage) {
-      // Center the tweet and scale to 50% of canvas width
+      // Scale to 50% of canvas width
       const scale = 0.5;
       const scaledWidth = CANVAS_WIDTH * scale;
       const scaledHeight = (tweetImage.height / tweetImage.width) * scaledWidth;
-      const x = (CANVAS_WIDTH - scaledWidth) / 2;
-      const y = (CANVAS_HEIGHT - scaledHeight) / 2;
+      
+      // Use position state (percentage-based)
+      const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
+      const y = tweetPosition.y * CANVAS_HEIGHT - scaledHeight / 2;
 
       // Draw tweet image
       ctx.drawImage(tweetImage, x, y, scaledWidth, scaledHeight);
 
-      // Draw outline (if color selected)
+      // Draw outline AROUND the tweet (if color selected)
       if (outlineColor) {
         ctx.strokeStyle = outlineColor;
         ctx.lineWidth = OUTLINE_WIDTH;
+        // Draw outline slightly inset so it's fully visible
+        ctx.strokeRect(
+          x + OUTLINE_WIDTH / 2, 
+          y + OUTLINE_WIDTH / 2, 
+          scaledWidth - OUTLINE_WIDTH, 
+          scaledHeight - OUTLINE_WIDTH
+        );
+      }
+
+      // Draw dashed selection border when in tweet or outline step
+      if (step === "tweet" || step === "outline") {
+        ctx.strokeStyle = "#00ffff";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
         ctx.strokeRect(x, y, scaledWidth, scaledHeight);
+        ctx.setLineDash([]); // Reset dash
       }
     }
-  }, [backgroundImage, tweetImage, outlineColor]);
+  }, [backgroundImage, tweetImage, outlineColor, tweetPosition, step]);
 
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -113,15 +133,72 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
     reader.readAsDataURL(file);
   };
 
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (step !== "tweet" && step !== "outline") return;
+    if (!tweetImage) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+    
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    // Check if click is on the tweet
+    const scale = 0.5;
+    const scaledWidth = CANVAS_WIDTH * scale;
+    const scaledHeight = (tweetImage.height / tweetImage.width) * scaledWidth;
+    const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
+    const y = tweetPosition.y * CANVAS_HEIGHT - scaledHeight / 2;
+
+    if (mouseX >= x && mouseX <= x + scaledWidth && mouseY >= y && mouseY <= y + scaledHeight) {
+      setIsDragging(true);
+      setDragStart({ x: mouseX - tweetPosition.x * CANVAS_WIDTH, y: mouseY - tweetPosition.y * CANVAS_HEIGHT });
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+    
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    // Update position (percentage-based)
+    const newX = (mouseX - dragStart.x) / CANVAS_WIDTH;
+    const newY = (mouseY - dragStart.y) / CANVAS_HEIGHT;
+
+    // Clamp to canvas bounds
+    setTweetPosition({
+      x: Math.max(0.25, Math.min(0.75, newX)), // Keep tweet mostly on canvas
+      y: Math.max(0.25, Math.min(0.75, newY)),
+    });
+  };
+
+  const handleCanvasMouseUp = () => {
+    setIsDragging(false);
+  };
+
   const handleOutlineSelect = (color: string | null) => {
     setOutlineColor(color);
     
-    // Generate final image
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const dataUrl = canvas.toDataURL("image/png");
-      onComplete(dataUrl);
-    }
+    // Wait a moment for the outline to render, then generate final image
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const dataUrl = canvas.toDataURL("image/png");
+        onComplete(dataUrl);
+      }
+    }, 100);
   };
 
   return (
@@ -132,10 +209,21 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          className="border border-gray-700 rounded"
+          className="border border-gray-700 rounded cursor-move"
           style={{ width: "380px", height: "auto" }}
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+          onMouseLeave={handleCanvasMouseUp}
         />
       </div>
+
+      {/* Instructions */}
+      {(step === "tweet" || step === "outline") && tweetImage && (
+        <div className="text-center text-sm text-cyan-400">
+          💡 Drag the tweet to reposition it
+        </div>
+      )}
 
       {/* Step 1: Upload Background */}
       {step === "background" && (
@@ -192,6 +280,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
                 variant="outline"
                 style={{
                   borderColor: option.color || "#6b7280",
+                  borderWidth: "2px",
                   color: option.color || "#9ca3af",
                 }}
               >
