@@ -290,7 +290,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                 ) : postComments.length === 0 ? (
                   <p className="text-gray-400 text-sm text-center py-2">No comments yet</p>
                 ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {postComments.map((comment: RedditComment) => {
                       const commentTime = Math.floor((Date.now() - comment.created) / 3600000);
                       const commentTimeAgo = commentTime < 1 
