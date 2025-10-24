@@ -62,7 +62,7 @@ export const redditRouter = router({
   getComments: publicProcedure
     .input(z.object({
       permalink: z.string(),
-      limit: z.number().min(1).max(50).default(10),
+      limit: z.number().min(1).max(50).default(25),
     }))
     .query(async ({ input }) => {
       try {
@@ -101,7 +101,8 @@ export const redditRouter = router({
               score: comment.score,
               created: comment.created_utc * 1000,
             };
-          });
+          })
+          .sort((a: any, b: any) => b.score - a.score); // Sort by score (most popular first)
 
         console.log('[Reddit] Successfully fetched', comments.length, 'comments');
         return comments;

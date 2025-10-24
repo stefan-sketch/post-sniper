@@ -37,7 +37,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
   // Fetch comments using tRPC (server-side to avoid CORS)
   const commentsQuery = trpc.reddit.getComments.useQuery(
-    { permalink: currentPermalink!, limit: 10 },
+    { permalink: currentPermalink!, limit: 25 },
     { enabled: !!currentPermalink }
   );
 
