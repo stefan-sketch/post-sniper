@@ -29,6 +29,7 @@ export default function Home() {
   const [showPagesSettings, setShowPagesSettings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [isCreatePostMinimized, setIsCreatePostMinimized] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter'>('live');
 
@@ -2094,13 +2095,30 @@ export default function Home() {
         />
         <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
         <CreatePostDialog 
-          open={showCreatePost} 
+          open={showCreatePost && !isCreatePostMinimized} 
           onOpenChange={(open) => {
             setShowCreatePost(open);
+            setIsCreatePostMinimized(false);
             if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
+          }}
+          onMinimize={() => {
+            setIsCreatePostMinimized(true);
           }}
           initialImage={droppedImage}
         />
+        
+        {/* Minimized Create Post Floating Button */}
+        {showCreatePost && isCreatePostMinimized && (
+          <button
+            onClick={() => setIsCreatePostMinimized(false)}
+            className="fixed bottom-6 right-6 z-[9998] p-4 rounded-full bg-[#1877F2] hover:bg-[#1664D8] text-white shadow-2xl transition-all hover:scale-110 animate-pulse"
+            title="Resume creating post"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        )}
       </Suspense>
       
       {/* Twitter Image Modal */}
