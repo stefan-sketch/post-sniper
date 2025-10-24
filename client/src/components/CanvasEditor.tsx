@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Upload } from "lucide-react";
 
 const PAGE_OUTLINES = [
@@ -215,20 +215,20 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
     setIsDragging(false);
   };
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
       const dataUrl = canvas.toDataURL("image/png");
       onComplete(dataUrl);
     }
-  };
+  }, [onComplete]);
 
   // Expose handleComplete to parent
   useEffect(() => {
     if (onCompleteClick && step === "tweet" && tweetImage) {
       onCompleteClick(handleComplete);
     }
-  }, [step, tweetImage, onCompleteClick]);
+  }, [step, tweetImage, onCompleteClick, handleComplete]);
 
   return (
     <div className="space-y-4">
