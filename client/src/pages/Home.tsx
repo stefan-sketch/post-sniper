@@ -577,14 +577,14 @@ export default function Home() {
                   setViewTransition('none');
                   // Keep isViewSwitching true longer to prevent post animations during transition
                   setTimeout(() => {
-                    setIsViewSwitching(false);
-                    // Reset flags after animations complete
-                    if (newView === 'feed') {
-                      setTimeout(() => {
-                        justSwitchedToFeed.current = false;
-                        wasMatchdayOpenBeforeSwitch.current = false;
-                      }, 100);
-                    }
+                  setIsViewSwitching(false);
+                  // Reset flags after animations complete
+                  if (newView === 'feed') {
+                    setTimeout(() => {
+                      justSwitchedToFeed.current = false;
+                      // Don't reset wasMatchdayOpenBeforeSwitch here - it should only be reset when manually toggling MATCHDAY
+                    }, 100);
+                  }
                   }, 600);
                 }, 500);
               }}
@@ -618,6 +618,9 @@ export default function Home() {
             {currentView === 'feed' && (
               <button
                 onClick={() => {
+                  // Reset the flag when manually toggling MATCHDAY
+                  wasMatchdayOpenBeforeSwitch.current = false;
+                  
                   if (feedColumns === 3) {
                     // Trigger exit animation
                     setIsAnimatingOut(true);
