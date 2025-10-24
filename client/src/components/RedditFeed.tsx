@@ -281,41 +281,85 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                             <span>{commentTimeAgo}</span>
                           </div>
                           <div className="text-sm text-gray-200 whitespace-pre-wrap">
-                            {/* Parse comment body for images and links */}
-                            {comment.body.split(/(https?:\/\/[^\s]+)/g).map((part, i) => {
-                              // Check if it's a URL
-                              if (part.match(/^https?:\/\//)) {
-                                // Check if it's an image URL
-                                if (part.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i)) {
-                                  return (
-                                    <img 
-                                      key={i}
-                                      src={part} 
-                                      alt="Comment image"
-                                      className="max-w-full max-h-64 rounded my-2 bg-gray-900"
-                                      onError={(e) => {
-                                        // If image fails to load, show link instead
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
+                            {/* Parse comment body for GIFs, images and links */}
+                            {(() => {
+                              let text = comment.body;
+                              const parts: JSX.Element[] = [];
+                              let key = 0;
+                              
+                              // First, handle Reddit GIF format: ![gif](giphyID)
+                              const gifRegex = /!\[gif\]\(([^)]+)\)/g;
+                              let lastIndex = 0;
+                              let match;
+                              
+                              while ((match = gifRegex.exec(text)) !== null) {
+                                // Add text before the GIF
+                                if (match.index > lastIndex) {
+                                  const beforeText = text.substring(lastIndex, match.index);
+                                  parts.push(
+                                    <span key={key++}>{beforeText}</span>
                                   );
                                 }
-                                // Regular link
-                                return (
-                                  <a 
-                                    key={i}
-                                    href={part} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-[#FF4500] hover:underline break-all"
-                                  >
-                                    {part}
-                                  </a>
+                                
+                                // Add the GIF
+                                const giphyId = match[1];
+                                const gifUrl = `https://i.giphy.com/media/${giphyId}/giphy.gif`;
+                                parts.push(
+                                  <img 
+                                    key={key++}
+                                    src={gifUrl} 
+                                    alt="GIF"
+                                    className="max-w-full max-h-64 rounded my-2 bg-gray-900"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
                                 );
+                                
+                                lastIndex = gifRegex.lastIndex;
                               }
-                              // Regular text
-                              return <span key={i}>{part}</span>;
-                            })}
+                              
+                              // Add remaining text after last GIF
+                              const remainingText = text.substring(lastIndex);
+                              
+                              // Parse remaining text for URLs and images
+                              remainingText.split(/(https?:\/\/[^\s]+)/g).forEach((part) => {
+                                if (part.match(/^https?:\/\//)) {
+                                  // Check if it's an image URL
+                                  if (part.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i)) {
+                                    parts.push(
+                                      <img 
+                                        key={key++}
+                                        src={part} 
+                                        alt="Comment image"
+                                        className="max-w-full max-h-64 rounded my-2 bg-gray-900"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    );
+                                  } else {
+                                    // Regular link
+                                    parts.push(
+                                      <a 
+                                        key={key++}
+                                        href={part} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-[#FF4500] hover:underline break-all"
+                                      >
+                                        {part}
+                                      </a>
+                                    );
+                                  }
+                                } else if (part) {
+                                  // Regular text
+                                  parts.push(<span key={key++}>{part}</span>);
+                                }
+                              });
+                              
+                              return parts;
+                            })()}
                           </div>
                         </div>
                       );
