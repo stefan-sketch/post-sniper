@@ -736,7 +736,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       // Save the completed rectangle
       const colorMap = {
         'yellow': '#FFD700',
-        'black': '#000000',
+        'black': '#FFFFFF',
         'burgundy': '#800020'
       };
       const { startX, startY, endX, endY } = currentRect;
@@ -838,7 +838,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
           {/* Overlay Controls - Always visible, greyed out when no image */}
           <div className="space-y-2">
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               {/* Crop Button */}
                 <Button
                   type="button"
@@ -863,7 +863,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     }
                   }}
                   disabled={!image}
-                  className={`flex-1 transition-all duration-200 relative z-50 ${
+                  className={`flex-1 transition-all duration-200 relative z-50 px-2 ${
                     !image
                       ? "opacity-50 cursor-not-allowed"
                       : cropMode
@@ -873,11 +873,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   title={cropMode ? "Confirm crop" : "Crop image"}
                 >
                   {cropMode ? (
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className="h-3.5 w-3.5" />
                   )}
                 </Button>
 
@@ -888,7 +888,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 size="sm"
                 onClick={() => setUseWatermark(!useWatermark)}
                 disabled={!image || !selectedPage || cropMode}
-                className={`flex-1 transition-all duration-200 ${
+                className={`flex-1 transition-all duration-200 px-2 ${
                   !image || !selectedPage || cropMode
                     ? "opacity-50 cursor-not-allowed"
                     : useWatermark
@@ -897,7 +897,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title={!selectedPage ? "Select a page first" : "Add watermark"}
               >
-                <Droplet className="h-4 w-4" />
+                <Droplet className="h-3.5 w-3.5" />
               </Button>
 
               {/* Gradient Button */}
@@ -907,7 +907,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 size="sm"
                 onClick={() => setUseGradient(!useGradient)}
                 disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 ${
+                className={`flex-1 transition-all duration-200 px-2 ${
                   !image || cropMode
                     ? "opacity-50 cursor-not-allowed"
                     : useGradient
@@ -916,7 +916,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title="Add gradient overlay"
               >
-                <Layers className="h-4 w-4" />
+                <Layers className="h-3.5 w-3.5" />
               </Button>
 
               {/* Text Button */}
@@ -939,7 +939,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   }
                 }}
                 disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 ${
+                className={`flex-1 transition-all duration-200 px-2 ${
                   !image || cropMode
                     ? "opacity-50 cursor-not-allowed"
                     : overlayText
@@ -948,7 +948,40 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title="Add text overlay"
               >
-                <Type className="h-4 w-4" />
+                <Type className="h-3.5 w-3.5" />
+              </Button>
+
+              {/* Box Drawing Button */}
+              <Button
+                type="button"
+                variant={drawingEnabled ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setDrawingEnabled(!drawingEnabled);
+                  // Auto-set drawing color based on selected page
+                  if (!drawingEnabled && selectedPage) {
+                    if (selectedPage === 'football-funnys') {
+                      setDrawingColor('yellow');
+                    } else if (selectedPage === 'footy-feed') {
+                      setDrawingColor('black'); // Will render as white
+                    } else if (selectedPage === 'football-away-days') {
+                      setDrawingColor('burgundy');
+                    }
+                  }
+                }}
+                disabled={!image || cropMode}
+                className={`flex-1 transition-all duration-200 px-2 ${
+                  !image || cropMode
+                    ? "opacity-50 cursor-not-allowed"
+                    : drawingEnabled
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                }`}
+                title="Draw boxes"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" strokeWidth="2" rx="2" />
+                </svg>
               </Button>
 
               {/* Overlay Image Button - DISABLED */}
@@ -1000,8 +1033,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   className={`w-8 h-8 rounded-full border-2 ${
                     drawingColor === 'black' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
                   }`}
-                  style={{ backgroundColor: '#000000' }}
-                  title="Black"
+                  style={{ backgroundColor: '#FFFFFF' }}
+                  title="White"
                 />
                 <button
                   type="button"
@@ -1595,7 +1628,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                         const y = Math.min(currentRect.startY, currentRect.endY);
                         const width = Math.abs(currentRect.endX - currentRect.startX);
                         const height = Math.abs(currentRect.endY - currentRect.startY);
-                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#000000' : '#800020';
+                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#FFFFFF' : '#800020';
                         return (
                           <rect
                             x={x}
