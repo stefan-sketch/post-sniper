@@ -49,24 +49,30 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
         setLoading(true);
         setError(null);
 
-        // Fetch directly from Reddit's JSON API (client-side)
-        const response = await fetch(
-          `https://www.reddit.com/r/soccercirclejerk/${sort}.json?limit=25${sort === 'top' ? '&t=day' : ''}`,
-          {
-            headers: {
-              'Accept': 'application/json',
-            },
-          }
-        );
+        // Fetch from multiple subreddits
+        const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague'];
+        const allPosts: RedditPost[] = [];
 
-        if (!response.ok) {
-          throw new Error(`Reddit API error: ${response.status}`);
-        }
+        for (const subreddit of subreddits) {
+          try {
+            const response = await fetch(
+              `https://www.reddit.com/r/${subreddit}/${sort}.json?limit=10${sort === 'top' ? '&t=day' : ''}`,
+              {
+                headers: {
+                  'Accept': 'application/json',
+                },
+              }
+            );
 
-        const data = await response.json();
+            if (!response.ok) {
+              console.warn(`Failed to fetch r/${subreddit}: ${response.status}`);
+              continue;
+            }
+
+            const data = await response.json();
         
-        // Transform Reddit data
-        const redditPosts: RedditPost[] = data.data.children.map((child: any) => {
+            // Transform Reddit data
+            const redditPosts: RedditPost[] = data.data.children.map((child: any) => {
           const post = child.data;
           
           // Get the best quality image URL
@@ -88,22 +94,42 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
             imageUrl = post.thumbnail;
           }
           
-          return {
-            id: post.id,
-            title: post.title,
-            author: post.author,
-            subreddit: post.subreddit,
-            upvotes: post.ups,
-            comments: post.num_comments,
-            created: post.created_utc * 1000,
-            url: post.url,
-            permalink: post.permalink,
-            thumbnail: imageUrl,
-            isVideo: post.is_video || false,
-          };
+              return {
+                id: post.id,
+                title: post.title,
+                author: post.author,
+                subreddit: post.subreddit,
+                upvotes: post.ups,
+                comments: post.num_comments,
+                created: post.created_utc * 1000,
+                url: post.url,
+                permalink: post.permalink,
+                thumbnail: imageUrl,
+                isVideo: post.is_video || false,
+              };
+            });
+
+            allPosts.push(...redditPosts);
+          } catch (err) {
+            console.warn(`Error fetching r/${subreddit}:`, err);
+          }
+        }
+
+        // Sort all posts by creation time (newest first) or upvotes (for hot/top)
+        const sortedPosts = allPosts.sort((a, b) => {
+          if (sort === 'new') {
+            return b.created - a.created;
+          } else if (sort === 'top') {
+            return b.upvotes - a.upvotes;
+          } else {
+            // For 'hot', use a combination of upvotes and recency
+            const aScore = a.upvotes / Math.pow((Date.now() - a.created) / 3600000 + 2, 1.5);
+            const bScore = b.upvotes / Math.pow((Date.now() - b.created) / 3600000 + 2, 1.5);
+            return bScore - aScore;
+          }
         });
 
-        setPosts(redditPosts);
+        setPosts(sortedPosts.slice(0, 30)); // Limit to 30 total posts
       } catch (err) {
         console.error('Error fetching Reddit posts:', err);
         setError('Failed to load Reddit posts');
@@ -130,7 +156,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   if (loading) {
     return (
       <div className="glass-card p-6 rounded-xl text-center">
-        <p className="text-muted-foreground">Loading r/soccercirclejerk...</p>
+        <p className="text-muted-foreground">Loading Reddit posts...</p>
       </div>
     );
   }
