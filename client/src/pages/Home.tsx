@@ -958,14 +958,8 @@ export default function Home() {
             
             <div className="flex items-center justify-center gap-2 flex-1">
               
-              {/* Animated Discovery Icon + Three Logo Buttons + Dropdown */}
+              {/* Three Logo Buttons + Dropdown */}
               <div className="flex gap-2 items-center">
-                {/* Animated Discovery/Compass Icon */}
-                <div className="h-7 w-7 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '3s' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                  </svg>
-                </div>
                 {/* Facebook Button */}
                 <button
                   onClick={() => setFeedType('popular')}
