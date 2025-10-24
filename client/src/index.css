@@ -263,6 +263,30 @@
     display: none;  /* Chrome, Safari and Opera */
   }
 
+  /* Visible scrollbar for specific components */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.8);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thumb-gray-600::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 85, 99, 1);
+  }
+  
+  .scrollbar-track-gray-800::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.5);
+    border-radius: 3px;
+  }
+
   /* Desktop: macOS-style scrollbar (optional, for columns that show scrollbar) */
   @media (min-width: 768px) {
     ::-webkit-scrollbar {

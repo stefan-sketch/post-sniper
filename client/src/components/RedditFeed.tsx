@@ -1,4 +1,4 @@
-import { MessageCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { MessageCircle, ChevronDown, ChevronUp, ExternalLink, X } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 
@@ -33,6 +33,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [currentPermalink, setCurrentPermalink] = useState<string | null>(null);
 
   // Fetch comments using tRPC (server-side to avoid CORS)
@@ -215,7 +216,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                       src={post.thumbnail} 
                       alt=""
                       className="w-full max-h-96 object-contain rounded mb-2 bg-gray-900 cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => window.open(`https://reddit.com${post.permalink}`, '_blank')}
+                      onClick={() => setExpandedImage(post.thumbnail)}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -260,7 +261,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                 ) : postComments.length === 0 ? (
                   <p className="text-gray-400 text-sm text-center py-2">No comments yet</p>
                 ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                     {postComments.map((comment: RedditComment) => {
                       const commentTime = Math.floor((Date.now() - comment.created) / 3600000);
                       const commentTimeAgo = commentTime < 1 
@@ -326,6 +327,28 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
         );
       })}
       </div>
+      
+      {/* Image Modal */}
+      {expandedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setExpandedImage(null)}
+        >
+          <button
+            onClick={() => setExpandedImage(null)}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+            title="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img 
+            src={expandedImage} 
+            alt="Expanded view"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }
