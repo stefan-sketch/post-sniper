@@ -825,29 +825,27 @@ export default function Home() {
           {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
             {/* Settings button - desktop only */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              className="hidden md:flex items-center justify-center p-2 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              title="Settings"
             >
-              <Settings className="h-4 w-4 md:h-5 md:w-5" />
-            </Button>
+              <Settings className="h-4 w-4" />
+            </button>
             <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
               SDL MEDIA
             </h1>
             {/* Create post button - desktop only */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => {
                 setDroppedImage(null);
                 setShowCreatePost(true);
               }}
-              className="hidden md:flex relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
+              className="hidden md:flex items-center justify-center p-2 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              title="Create Post"
             >
-              <Plus className="h-4 w-4 md:h-5 md:w-5" />
-            </Button>
+              <Plus className="h-4 w-4" />
+            </button>
           </div>
 
           {/* Right: Settings + Notifications + Online Status (desktop) + Drag-drop icon (desktop only) */}
@@ -870,28 +868,26 @@ export default function Home() {
               )}
             </div>
             {/* Settings button - mobile only, after API light */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="md:hidden relative h-8 w-8 flex-shrink-0 md:order-1"
+              className="md:hidden flex items-center justify-center p-2 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-1"
+              title="Settings"
             >
               <Settings className="h-4 w-4" />
-            </Button>
+            </button>
             {/* Alerts button - after settings */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
               onClick={() => setShowAlerts(true)}
-              className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0 md:order-3"
+              className="relative flex items-center justify-center p-2 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-3"
+              title="Notifications"
             >
-              <Bell className="h-4 w-4 md:h-5 md:w-5" />
+              <Bell className="h-4 w-4" />
               {(unreadCountQuery.data || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
                   {unreadCountQuery.data}
                 </span>
               )}
-            </Button>
+            </button>
             {/* Drag-drop area - desktop only */}
             <div
               onDrop={async (e) => {
@@ -1117,14 +1113,14 @@ export default function Home() {
                 {/* Facebook Button */}
                 <button
                   onClick={() => handleFeedTypeChange('popular')}
-                  className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border ${
                     feedType === 'popular' 
-                      ? 'bg-[#1877F2] text-white shadow-lg shadow-[#1877F2]/50' 
-                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                      ? 'bg-[#1877F2] text-white border-[#1877F2]/50 shadow-lg shadow-[#1877F2]/30' 
+                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
                   }`}
                   title="Facebook Posts"
                 >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </button>
@@ -1132,14 +1128,14 @@ export default function Home() {
                 {/* X (Twitter) Button */}
                 <button
                   onClick={() => handleFeedTypeChange('twitter')}
-                  className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border ${
                     feedType === 'twitter' 
-                      ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/50' 
-                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                      ? 'bg-black text-white border-gray-600/50 shadow-lg shadow-black/30' 
+                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
                   }`}
                   title="X (Twitter) Posts"
                 >
-                  <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </button>
@@ -1147,13 +1143,13 @@ export default function Home() {
                 {/* Reddit Button */}
                 <button
                   onClick={() => handleFeedTypeChange('reddit')}
-                  className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all border ${
                     feedType === 'reddit' 
-                      ? 'bg-[#FF4500] text-white shadow-lg shadow-[#FF4500]/50' 
-                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                      ? 'bg-[#FF4500] text-white border-[#FF4500]/50 shadow-lg shadow-[#FF4500]/30' 
+                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
                   }`}
                   title="Reddit Posts"
-                >                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                >                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498 .056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
                   </svg>
                 </button>

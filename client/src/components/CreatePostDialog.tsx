@@ -781,10 +781,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             <div className="flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 {/* Close and Minimize buttons - Top Left */}
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                   <button
                     onClick={handleClose}
-                    className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                     title="Close and discard"
                   >
                     <X className="w-4 h-4" />
@@ -792,7 +792,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   {onMinimize && hasContent() && (
                     <button
                       onClick={onMinimize}
-                      className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                       title="Minimize"
                     >
                       <Minus className="w-4 h-4" />
