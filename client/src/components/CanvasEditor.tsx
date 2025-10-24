@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Upload } from "lucide-react";
 
 const PAGE_OUTLINES = [
@@ -22,11 +22,12 @@ const PAGE_OUTLINES = [
 interface CanvasEditorProps {
   onComplete: (imageDataUrl: string) => void;
   selectedPage: string | null;
+  tweetOutlineColor?: 'white' | 'black';
   onTweetEditingChange?: (isEditing: boolean) => void;
   onCompleteClick?: (handler: () => void) => void;
 }
 
-export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, onCompleteClick }: CanvasEditorProps) {
+export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'white', onTweetEditingChange, onCompleteClick }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasRegisteredHandler = useRef(false);
@@ -45,13 +46,13 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
     if (!pageId) return null;
     switch (pageId) {
       case 'football-funnys': return '#FFD700'; // Yellow/Gold
-      case 'footy-feed': return '#FFFFFF'; // White
+      case 'footy-feed': return tweetOutlineColor === 'black' ? '#000000' : '#FFFFFF'; // User-selected
       case 'football-away-days': return '#8B0000'; // Burgundy
       default: return null;
     }
   };
   
-  const outlineColor = getOutlineColorForPage(selectedPage);
+  const outlineColor = useMemo(() => getOutlineColorForPage(selectedPage), [selectedPage, tweetOutlineColor]);
   const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
   const [tweetScale, setTweetScale] = useState(1.0); // Scale factor (0.1 to 2.0)
   const [isDragging, setIsDragging] = useState(false);

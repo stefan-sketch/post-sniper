@@ -70,6 +70,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
   const [strokeWidth, setStrokeWidth] = useState(4); // Default stroke width
   const [borderRadius, setBorderRadius] = useState(0); // Default border radius for rectangles
+  const [tweetOutlineColor, setTweetOutlineColor] = useState<'white' | 'black'>('white'); // For Footy Feed tweet overlay
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [canvasMode, setCanvasMode] = useState(false);
@@ -589,6 +590,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       setDrawingColor('yellow');
       setStrokeWidth(4);
       setBorderRadius(0);
+      setTweetOutlineColor('white');
       
       // Close dialog after short delay to show success message
       setTimeout(() => {
@@ -652,6 +654,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     setDrawingColor('yellow');
     setStrokeWidth(4);
     setBorderRadius(0);
+    setTweetOutlineColor('white');
     // Close dialog
     onOpenChange(false);
   };
@@ -1220,6 +1223,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             {canvasMode && !image ? (
               <CanvasEditor
                 selectedPage={selectedPage}
+                tweetOutlineColor={tweetOutlineColor}
                 onComplete={(imageDataUrl) => {
                   setImage(imageDataUrl);
                   setCanvasMode(false);
@@ -1268,6 +1272,33 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   <Sparkles className="h-3 w-3 mr-1" />
                   Canvas
                 </Button>
+                {/* Tweet Outline Color Selector - Only show for Footy Feed */}
+                {selectedPage === 'footy-feed' && (
+                  <div className="absolute top-11 left-2 flex gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => setTweetOutlineColor('white')}
+                      className={`w-8 h-8 rounded border-2 transition-all ${
+                        tweetOutlineColor === 'white'
+                          ? 'border-white bg-white/20'
+                          : 'border-gray-600 hover:border-gray-400'
+                      }`}
+                      title="White outline"
+                    >
+                      <div className="w-full h-full rounded bg-white" />
+                    </button>
+                    <button
+                      onClick={() => setTweetOutlineColor('black')}
+                      className={`w-8 h-8 rounded border-2 transition-all ${
+                        tweetOutlineColor === 'black'
+                          ? 'border-white bg-gray-800'
+                          : 'border-gray-600 hover:border-gray-400'
+                      }`}
+                      title="Black outline"
+                    >
+                      <div className="w-full h-full rounded bg-black" />
+                    </button>
+                  </div>
+                )}
                 {/* Small Paste button in top-right - Hidden on iOS */}
                 {!/iPhone|iPad|iPod/.test(navigator.userAgent) && (
                   <Button
