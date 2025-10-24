@@ -1,10 +1,8 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, Image as ImageIcon } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, X } from "lucide-react";
+import React from "react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-
-import { X } from "lucide-react";
 
 interface PostCardProps {
   post: {
@@ -30,7 +28,8 @@ interface PostCardProps {
   hidePageHeader?: boolean; // Hide page name and profile picture
 }
 
-export default function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
+function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
   
@@ -257,12 +256,19 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
           className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
           onClick={handleOpenPost}
         >
+          {/* Blur placeholder while loading */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+          )}
           <img 
             src={post.image} 
             alt="Post content"
             loading="lazy"
             decoding="async"
-            className="w-full h-auto object-cover"
+            onLoad={() => setImageLoaded(true)}
+            className={`w-full h-auto object-cover transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             draggable="true"
             onDragStart={(e) => {
               e.dataTransfer.setData('text/uri-list', post.image!);
@@ -289,4 +295,19 @@ export default function PostCard({ post, showDismiss, onDismiss, reactionIncreas
     </div>
   );
 }
+
+// Memoize PostCard to prevent unnecessary re-renders
+export default React.memo(PostCard, (prevProps, nextProps) => {
+  // Only re-render if these specific props change
+  return (
+    prevProps.post.id === nextProps.post.id &&
+    prevProps.post.reactions === nextProps.post.reactions &&
+    prevProps.post.kpi?.page_posts_comments_count?.value === nextProps.post.kpi?.page_posts_comments_count?.value &&
+    prevProps.post.kpi?.page_posts_shares_count?.value === nextProps.post.kpi?.page_posts_shares_count?.value &&
+    prevProps.reactionIncrease === nextProps.reactionIncrease &&
+    prevProps.showDismiss === nextProps.showDismiss &&
+    prevProps.hideActions === nextProps.hideActions &&
+    prevProps.hidePageHeader === nextProps.hidePageHeader
+  );
+});
 

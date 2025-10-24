@@ -194,6 +194,9 @@
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    contain: layout style paint;  /* CSS containment for better performance */
+    transform: translateZ(0);  /* Force GPU acceleration */
+    backface-visibility: hidden;  /* Prevent flickering */
   }
   
   /* Neon glow effects */
@@ -214,6 +217,10 @@
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+    -webkit-overflow-scrolling: touch;  /* iOS momentum scrolling */
+    scroll-behavior: smooth;  /* Smooth scrolling */
+    will-change: scroll-position;  /* Optimize scroll performance */
+    transform: translateZ(0);  /* Force GPU acceleration */
   }
   
   .hide-scrollbar::-webkit-scrollbar,
@@ -279,6 +286,7 @@
 
 .animate-slideIn {
   animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;  /* Optimize animation performance */
 }
 
 /* Slide in from left animation for Football Hub */
@@ -307,6 +315,7 @@
 
 .animate-slideInFromLeft {
   animation: slideInFromLeft 0.5s ease-out;
+  will-change: transform, opacity;  /* Optimize animation performance */
 }
 
 /* Slide in from right animation */

@@ -82,7 +82,7 @@ export default function Home() {
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
     { limit: 50 }, 
     { 
-      refetchInterval: 60000, // Refresh UI every 60 seconds from database (reduced from 30s)
+      refetchInterval: isIOS ? 90000 : 60000, // Refresh UI every 90s on iOS, 60s on desktop (battery optimization)
       staleTime: 30000, // Consider data fresh for 30 seconds
     }
   );
@@ -130,7 +130,7 @@ export default function Home() {
   }, [isPlaying]);
   // Use cached posts from server (fetched by background job)
   const postsQuery = trpc.cachedPosts.getAll.useQuery(undefined, {
-    refetchInterval: 10000, // Poll every 10 seconds to get latest cached data (reduced from 5s)
+    refetchInterval: isIOS ? 15000 : 10000, // Poll every 15s on iOS, 10s on desktop (battery optimization)
     staleTime: 5000, // Consider data fresh for 5 seconds
     refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
