@@ -96,6 +96,48 @@ export default function Home() {
     },
   });
   
+  // Function to handle view switching (used by both button and keyboard shortcut)
+  const handleViewSwitch = () => {
+    const newView = currentView === 'feed' ? 'pages' : 'feed';
+    setIsViewSwitching(true);
+    setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
+    if (newView === 'pages') {
+      // Save MATCHDAY state before switching to Pages
+      wasMatchdayOpenBeforeSwitch.current = feedColumns === 3;
+    } else if (newView === 'feed') {
+      justSwitchedToFeed.current = true;
+    }
+    setTimeout(() => {
+      setCurrentView(newView);
+      setViewTransition('none');
+      // Keep isViewSwitching true longer to prevent post animations during transition
+      setTimeout(() => {
+        setIsViewSwitching(false);
+        // Reset flags after animations complete
+        if (newView === 'feed') {
+          setTimeout(() => {
+            justSwitchedToFeed.current = false;
+            // Don't reset wasMatchdayOpenBeforeSwitch here - it should only be reset when manually toggling MATCHDAY
+          }, 100);
+        }
+      }, 600);
+    }, 500);
+  };
+
+  // Keyboard shortcut: CMD+D to toggle between Feed and Pages
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for CMD+D (Mac) or Ctrl+D (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
+        e.preventDefault(); // Prevent browser bookmark dialog
+        handleViewSwitch();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentView, feedColumns]); // Re-bind when dependencies change
+
   // Twitter: Periodically fetch from API when playing
   useEffect(() => {
     if (!twitterPlaying) return;
@@ -562,32 +604,7 @@ export default function Home() {
               )}
             </div>
             <button
-              onClick={() => {
-                const newView = currentView === 'feed' ? 'pages' : 'feed';
-                setIsViewSwitching(true);
-                setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
-                if (newView === 'pages') {
-                  // Save MATCHDAY state before switching to Pages
-                  wasMatchdayOpenBeforeSwitch.current = feedColumns === 3;
-                } else if (newView === 'feed') {
-                  justSwitchedToFeed.current = true;
-                }
-                setTimeout(() => {
-                  setCurrentView(newView);
-                  setViewTransition('none');
-                  // Keep isViewSwitching true longer to prevent post animations during transition
-                  setTimeout(() => {
-                  setIsViewSwitching(false);
-                  // Reset flags after animations complete
-                  if (newView === 'feed') {
-                    setTimeout(() => {
-                      justSwitchedToFeed.current = false;
-                      // Don't reset wasMatchdayOpenBeforeSwitch here - it should only be reset when manually toggling MATCHDAY
-                    }, 100);
-                  }
-                  }, 600);
-                }, 500);
-              }}
+              onClick={handleViewSwitch}
               className="hidden md:flex group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
