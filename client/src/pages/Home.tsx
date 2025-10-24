@@ -43,7 +43,7 @@ export default function Home() {
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
-  const [feedType, setFeedType] = useState<'popular' | 'twitter'>('popular');
+  const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
@@ -963,36 +963,55 @@ export default function Home() {
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
-              <TrendingUp className={`h-5 w-5 animate-pulse transition-colors ${
-                feedType === 'popular' ? 'text-[#1877F2]' : 'text-white'
-              }`} />
-              {/* Toggle Switch - Smaller */}
-            <button
-              onClick={() => setFeedType(feedType === 'popular' ? 'twitter' : 'popular')}
-              className="relative inline-flex h-7 w-24 items-center rounded-full bg-gray-700 transition-all hover:bg-gray-600 overflow-hidden"
-            >
-              <span
-                className={`inline-block h-6 w-12 transform rounded-full shadow-lg transition-all ${
-                  feedType === 'twitter' 
-                    ? 'translate-x-[45px] bg-gray-800' 
-                    : 'translate-x-0.5 bg-[#1877F2]'
-                }`}
-              />
-              <span className={`absolute left-2 flex items-center pointer-events-none transition-colors ${
-                feedType === 'popular' ? 'text-white' : 'text-gray-900'
-              }`}>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </span>
-              <span className={`absolute right-2 flex items-center pointer-events-none transition-colors ${
-                feedType === 'twitter' ? 'text-white' : 'text-gray-900'
-              }`}>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </span>
-            </button>
+              <TrendingUp className="h-5 w-5 animate-pulse text-cyan-400" />
+              
+              {/* Three Logo Buttons */}
+              <div className="flex gap-1">
+                {/* Facebook Button */}
+                <button
+                  onClick={() => setFeedType('popular')}
+                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                    feedType === 'popular' 
+                      ? 'bg-[#1877F2] text-white scale-110 shadow-lg shadow-[#1877F2]/50' 
+                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                  }`}
+                  title="Facebook Posts"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </button>
+
+                {/* X (Twitter) Button */}
+                <button
+                  onClick={() => setFeedType('twitter')}
+                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                    feedType === 'twitter' 
+                      ? 'bg-gray-900 text-white scale-110 shadow-lg shadow-gray-900/50' 
+                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                  }`}
+                  title="X (Twitter) Posts"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </button>
+
+                {/* Reddit Button */}
+                <button
+                  onClick={() => setFeedType('reddit')}
+                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                    feedType === 'reddit' 
+                      ? 'bg-[#FF4500] text-white scale-110 shadow-lg shadow-[#FF4500]/50' 
+                      : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                  }`}
+                  title="Reddit Posts"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+                  </svg>
+                </button>
+              </div>
             
             {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) */}
             {feedType === 'twitter' ? (
@@ -1062,7 +1081,110 @@ export default function Home() {
           </div>
           
           <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
-            {feedType === 'popular' ? (
+            {feedType === 'reddit' ? (
+              <>
+                {/* Mock Reddit Posts */}
+                <div className="sticky top-0 z-10 relative h-0.5 bg-[#FF4500]/30 mb-3 overflow-hidden flex-shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF4500] to-transparent animate-pulse"></div>
+                </div>
+                {[
+                  {
+                    id: '1',
+                    title: 'Maccabi Tel Aviv 0-2 Midtjylland - Philip Billing 71\'',
+                    author: 'u/soccer_fan',
+                    subreddit: 'soccer',
+                    upvotes: 6835,
+                    comments: 251,
+                    created: Date.now() - 3600000,
+                    url: 'https://v.redd.it/t3oe1zd09xwf1',
+                    thumbnail: 'https://via.placeholder.com/140x140?text=Video'
+                  },
+                  {
+                    id: '2',
+                    title: 'Sheffield Wednesday file for administration',
+                    author: 'u/football_news',
+                    subreddit: 'soccer',
+                    upvotes: 363,
+                    comments: 126,
+                    created: Date.now() - 7200000,
+                    url: 'https://news.sky.com/story/sheffield-wednesday',
+                    thumbnail: 'https://via.placeholder.com/140x140?text=News'
+                  },
+                  {
+                    id: '3',
+                    title: 'Morgan Gibbs-White: "I feel like I can finally breathe. Happy to get our first win in 9..."',
+                    author: 'u/premier_league',
+                    subreddit: 'soccer',
+                    upvotes: 3701,
+                    comments: 344,
+                    created: Date.now() - 10800000,
+                    url: 'https://v.redd.it/2wkq34a5kxwf1',
+                    thumbnail: 'https://via.placeholder.com/140x140?text=Video'
+                  },
+                  {
+                    id: '4',
+                    title: 'Free Talk Friday',
+                    author: 'u/AutoModerator',
+                    subreddit: 'soccer',
+                    upvotes: 9,
+                    comments: 448,
+                    created: Date.now() - 14400000,
+                    url: 'https://www.reddit.com/r/soccer/comments/1oesr4z/free_talk_friday/',
+                    thumbnail: 'https://via.placeholder.com/140x140?text=Discussion'
+                  },
+                  {
+                    id: '5',
+                    title: 'Daily Discussion',
+                    author: 'u/AutoModerator',
+                    subreddit: 'soccer',
+                    upvotes: 26,
+                    comments: 719,
+                    created: Date.now() - 18000000,
+                    url: 'https://www.reddit.com/r/soccer/comments/1oe4246/daily_discussion/',
+                    thumbnail: 'https://via.placeholder.com/140x140?text=Discussion'
+                  }
+                ].map((redditPost) => (
+                  <div key={redditPost.id} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-[#FF4500] transition-all">
+                    <div className="flex gap-3">
+                      {/* Upvote section */}
+                      <div className="flex flex-col items-center gap-1 text-xs">
+                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+                        </svg>
+                        <span className="font-bold text-[#FF4500]">{redditPost.upvotes.toLocaleString()}</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 20l-8-8h6V4h4v8h6z"/>
+                        </svg>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                          <span className="font-semibold text-[#FF4500]">r/{redditPost.subreddit}</span>
+                          <span>•</span>
+                          <span>{redditPost.author}</span>
+                          <span>•</span>
+                          <span>{Math.floor((Date.now() - redditPost.created) / 3600000)}h ago</span>
+                        </div>
+                        <h3 className="text-white font-semibold mb-2 line-clamp-2">{redditPost.title}</h3>
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{redditPost.comments} comments</span>
+                          </div>
+                          <button className="flex items-center gap-1 hover:text-white transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            <span>Share</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
                   <div className="glass-card p-6 rounded-xl text-center">
