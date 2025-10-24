@@ -21,15 +21,28 @@ const PAGE_OUTLINES = [
 
 interface CanvasEditorProps {
   onComplete: (imageDataUrl: string) => void;
+  selectedPage: string | null;
 }
 
-export function CanvasEditor({ onComplete }: CanvasEditorProps) {
+export function CanvasEditor({ onComplete, selectedPage }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [step, setStep] = useState<"background" | "tweet" | "outline">("background");
+  const [step, setStep] = useState<"background" | "tweet">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
-  const [outlineColor, setOutlineColor] = useState<string | null>(null);
+  
+  // Auto-apply outline color based on selected page
+  const getOutlineColorForPage = (pageId: string | null): string | null => {
+    if (!pageId) return null;
+    switch (pageId) {
+      case 'football-funnys': return '#FFD700'; // Yellow/Gold
+      case 'footy-feed': return '#000000'; // Black
+      case 'football-away-days': return '#8B0000'; // Burgundy
+      default: return null;
+    }
+  };
+  
+  const outlineColor = getOutlineColorForPage(selectedPage);
   const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
   const [tweetScale, setTweetScale] = useState(1.0); // Scale factor (0.1 to 2.0)
   const [isDragging, setIsDragging] = useState(false);
@@ -112,7 +125,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
       const img = new Image();
       img.onload = () => {
         setBackgroundImage(img);
-        setStep("tweet");
+        setStep("tweet"); // Move to tweet upload
       };
       img.src = event.target?.result as string;
     };
@@ -133,7 +146,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
         if (maxDimension > CANVAS_WIDTH * 0.8) {
           setTweetScale((CANVAS_WIDTH * 0.8) / maxDimension);
         }
-        setStep("outline");
+        // Stay on tweet step, outline is auto-applied
       };
       img.src = event.target?.result as string;
     };
@@ -141,7 +154,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (step !== "tweet" && step !== "outline") return;
+    if (step !== "tweet") return;
     if (!tweetImage) return;
 
     const canvas = canvasRef.current;
@@ -194,20 +207,12 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
     setIsDragging(false);
   };
 
-  const handleOutlineSelect = (color: string | null) => {
-    setOutlineColor(color);
-  };
-
   const handleComplete = () => {
     const canvas = canvasRef.current;
     if (canvas) {
       const dataUrl = canvas.toDataURL("image/png");
       onComplete(dataUrl);
     }
-  };
-
-  const handleBackToOutline = () => {
-    setOutlineColor(null);
   };
 
   return (
@@ -272,7 +277,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
       </div>
 
       {/* Scale Slider - Only show when tweet is uploaded */}
-      {(step === "tweet" || step === "outline") && tweetImage && (
+      {step === "tweet" && tweetImage && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-white">Tweet Size</span>
@@ -293,54 +298,17 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
         </div>
       )}
 
-      {/* Step 3: Select Outline with Page Icons */}
-      {step === "outline" && (
-        <>
-          {/* Complete Button - Top Right */}
+      {/* Complete Button - Show when tweet is uploaded */}
+      {step === "tweet" && tweetImage && (
+        <div className="flex justify-end">
           <button
             onClick={handleComplete}
-            className="absolute top-6 right-6 bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 py-2 rounded-md font-medium transition-all duration-200 hover:scale-[1.02] z-10"
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg"
           >
             Complete
           </button>
-          
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white text-center">Select Outline Color</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {PAGE_OUTLINES.map((page) => (
-                <button
-                  key={page.name}
-                  onClick={() => handleOutlineSelect(page.color)}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 border-2 ${
-                    outlineColor === page.color
-                      ? 'bg-cyan-600 border-cyan-400'
-                      : 'bg-gray-800 hover:bg-gray-700 border-transparent hover:border-cyan-500'
-                  }`}
-                  title={page.name}
-                >
-                  <div className="relative">
-                    <img 
-                      src={page.icon} 
-                      alt={page.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div 
-                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-800"
-                      style={{ backgroundColor: page.color }}
-                    />
-                  </div>
-                  <span className="text-xs text-white text-center leading-tight">
-                    {page.name === "Football Funnys" ? "Funnys" : 
-                     page.name === "Footy Feed" ? "Feed" :
-                     page.name === "Football Away Days" ? "Away Days" : page.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
 }
-

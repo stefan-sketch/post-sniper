@@ -1106,6 +1106,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
           <div className="space-y-2">
             {canvasMode && !image ? (
               <CanvasEditor
+                selectedPage={selectedPage}
                 onComplete={(imageDataUrl) => {
                   setImage(imageDataUrl);
                   setCanvasMode(false);
