@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
@@ -12,9 +12,11 @@ const PAGE_COLORS: Record<PageId, string> = {
 interface CanvasEditorProps {
   selectedPage: PageId | null;
   onCanvasUpdate: (imageDataUrl: string) => void;
+  triggerOverlayUpload?: File | null;
+  onOverlayUploaded?: () => void;
 }
 
-export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps) {
+export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUpload, onOverlayUploaded }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [overlayImage, setOverlayImage] = useState<HTMLImageElement | null>(null);
@@ -26,6 +28,23 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
   const CANVAS_WIDTH = 1080;
   const CANVAS_HEIGHT = 1350;
   const BORDER_WIDTH = 8;
+
+  // Handle overlay upload triggered from tools button
+  useEffect(() => {
+    if (triggerOverlayUpload) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          setOverlayImage(img);
+          setOverlayPosition({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 });
+          onOverlayUploaded?.();
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(triggerOverlayUpload);
+    }
+  }, [triggerOverlayUpload]);
 
   useEffect(() => {
     drawCanvas();
@@ -106,22 +125,6 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => setBackgroundImage(img);
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleOverlayUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        setOverlayImage(img);
-        setOverlayPosition({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 });
-      };
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
@@ -225,8 +228,8 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
         )}
       </div>
 
-      {/* Canvas on the RIGHT with floating tweet button */}
-      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2 relative">
+      {/* Canvas on the RIGHT */}
+      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2">
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -238,27 +241,6 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
-        
-        {/* Floating tweet overlay button - appears INSIDE canvas once background is uploaded */}
-        {backgroundImage && !overlayImage && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleOverlayUpload}
-              className="hidden"
-              id="canvas-overlay"
-            />
-            <label
-              htmlFor="canvas-overlay"
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full flex flex-col items-center justify-center cursor-pointer transition-all bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110"
-              title="Add Tweet Overlay"
-            >
-              <Upload className="h-6 w-6 mb-1" />
-              <span className="text-xs font-medium">Tweet</span>
-            </label>
-          </>
-        )}
       </div>
     </div>
   );

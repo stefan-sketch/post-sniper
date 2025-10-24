@@ -71,6 +71,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [canvasMode, setCanvasMode] = useState(false);
+  const [triggerOverlayUpload, setTriggerOverlayUpload] = useState<File | null>(null);
 
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -882,6 +883,34 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 <Pen className="h-4 w-4" />
               </Button>
 
+              {/* Tweet Overlay Button - Only in Canvas Mode */}
+              {canvasMode && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setTriggerOverlayUpload(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="canvas-overlay-tools"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('canvas-overlay-tools')?.click()}
+                    className="flex-1 transition-all duration-200 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500 hover:bg-cyan-500/10"
+                    title="Add Tweet Overlay"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+
               {/* Overlay Image Button - DISABLED */}
               {/* <Button
                 type="button"
@@ -1147,6 +1176,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   setCropMode(false);
                   setCroppedImage(null);
                 }}
+                triggerOverlayUpload={triggerOverlayUpload}
+                onOverlayUploaded={() => setTriggerOverlayUpload(null)}
               />
             ) : cropMode ? (
               <div className="space-y-2">
