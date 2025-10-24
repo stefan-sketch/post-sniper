@@ -1122,10 +1122,7 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
-            <div className="flex items-center gap-2" style={{ minWidth: feedColumns === 3 || isAnimatingOut ? '0' : '120px', visibility: feedColumns === 3 || isAnimatingOut ? 'hidden' : 'visible' }}>
-            </div>
-            
+          <div className="flex items-center justify-center mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
               
               {/* Three Logo Buttons with Integrated Dropdowns */}
@@ -1239,9 +1236,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
-            {/* Empty spacer for balance */}
-            <div style={{ minWidth: feedColumns === 3 || isAnimatingOut ? '0' : '120px', visibility: feedColumns === 3 || isAnimatingOut ? 'hidden' : 'visible' }}></div>
           </div>
           
           <div 

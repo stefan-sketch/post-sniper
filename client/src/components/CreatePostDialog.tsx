@@ -808,15 +808,13 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
-                  {onMinimize && hasContent() && (
-                    <button
-                      onClick={onMinimize}
-                      className="flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
-                      title="Minimize"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                  <button
+                    onClick={onMinimize}
+                    className="flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    title="Minimize"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
               </div>

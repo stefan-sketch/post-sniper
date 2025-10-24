@@ -35,6 +35,7 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
   const [step, setStep] = useState<"background" | "tweet">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Notify parent when tweet editing state changes
   useEffect(() => {
@@ -161,6 +162,75 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
     };
     reader.readAsDataURL(file);
   };
+
+  // Handle file from drag-drop or paste
+  const handleImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        if (step === 'background') {
+          setBackgroundImage(img);
+          setStep('tweet');
+        } else if (step === 'tweet' && !tweetImage) {
+          setTweetImage(img);
+          const maxDimension = Math.max(img.width, img.height);
+          if (maxDimension > CANVAS_WIDTH * 0.8) {
+            setTweetScale((CANVAS_WIDTH * 0.8) / maxDimension);
+          }
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleImageFile(file);
+    }
+  };
+
+  // Paste handler
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            handleImageFile(file);
+          }
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [step, tweetImage]);
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (step !== "tweet") return;
@@ -301,7 +371,15 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
   return (
     <div className="space-y-4">
       {/* Canvas with Overlay Prompts */}
-      <div ref={containerRef} className="relative flex justify-center bg-gray-800 rounded-lg p-4">
+      <div 
+        ref={containerRef} 
+        className={`relative flex justify-center bg-gray-800 rounded-lg p-4 transition-all ${
+          isDragging ? 'ring-4 ring-cyan-500 bg-gray-700' : ''
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -328,13 +406,16 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
                 className="hidden"
                 id="canvas-bg-upload"
               />
-              <button
-                onClick={() => document.getElementById("canvas-bg-upload")?.click()}
-                className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
-              >
-                <Upload className="h-6 w-6" />
-                Upload Background
-              </button>
+              <div className="text-center">
+                <button
+                  onClick={() => document.getElementById("canvas-bg-upload")?.click()}
+                  className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
+                >
+                  <Upload className="h-6 w-6" />
+                  Upload Background
+                </button>
+                <p className="text-gray-400 text-sm mt-3">or drag & drop / paste image</p>
+              </div>
             </div>
           </div>
         )}
@@ -350,13 +431,16 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
                 className="hidden"
                 id="canvas-tweet-upload"
               />
-              <button
-                onClick={() => document.getElementById("canvas-tweet-upload")?.click()}
-                className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
-              >
-                <Upload className="h-6 w-6" />
-                Upload Tweet
-              </button>
+              <div className="text-center">
+                <button
+                  onClick={() => document.getElementById("canvas-tweet-upload")?.click()}
+                  className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
+                >
+                  <Upload className="h-6 w-6" />
+                  Upload Tweet
+                </button>
+                <p className="text-gray-400 text-sm mt-3">or drag & drop / paste image</p>
+              </div>
             </div>
           </div>
         )}
