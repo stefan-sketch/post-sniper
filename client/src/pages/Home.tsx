@@ -2160,20 +2160,8 @@ export default function Home() {
                 className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all active:scale-90"
                 title="Switch to Pages"
               >
-                <svg 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <polyline points="17 1 21 5 17 9"/>
-                  <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                  <polyline points="7 23 3 19 7 15"/>
-                  <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
                 </svg>
               </button>
               
@@ -2230,7 +2218,10 @@ export default function Home() {
                 }}
                 className="flex items-center justify-center p-3 rounded-full bg-cyan-500 hover:bg-cyan-600 text-white transition-all active:scale-90"
               >
-                <Plus className="w-6 h-6" />
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
               </button>
             </div>
           </div>
