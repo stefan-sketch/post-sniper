@@ -32,10 +32,20 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasRegisteredHandler = useRef(false);
-  const [step, setStep] = useState<"background" | "tweet">("background");
+  const [step, setStep] = useState<"background" | "gradient" | "tweet">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [useGradient, setUseGradient] = useState(false);
+  // Future: gradient color can be customized per page
+  // const gradientColor = useMemo(() => {
+  //   switch (selectedPage) {
+  //     case 'football-funnys': return '#FFD700'; // Yellow
+  //     case 'football-away-days': return '#8B0000'; // Burgundy
+  //     default: return '#000000'; // Black
+  //   }
+  // }, [selectedPage]);
+  const gradientColor = '#000000'; // Black for now
   
   // Notify parent when tweet editing state changes
   useEffect(() => {
@@ -97,6 +107,16 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
       ctx.drawImage(backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
     }
 
+    // Draw gradient overlay (if enabled) - between background and tweet
+    if (useGradient && backgroundImage) {
+      const gradient = ctx.createLinearGradient(0, CANVAS_HEIGHT, 0, CANVAS_HEIGHT / 2);
+      gradient.addColorStop(0, gradientColor); // Solid color at bottom
+      gradient.addColorStop(1, 'transparent'); // Fade to transparent at middle
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    }
+
     // Draw tweet image ON TOP (if exists)
     if (tweetImage) {
       // Use original dimensions scaled by tweetScale
@@ -123,7 +143,7 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
         );
       }
     }
-  }, [backgroundImage, tweetImage, outlineColor, tweetPosition, tweetScale]);
+  }, [backgroundImage, tweetImage, outlineColor, tweetPosition, tweetScale, useGradient, gradientColor]);
 
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -134,7 +154,7 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
       const img = new Image();
       img.onload = () => {
         setBackgroundImage(img);
-        setStep("tweet"); // Move to tweet upload
+        setStep("gradient"); // Move to gradient prompt
       };
       img.src = event.target?.result as string;
     };
@@ -172,7 +192,7 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
       img.onload = () => {
         if (step === 'background') {
           setBackgroundImage(img);
-          setStep('tweet');
+          setStep('gradient'); // Move to gradient prompt
         } else if (step === 'tweet' && !tweetImage) {
           setTweetImage(img);
           const maxDimension = Math.max(img.width, img.height);
@@ -419,7 +439,39 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
           </div>
         )}
 
-        {/* Step 2: Upload Tweet - Centered in Canvas */}
+        {/* Step 2: Gradient Prompt - Centered in Canvas */}
+        {step === "gradient" && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl p-8 shadow-2xl max-w-md">
+              <div className="text-center space-y-6">
+                <h3 className="text-2xl font-bold text-white">Add Gradient Overlay?</h3>
+                <p className="text-gray-300">A black gradient will fade from the bottom to the middle of your image</p>
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={() => {
+                      setUseGradient(true);
+                      setStep("tweet");
+                    }}
+                    className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+                  >
+                    Yes, Add Gradient
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUseGradient(false);
+                      setStep("tweet");
+                    }}
+                    className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-all hover:scale-105"
+                  >
+                    No, Skip
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Upload Tweet - Centered in Canvas */}
         {step === "tweet" && !tweetImage && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="pointer-events-auto">
