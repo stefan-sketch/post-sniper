@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, X, ExternalLink } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, ExternalLink } from "lucide-react";
 import React from "react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,6 @@ interface PostCardProps {
 function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [isVisible, setIsVisible] = React.useState(false);
-  const [expandedImage, setExpandedImage] = React.useState<string | null>(null);
   const cardRef = React.useRef<HTMLDivElement>(null);
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
@@ -302,10 +301,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
       {post.image && isVisible && (
         <div 
           className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpandedImage(post.image!);
-          }}
+          onClick={handleOpenPost}
         >
           {/* Blur placeholder while loading */}
           {!imageLoaded && (
@@ -346,28 +342,6 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
         </div>
       )}
     </div>
-    
-    {/* Image Modal */}
-    {expandedImage && (
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-        onClick={() => setExpandedImage(null)}
-      >
-        <button
-          onClick={() => setExpandedImage(null)}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
-          title="Close"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <img 
-          src={expandedImage} 
-          alt="Expanded view"
-          className="max-w-full max-h-full object-contain"
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
-    )}
     </>
   );
 }

@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon, ExternalLink, X } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon, ExternalLink } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { RedditFeed } from "@/components/RedditFeed";
@@ -66,7 +66,6 @@ export default function Home() {
   const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
   const [showAllPopularPosts, setShowAllPopularPosts] = useState(false); // Track if "SEE MORE" clicked for Popular posts
   const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
-  const [expandedTwitterImage, setExpandedTwitterImage] = useState<string | null>(null); // Track expanded Twitter image
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -1295,9 +1294,8 @@ export default function Home() {
                         style={{
                           width: feedColumns === 3 || isAnimatingOut ? 'calc(100% + 1rem)' : '100%'
                         }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedTwitterImage(tweet.image);
+                        onClick={() => {
+                          window.open(`https://twitter.com/${tweet.author.username}/status/${tweet.id}`, '_blank');
                         }}
                       >
                         <img 
@@ -1655,9 +1653,8 @@ export default function Home() {
                   {tweet.image && (
                     <div 
                       className="w-full overflow-hidden cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedTwitterImage(tweet.image);
+                      onClick={() => {
+                        window.open(`https://twitter.com/${tweet.author.username}/status/${tweet.id}`, '_blank');
                       }}
                     >
                       <img 
@@ -2096,27 +2093,6 @@ export default function Home() {
         />
       </Suspense>
       
-      {/* Twitter Image Modal */}
-      {expandedTwitterImage && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setExpandedTwitterImage(null)}
-        >
-          <button
-            onClick={() => setExpandedTwitterImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
-            title="Close"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <img 
-            src={expandedTwitterImage} 
-            alt="Expanded view"
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
     </div>
   );
 }
