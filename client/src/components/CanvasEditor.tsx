@@ -20,6 +20,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
   const [outlineColor, setOutlineColor] = useState<string | null>(null);
   const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
+  const [tweetScale, setTweetScale] = useState(1.0); // Scale factor (0.1 to 2.0)
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -27,7 +28,7 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
   const CANVAS_HEIGHT = 1350;
   const OUTLINE_WIDTH = 8;
 
-  // Draw canvas whenever images, outline, or position changes
+  // Draw canvas whenever images, outline, position, or scale changes
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -65,10 +66,9 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
     // Draw tweet image ON TOP (if exists)
     if (tweetImage) {
-      // Scale to 50% of canvas width
-      const scale = 0.5;
-      const scaledWidth = CANVAS_WIDTH * scale;
-      const scaledHeight = (tweetImage.height / tweetImage.width) * scaledWidth;
+      // Use original dimensions scaled by tweetScale
+      const scaledWidth = tweetImage.width * tweetScale;
+      const scaledHeight = tweetImage.height * tweetScale;
       
       // Use position state (percentage-based)
       const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
@@ -89,17 +89,8 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
           scaledHeight - OUTLINE_WIDTH
         );
       }
-
-      // Draw dashed selection border when in tweet or outline step
-      if (step === "tweet" || step === "outline") {
-        ctx.strokeStyle = "#00ffff";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.strokeRect(x, y, scaledWidth, scaledHeight);
-        ctx.setLineDash([]); // Reset dash
-      }
     }
-  }, [backgroundImage, tweetImage, outlineColor, tweetPosition, step]);
+  }, [backgroundImage, tweetImage, outlineColor, tweetPosition, tweetScale]);
 
   const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,6 +117,11 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
       const img = new Image();
       img.onload = () => {
         setTweetImage(img);
+        // Auto-scale to fit within canvas if too large
+        const maxDimension = Math.max(img.width, img.height);
+        if (maxDimension > CANVAS_WIDTH * 0.8) {
+          setTweetScale((CANVAS_WIDTH * 0.8) / maxDimension);
+        }
         setStep("outline");
       };
       img.src = event.target?.result as string;
@@ -148,9 +144,8 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
     const mouseY = (e.clientY - rect.top) * scaleY;
 
     // Check if click is on the tweet
-    const scale = 0.5;
-    const scaledWidth = CANVAS_WIDTH * scale;
-    const scaledHeight = (tweetImage.height / tweetImage.width) * scaledWidth;
+    const scaledWidth = tweetImage.width * tweetScale;
+    const scaledHeight = tweetImage.height * tweetScale;
     const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
     const y = tweetPosition.y * CANVAS_HEIGHT - scaledHeight / 2;
 
@@ -179,8 +174,8 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
     // Clamp to canvas bounds
     setTweetPosition({
-      x: Math.max(0.25, Math.min(0.75, newX)), // Keep tweet mostly on canvas
-      y: Math.max(0.25, Math.min(0.75, newY)),
+      x: Math.max(0.1, Math.min(0.9, newX)),
+      y: Math.max(0.1, Math.min(0.9, newY)),
     });
   };
 
@@ -218,10 +213,25 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
         />
       </div>
 
-      {/* Instructions */}
+      {/* Scale Slider */}
       {(step === "tweet" || step === "outline") && tweetImage && (
-        <div className="text-center text-sm text-cyan-400">
-          💡 Drag the tweet to reposition it
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white">Tweet Size</span>
+            <span className="text-cyan-400">{Math.round(tweetScale * 100)}%</span>
+          </div>
+          <input
+            type="range"
+            min="0.1"
+            max="2.0"
+            step="0.05"
+            value={tweetScale}
+            onChange={(e) => setTweetScale(parseFloat(e.target.value))}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+          />
+          <div className="text-center text-xs text-cyan-400">
+            💡 Drag the tweet to reposition • Use slider to resize
+          </div>
         </div>
       )}
 

@@ -961,7 +961,7 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
+          <div className="flex items-center justify-between mb-2 py-2" style={{ minHeight: '48px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
               <TrendingUp className="h-5 w-5 animate-pulse text-cyan-400" />
               
@@ -972,7 +972,7 @@ export default function Home() {
                   onClick={() => setFeedType('popular')}
                   className={`h-10 w-10 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'popular' 
-                      ? 'bg-[#1877F2] text-white scale-110 shadow-lg shadow-[#1877F2]/50' 
+                      ? 'bg-[#1877F2] text-white shadow-lg shadow-[#1877F2]/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
                   }`}
                   title="Facebook Posts"
@@ -987,7 +987,7 @@ export default function Home() {
                   onClick={() => setFeedType('twitter')}
                   className={`h-10 w-10 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'twitter' 
-                      ? 'bg-gray-900 text-white scale-110 shadow-lg shadow-gray-900/50' 
+                      ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
                   }`}
                   title="X (Twitter) Posts"
@@ -1002,7 +1002,7 @@ export default function Home() {
                   onClick={() => setFeedType('reddit')}
                   className={`h-10 w-10 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'reddit' 
-                      ? 'bg-[#FF4500] text-white scale-110 shadow-lg shadow-[#FF4500]/50' 
+                      ? 'bg-[#FF4500] text-white shadow-lg shadow-[#FF4500]/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
                   }`}
                   title="Reddit Posts"
@@ -1012,7 +1012,7 @@ export default function Home() {
                 </button>
               </div>
             
-            {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) */}
+            {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) or Nothing (Reddit) */}
             {feedType === 'twitter' ? (
               <button
                 onClick={() => setTwitterPlaying(!twitterPlaying)}
@@ -1026,7 +1026,7 @@ export default function Home() {
                   <Play className="h-4 w-4 text-white" />
                 )}
               </button>
-            ) : (
+            ) : feedType === 'popular' ? (
               <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
@@ -1059,7 +1059,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            )}
+            ) : null}
             </div>
             <div className="flex-shrink-0">
               {showPopularScrollTop && (
