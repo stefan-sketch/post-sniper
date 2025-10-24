@@ -37,6 +37,10 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
 
   // Intersection Observer for lazy loading
   React.useEffect(() => {
+    // Desktop: Load further ahead (200px), Mobile: Load closer (50px)
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    const rootMargin = isDesktop ? '200px' : '50px';
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -45,7 +49,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
         }
       },
       {
-        rootMargin: '50px',  // Load 50px before entering viewport
+        rootMargin,  // Load ahead based on device
         threshold: 0.01,
       }
     );

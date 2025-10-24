@@ -183,20 +183,53 @@
   /* Glassmorphism effects */
   .glass-panel {
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(6px);  /* Reduced from 10px for iOS performance */
-    -webkit-backdrop-filter: blur(6px);  /* Reduced from 10px for iOS performance */
+    backdrop-filter: blur(6px);  /* Mobile: 6px for performance */
+    -webkit-backdrop-filter: blur(6px);  /* Mobile: 6px for performance */
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Desktop: Restore full-quality blur */
+  @media (min-width: 768px) {
+    .glass-panel {
+      backdrop-filter: blur(12px);  /* Desktop: Higher quality */
+      -webkit-backdrop-filter: blur(12px);  /* Desktop: Higher quality */
+    }
   }}
   
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(8px);  /* Reduced from 16px for iOS performance */
-    -webkit-backdrop-filter: blur(8px);  /* Reduced from 16px for iOS performance */
+    backdrop-filter: blur(8px);  /* Mobile: 8px for performance */
+    -webkit-backdrop-filter: blur(8px);  /* Mobile: 8px for performance */
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     contain: layout style paint;  /* CSS containment for better performance */
     transform: translateZ(0);  /* Force GPU acceleration */
     backface-visibility: hidden;  /* Prevent flickering */
+  }
+
+  /* Desktop: Optimize hover effects */
+  @media (hover: hover) and (pointer: fine) {
+    .glass-card:hover {
+      will-change: box-shadow, transform;  /* Prepare for hover animation */
+    }
+
+    /* Cursor optimization for instant feedback */
+    button, a, [role="button"], .cursor-pointer {
+      cursor: pointer;
+      will-change: transform;  /* Optimize cursor change */
+    }
+
+    button:active, a:active, [role="button"]:active {
+      will-change: transform, opacity;  /* Optimize active state */
+    }
+  }
+
+  /* Desktop: Restore full-quality blur */
+  @media (min-width: 768px) {
+    .glass-card {
+      backdrop-filter: blur(16px);  /* Desktop: Full quality */
+      -webkit-backdrop-filter: blur(16px);  /* Desktop: Full quality */
+    }
   }
   
   /* Neon glow effects */
@@ -228,6 +261,28 @@
   .hide-scrollbar::-webkit-scrollbar,
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Desktop: macOS-style scrollbar (optional, for columns that show scrollbar) */
+  @media (min-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
   }
 }
 
