@@ -1,10 +1,80 @@
-import { trpc } from "@/lib/trpc";
 import { MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface RedditPost {
+  id: string;
+  title: string;
+  author: string;
+  subreddit: string;
+  upvotes: number;
+  comments: number;
+  created: number;
+  url: string;
+  permalink: string;
+  thumbnail: string | null;
+  isVideo: boolean;
+}
 
 export function RedditFeed() {
-  const redditQuery = trpc.reddit.getPosts.useQuery({ limit: 25 });
+  const [posts, setPosts] = useState<RedditPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (redditQuery.isLoading) {
+  useEffect(() => {
+    async function fetchRedditPosts() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch directly from Reddit's JSON API (client-side)
+        const response = await fetch(
+          'https://www.reddit.com/r/soccercirclejerk/hot.json?limit=25',
+          {
+            headers: {
+              'Accept': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Reddit API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Transform Reddit data
+        const redditPosts: RedditPost[] = data.data.children.map((child: any) => {
+          const post = child.data;
+          return {
+            id: post.id,
+            title: post.title,
+            author: post.author,
+            subreddit: post.subreddit,
+            upvotes: post.ups,
+            comments: post.num_comments,
+            created: post.created_utc * 1000,
+            url: post.url,
+            permalink: `https://www.reddit.com${post.permalink}`,
+            thumbnail: post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' 
+              ? post.thumbnail 
+              : null,
+            isVideo: post.is_video || false,
+          };
+        });
+
+        setPosts(redditPosts);
+      } catch (err) {
+        console.error('Error fetching Reddit posts:', err);
+        setError('Failed to load Reddit posts');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRedditPosts();
+  }, []);
+
+  if (loading) {
     return (
       <div className="glass-card p-6 rounded-xl text-center">
         <p className="text-muted-foreground">Loading r/soccercirclejerk...</p>
@@ -12,15 +82,13 @@ export function RedditFeed() {
     );
   }
 
-  if (redditQuery.error) {
+  if (error) {
     return (
       <div className="glass-card p-6 rounded-xl text-center">
-        <p className="text-red-400">Failed to load Reddit posts</p>
+        <p className="text-red-400">{error}</p>
       </div>
     );
   }
-
-  const posts = redditQuery.data || [];
 
   if (posts.length === 0) {
     return (
