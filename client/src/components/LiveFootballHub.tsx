@@ -372,7 +372,7 @@ export default function LiveFootballHub() {
         )}
 
         {/* Teams and Scores */}
-        <div className={`${isFinished ? 'space-y-1' : 'space-y-3'} relative z-10`}>
+        <div className={`${isFinished ? 'space-y-1' : 'space-y-4'} relative z-10`}>
           {/* Home Team */}
           <div>
             <div className="flex items-center gap-2">
@@ -412,9 +412,12 @@ export default function LiveFootballHub() {
               )}
             </div>
             {homeScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-400 mt-1 pr-2 space-y-0.5">
+              <div className="text-[10px] text-gray-400 mt-1.5 pr-2 space-y-1">
                 {homeScorers.map((scorer, idx) => (
-                  <div key={idx}>⚽ {scorer.player} {scorer.minute}'</div>
+                  <div key={idx} className="flex items-center gap-1">
+                    <span className="text-[10px]">⚽</span>
+                    <span>{scorer.player} {scorer.minute}'</span>
+                  </div>
                 ))}
               </div>
             )}
@@ -459,9 +462,12 @@ export default function LiveFootballHub() {
               )}
             </div>
             {awayScorers && !isUpcoming && !isFinished && (
-              <div className="text-[9px] text-gray-400 mt-1 pr-2 space-y-0.5">
+              <div className="text-[10px] text-gray-400 mt-1.5 pr-2 space-y-1">
                 {awayScorers.map((scorer, idx) => (
-                  <div key={idx}>⚽ {scorer.player} {scorer.minute}'</div>
+                  <div key={idx} className="flex items-center gap-1">
+                    <span className="text-[10px]">⚽</span>
+                    <span>{scorer.player} {scorer.minute}'</span>
+                  </div>
                 ))}
               </div>
             )}
