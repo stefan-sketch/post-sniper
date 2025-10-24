@@ -49,8 +49,10 @@ export default function Home() {
   const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
   const [pendingFeedType, setPendingFeedType] = useState<'popular' | 'twitter' | 'reddit' | null>(null);
   const [isFeedTypeAnimating, setIsFeedTypeAnimating] = useState(false);
-  const [isTimeFilterAnimating, setIsTimeFilterAnimating] = useState(false);
-  const [pendingTimeFilter, setPendingTimeFilter] = useState<string | null>(null);
+  const [isPopularTimeFilterAnimating, setIsPopularTimeFilterAnimating] = useState(false);
+  const [isTwitterTimeFilterAnimating, setIsTwitterTimeFilterAnimating] = useState(false);
+  const [pendingPopularTimeFilter, setPendingPopularTimeFilter] = useState<string | null>(null);
+  const [pendingTwitterTimeFilter, setPendingTwitterTimeFilter] = useState<string | null>(null);
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
@@ -78,35 +80,35 @@ export default function Home() {
 
   // Handle animated time filter switching
   const handlePopularTimeFilterChange = (newFilter: '2hr' | '6hr' | 'today') => {
-    if (newFilter === popularTimeFilter || isTimeFilterAnimating) return;
+    if (newFilter === popularTimeFilter || isPopularTimeFilterAnimating) return;
     
-    setPendingTimeFilter(newFilter);
-    setIsTimeFilterAnimating(true);
+    setPendingPopularTimeFilter(newFilter);
+    setIsPopularTimeFilterAnimating(true);
     setShowTimeFilter(false);
     
     setTimeout(() => {
       setPopularTimeFilter(newFilter);
-      setPendingTimeFilter(null);
+      setPendingPopularTimeFilter(null);
       
       setTimeout(() => {
-        setIsTimeFilterAnimating(false);
+        setIsPopularTimeFilterAnimating(false);
       }, 300);
     }, 300);
   };
 
   const handleTwitterTimeFilterChange = (newFilter: 'live' | '2hr' | '6hr' | 'today') => {
-    if (newFilter === twitterTimeFilter || isTimeFilterAnimating) return;
+    if (newFilter === twitterTimeFilter || isTwitterTimeFilterAnimating) return;
     
-    setPendingTimeFilter(newFilter);
-    setIsTimeFilterAnimating(true);
+    setPendingTwitterTimeFilter(newFilter);
+    setIsTwitterTimeFilterAnimating(true);
     setShowTimeFilter(false);
     
     setTimeout(() => {
       setTwitterTimeFilter(newFilter);
-      setPendingTimeFilter(null);
+      setPendingTwitterTimeFilter(null);
       
       setTimeout(() => {
-        setIsTimeFilterAnimating(false);
+        setIsTwitterTimeFilterAnimating(false);
       }, 300);
     }, 300);
   };
@@ -1057,12 +1059,7 @@ export default function Home() {
             ref={liveScrollRef} 
             className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
             style={{ 
-              touchAction: 'pan-y',
-              animation: isTimeFilterAnimating && pendingTimeFilter
-                ? 'slideOutToRight 0.3s ease-in-out forwards'
-                : isTimeFilterAnimating
-                  ? 'slideInFromRight 0.3s ease-in-out'
-                  : 'none'
+              touchAction: 'pan-y'
             }}
           >
             {postsQuery.isLoading && (
@@ -1270,9 +1267,13 @@ export default function Home() {
             className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
             style={{ 
               touchAction: 'pan-y',
-              animation: (isFeedTypeAnimating && pendingFeedType) || (isTimeFilterAnimating && pendingTimeFilter)
+              animation: (isFeedTypeAnimating && pendingFeedType) || 
+                         (feedType === 'popular' && isPopularTimeFilterAnimating && pendingPopularTimeFilter) ||
+                         (feedType === 'twitter' && isTwitterTimeFilterAnimating && pendingTwitterTimeFilter)
                 ? 'slideOutToRight 0.3s ease-in-out forwards' 
-                : (isFeedTypeAnimating || isTimeFilterAnimating)
+                : (isFeedTypeAnimating || 
+                   (feedType === 'popular' && isPopularTimeFilterAnimating) ||
+                   (feedType === 'twitter' && isTwitterTimeFilterAnimating))
                   ? 'slideInFromRight 0.3s ease-in-out' 
                   : 'none'
             }}

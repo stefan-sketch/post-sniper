@@ -216,6 +216,65 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
     setIsDragging(false);
   };
 
+  // Touch event handlers for iOS/mobile support
+  const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (step !== "tweet") return;
+    if (!tweetImage) return;
+    e.preventDefault();
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+    
+    const touch = e.touches[0];
+    const touchX = (touch.clientX - rect.left) * scaleX;
+    const touchY = (touch.clientY - rect.top) * scaleY;
+
+    // Check if touch is on the tweet
+    const scaledWidth = tweetImage.width * tweetScale;
+    const scaledHeight = tweetImage.height * tweetScale;
+    const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
+    const y = tweetPosition.y * CANVAS_HEIGHT - scaledHeight / 2;
+
+    if (touchX >= x && touchX <= x + scaledWidth && touchY >= y && touchY <= y + scaledHeight) {
+      setIsDragging(true);
+      setDragStart({ x: touchX - tweetPosition.x * CANVAS_WIDTH, y: touchY - tweetPosition.y * CANVAS_HEIGHT });
+    }
+  };
+
+  const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+    
+    const touch = e.touches[0];
+    const touchX = (touch.clientX - rect.left) * scaleX;
+    const touchY = (touch.clientY - rect.top) * scaleY;
+
+    // Update position (percentage-based)
+    const newX = (touchX - dragStart.x) / CANVAS_WIDTH;
+    const newY = (touchY - dragStart.y) / CANVAS_HEIGHT;
+
+    // Clamp to canvas bounds
+    setTweetPosition({
+      x: Math.max(0.1, Math.min(0.9, newX)),
+      y: Math.max(0.1, Math.min(0.9, newY)),
+    });
+  };
+
+  const handleCanvasTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   const handleComplete = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -246,11 +305,14 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           className="border border-gray-700 rounded cursor-move"
-          style={{ width: "380px", height: "auto" }}
+          style={{ width: "380px", height: "auto", touchAction: "none" }}
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseUp}
+          onTouchStart={handleCanvasTouchStart}
+          onTouchMove={handleCanvasTouchMove}
+          onTouchEnd={handleCanvasTouchEnd}
         />
         
         {/* Step 1: Upload Background - Centered in Canvas */}
