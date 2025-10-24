@@ -189,18 +189,7 @@ export function RedditFeed() {
             key={post.id}
             className="bg-gray-800/50 rounded-lg border border-gray-700 hover:border-[#FF4500] transition-all"
           >
-            <a
-              href={post.permalink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block p-4"
-              onClick={(e) => {
-                // Don't navigate if clicking on comments button
-                if ((e.target as HTMLElement).closest('.comments-button')) {
-                  e.preventDefault();
-                }
-              }}
-            >
+            <div className="p-4">
               <div className="flex gap-3">
                 {/* Upvote section */}
                 <div className="flex flex-col items-center gap-1 text-xs flex-shrink-0">
@@ -222,14 +211,21 @@ export function RedditFeed() {
                     <span>•</span>
                     <span>{timeAgo}</span>
                   </div>
-                  <h3 className="text-white font-semibold mb-2 line-clamp-3">{post.title}</h3>
+                  <a 
+                    href={post.permalink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <h3 className="text-white font-semibold mb-2 line-clamp-3 hover:text-[#FF4500] transition-colors">{post.title}</h3>
+                  </a>
                   
-                  {/* Thumbnail if available */}
+                  {/* Image if available */}
                   {post.thumbnail && (
                     <img 
                       src={post.thumbnail} 
                       alt=""
-                      className="w-full h-32 object-cover rounded mb-2"
+                      className="w-full max-h-96 object-contain rounded mb-2 bg-gray-900"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -266,7 +262,7 @@ export function RedditFeed() {
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
 
             {/* Comments Section */}
             {isExpanded && (
