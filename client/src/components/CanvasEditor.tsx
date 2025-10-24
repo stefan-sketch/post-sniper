@@ -9,7 +9,7 @@ const PAGE_OUTLINES = [
   },
   { 
     name: "Footy Feed", 
-    color: "#000000", // Black
+    color: "#FFFFFF", // White
     icon: "/page-icons/footy-feed.jpg"
   },
   { 
@@ -45,7 +45,7 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
     if (!pageId) return null;
     switch (pageId) {
       case 'football-funnys': return '#FFD700'; // Yellow/Gold
-      case 'footy-feed': return '#000000'; // Black
+      case 'footy-feed': return '#FFFFFF'; // White
       case 'football-away-days': return '#8B0000'; // Burgundy
       default: return null;
     }

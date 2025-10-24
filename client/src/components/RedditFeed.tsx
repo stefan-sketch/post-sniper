@@ -174,7 +174,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
         return (
           <div
             key={post.id}
-            className="bg-gray-800/50 rounded-lg border border-gray-700 hover:border-[#FF4500] transition-all relative"
+            className="bg-gray-800/50 rounded-lg border border-gray-700 transition-all relative"
           >
             {/* Link button in top-right */}
             <a
