@@ -23,9 +23,10 @@ interface CanvasEditorProps {
   onComplete: (imageDataUrl: string) => void;
   selectedPage: string | null;
   onTweetEditingChange?: (isEditing: boolean) => void;
+  onCompleteClick?: (handler: () => void) => void;
 }
 
-export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange }: CanvasEditorProps) {
+export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, onCompleteClick }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<"background" | "tweet">("background");
@@ -222,6 +223,13 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange }:
     }
   };
 
+  // Expose handleComplete to parent
+  useEffect(() => {
+    if (onCompleteClick && step === "tweet" && tweetImage) {
+      onCompleteClick(handleComplete);
+    }
+  }, [step, tweetImage, onCompleteClick]);
+
   return (
     <div className="space-y-4">
       {/* Canvas with Overlay Prompts */}
@@ -305,17 +313,7 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange }:
         </div>
       )}
 
-      {/* Complete Button - Show when tweet is uploaded */}
-      {step === "tweet" && tweetImage && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleComplete}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg"
-          >
-            Complete
-          </button>
-        </div>
-      )}
+
     </div>
   );
 }

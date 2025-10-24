@@ -74,6 +74,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [canvasMode, setCanvasMode] = useState(false);
   const [isEditingTweet, setIsEditingTweet] = useState(false);
+  const [canvasCompleteHandler, setCanvasCompleteHandler] = useState<(() => void) | null>(null);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -820,6 +821,14 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 {isUploading ? "Posting..." : "Post"}
               </Button>
             )}
+            {isEditingTweet && canvasCompleteHandler && (
+              <Button
+                onClick={canvasCompleteHandler}
+                className="bg-green-500 hover:bg-green-600 text-white px-6 transition-all duration-200 hover:scale-[1.02]"
+              >
+                Complete
+              </Button>
+            )}
           </div>
 
           {/* Overlay Controls - Always visible, greyed out when no image */}
@@ -1155,8 +1164,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   setImage(imageDataUrl);
                   setCanvasMode(false);
                   setIsEditingTweet(false);
+                  setCanvasCompleteHandler(null);
                 }}
                 onTweetEditingChange={setIsEditingTweet}
+                onCompleteClick={(handler) => setCanvasCompleteHandler(() => handler)}
               />
             ) : !image ? (
               <div className="relative">
