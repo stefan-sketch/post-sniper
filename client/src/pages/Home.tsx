@@ -54,10 +54,23 @@ export default function Home() {
   const [pendingPopularTimeFilter, setPendingPopularTimeFilter] = useState<string | null>(null);
   const [pendingTwitterTimeFilter, setPendingTwitterTimeFilter] = useState<string | null>(null);
   const [showTimeFilter, setShowTimeFilter] = useState(false);
+  const [openIconDropdown, setOpenIconDropdown] = useState<'popular' | 'twitter' | 'reddit' | null>(null); // Track which icon's dropdown is open
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
+
+  // Handle icon click: navigate on first click, toggle dropdown on second click
+  const handleIconClick = (type: 'popular' | 'twitter' | 'reddit') => {
+    if (feedType === type) {
+      // Already on this feed, toggle dropdown
+      setOpenIconDropdown(openIconDropdown === type ? null : type);
+    } else {
+      // Navigate to this feed
+      handleFeedTypeChange(type);
+      setOpenIconDropdown(null); // Close any open dropdown
+    }
+  };
 
   // Handle animated feed type switching
   const handleFeedTypeChange = (newType: 'popular' | 'twitter' | 'reddit') => {
@@ -339,6 +352,22 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [postsQuery.data?.lastFetchedAt]);
+
+  // Click-away behavior for icon dropdowns
+  useEffect(() => {
+    if (!openIconDropdown) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside the dropdown and its trigger button
+      if (!target.closest('.icon-dropdown') && !target.closest('.icon-dropdown-trigger')) {
+        setOpenIconDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openIconDropdown]);
 
   // Click-away behavior for time filter dropdown
   useEffect(() => {
@@ -1108,143 +1137,112 @@ export default function Home() {
             
             <div className="flex items-center justify-center gap-2 flex-1">
               
-              {/* Three Logo Buttons + Dropdown */}
+              {/* Three Logo Buttons with Integrated Dropdowns */}
               <div className="flex gap-2 items-center">
-                {/* Facebook Button */}
-                <button
-                  onClick={() => handleFeedTypeChange('popular')}
-                  className={`p-0.5 rounded-md flex items-center justify-center transition-all border ${
-                    feedType === 'popular' 
-                      ? 'bg-[#1877F2] text-white border-[#1877F2]/50 shadow-lg shadow-[#1877F2]/30' 
-                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
-                  }`}
-                  title="Facebook Posts"
-                >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </button>
+                {/* Facebook/Popular Button with Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => handleIconClick('popular')}
+                    className={`icon-dropdown-trigger p-0.5 rounded-md flex items-center justify-center transition-all border ${
+                      feedType === 'popular' 
+                        ? 'bg-[#1877F2] text-white border-[#1877F2]/50 shadow-lg shadow-[#1877F2]/30' 
+                        : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
+                    }`}
+                    title="Facebook Posts"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </button>
+                  {openIconDropdown === 'popular' && (
+                    <div className="icon-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                      {(['2hr', '6hr', 'today'] as const).map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => {
+                            handlePopularTimeFilterChange(time);
+                            setOpenIconDropdown(null);
+                          }}
+                          className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                          }`}
+                        >
+                          {time === 'today' ? 'Today' : time}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                {/* X (Twitter) Button */}
-                <button
-                  onClick={() => handleFeedTypeChange('twitter')}
-                  className={`p-0.5 rounded-md flex items-center justify-center transition-all border ${
-                    feedType === 'twitter' 
-                      ? 'bg-black text-white border-gray-600/50 shadow-lg shadow-black/30' 
-                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
-                  }`}
-                  title="X (Twitter) Posts"
-                >
-                  <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </button>
+                {/* X (Twitter) Button with Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => handleIconClick('twitter')}
+                    className={`icon-dropdown-trigger p-0.5 rounded-md flex items-center justify-center transition-all border ${
+                      feedType === 'twitter' 
+                        ? 'bg-black text-white border-gray-600/50 shadow-lg shadow-black/30' 
+                        : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
+                    }`}
+                    title="X (Twitter) Posts"
+                  >
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </button>
+                  {openIconDropdown === 'twitter' && (
+                    <div className="icon-dropdown absolute top-full mt-1 bg-black/90 border border-white/20 rounded-lg shadow-xl z-50 min-w-[80px] backdrop-blur-sm">
+                      {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => {
+                            handleTwitterTimeFilterChange(time);
+                            setOpenIconDropdown(null);
+                          }}
+                          className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
+                          }`}
+                        >
+                          {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
-                {/* Reddit Button */}
-                <button
-                  onClick={() => handleFeedTypeChange('reddit')}
-                  className={`p-0.5 rounded-md flex items-center justify-center transition-all border ${
-                    feedType === 'reddit' 
-                      ? 'bg-[#FF4500] text-white border-[#FF4500]/50 shadow-lg shadow-[#FF4500]/30' 
-                      : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
-                  }`}
-                  title="Reddit Posts"
-                >                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498 .056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-                  </svg>
-                </button>
-              {feedType === 'reddit' ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="time-filter-trigger px-2 py-0.5 rounded-full text-[10px] font-medium transition-all bg-[#FF4500] hover:bg-[#FF4500]/80 text-white shadow-sm flex items-center gap-0.5"
-                  style={{ height: '20px' }}
-                >
-                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                  </svg>
-                  {popularTimeFilter === 'today' ? 'Popular' : 'Newest'}
-                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showTimeFilter && (
-                  <div className="time-filter-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
-                    {(['today', '2hr'] as const).map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => handlePopularTimeFilterChange(time)}
-                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                          popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
-                        }`}
-                      >
-                        {time === 'today' ? 'Popular' : 'Newest'}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : feedType === 'popular' ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="time-filter-trigger px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-sm flex items-center gap-1"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showTimeFilter && (
-                  <div className="time-filter-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
-                    {(['2hr', '6hr', 'today'] as const).map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => handlePopularTimeFilterChange(time)}
-                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                          popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
-                        }`}
-                      >
-                        {time === 'today' ? 'Today' : time}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : feedType === 'twitter' ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="time-filter-trigger px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-white/10 hover:bg-white/20 text-white shadow-sm flex items-center gap-1 border border-white/20"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showTimeFilter && (
-                  <div className="time-filter-dropdown absolute top-full mt-1 bg-black/90 border border-white/20 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)] backdrop-blur-sm">
-                    {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => handleTwitterTimeFilterChange(time)}
-                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                          twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
-                        }`}
-                      >
-                        {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : null}
+                {/* Reddit Button with Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => handleIconClick('reddit')}
+                    className={`icon-dropdown-trigger p-0.5 rounded-md flex items-center justify-center transition-all border ${
+                      feedType === 'reddit' 
+                        ? 'bg-[#FF4500] text-white border-[#FF4500]/50 shadow-lg shadow-[#FF4500]/30' 
+                        : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
+                    }`}
+                    title="Reddit Posts"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498 .056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+                    </svg>
+                  </button>
+                  {openIconDropdown === 'reddit' && (
+                    <div className="icon-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                      {(['today', '2hr'] as const).map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => {
+                            handlePopularTimeFilterChange(time);
+                            setOpenIconDropdown(null);
+                          }}
+                          className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                          }`}
+                        >
+                          {time === 'today' ? 'Popular' : 'Newest'}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
