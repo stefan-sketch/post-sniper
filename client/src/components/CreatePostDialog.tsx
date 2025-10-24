@@ -4,10 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen } from "lucide-react";
+import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen, Sparkles } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
+import { CanvasEditor } from "./CanvasEditor";
 
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
@@ -70,6 +71,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [borderRadius, setBorderRadius] = useState(0); // Default border radius for rectangles
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
+  const [canvasMode, setCanvasMode] = useState(false);
 
 
 
@@ -1096,7 +1098,14 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
           {/* Image Upload/Preview */}
           <div className="space-y-2">
-            {!image ? (
+            {canvasMode && !image ? (
+              <CanvasEditor
+                onComplete={(imageDataUrl) => {
+                  setImage(imageDataUrl);
+                  setCanvasMode(false);
+                }}
+              />
+            ) : !image ? (
               <div className="relative">
                 <div
                   onDrop={handleDrop}
@@ -1114,7 +1123,19 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="hidden"
                   />
                 </div>
-
+                {/* Canvas button in top-left */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCanvasMode(true);
+                  }}
+                  className="absolute top-2 left-2 text-xs px-2 py-1 h-auto bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Canvas
+                </Button>
                 {/* Small Paste button in top-right - Hidden on iOS */}
                 {!/iPhone|iPad|iPod/.test(navigator.userAgent) && (
                   <Button
