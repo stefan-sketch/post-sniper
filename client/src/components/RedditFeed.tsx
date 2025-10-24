@@ -65,14 +65,20 @@ export function RedditFeed() {
           
           // Get the best quality image URL
           let imageUrl = null;
-          if (post.preview?.images?.[0]?.source?.url) {
-            // Use the full resolution image from preview
+          
+          // Try to get the highest resolution from resolutions array
+          if (post.preview?.images?.[0]?.resolutions?.length > 0) {
+            const resolutions = post.preview.images[0].resolutions;
+            // Get the highest resolution (last in array)
+            imageUrl = resolutions[resolutions.length - 1].url.replace(/&amp;/g, '&');
+          } else if (post.preview?.images?.[0]?.source?.url) {
+            // Use the source image from preview
             imageUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
-          } else if (post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.gif'))) {
+          } else if (post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.gif') || post.url.endsWith('.jpeg'))) {
             // Direct image link
             imageUrl = post.url;
           } else if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' && post.thumbnail.startsWith('http')) {
-            // Fallback to thumbnail
+            // Fallback to thumbnail (last resort)
             imageUrl = post.thumbnail;
           }
           
@@ -244,7 +250,7 @@ export function RedditFeed() {
                 ) : postComments.length === 0 ? (
                   <p className="text-gray-400 text-sm text-center py-2">No comments yet</p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                     {postComments.map((comment: RedditComment) => {
                       const commentTime = Math.floor((Date.now() - comment.created) / 3600000);
                       const commentTimeAgo = commentTime < 1 
@@ -262,7 +268,43 @@ export function RedditFeed() {
                             <span>•</span>
                             <span>{commentTimeAgo}</span>
                           </div>
-                          <p className="text-sm text-gray-200 whitespace-pre-wrap">{comment.body}</p>
+                          <div className="text-sm text-gray-200 whitespace-pre-wrap">
+                            {/* Parse comment body for images and links */}
+                            {comment.body.split(/(https?:\/\/[^\s]+)/g).map((part, i) => {
+                              // Check if it's a URL
+                              if (part.match(/^https?:\/\//)) {
+                                // Check if it's an image URL
+                                if (part.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i)) {
+                                  return (
+                                    <img 
+                                      key={i}
+                                      src={part} 
+                                      alt="Comment image"
+                                      className="max-w-full max-h-64 rounded my-2 bg-gray-900"
+                                      onError={(e) => {
+                                        // If image fails to load, show link instead
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  );
+                                }
+                                // Regular link
+                                return (
+                                  <a 
+                                    key={i}
+                                    href={part} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[#FF4500] hover:underline break-all"
+                                  >
+                                    {part}
+                                  </a>
+                                );
+                              }
+                              // Regular text
+                              return <span key={i}>{part}</span>;
+                            })}
+                          </div>
                         </div>
                       );
                     })}
