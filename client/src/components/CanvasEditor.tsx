@@ -17,11 +17,6 @@ const PAGE_OUTLINES = [
     color: "#8B0000", // Burgundy
     icon: "/page-icons/football-away-days.jpg"
   },
-  { 
-    name: "None", 
-    color: null,
-    icon: null
-  },
 ];
 
 interface CanvasEditorProps {
@@ -300,54 +295,50 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
       {/* Step 3: Select Outline with Page Icons */}
       {step === "outline" && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-white text-center">Select Outline Color</h3>
-          <div className="grid grid-cols-4 gap-3">
-            {PAGE_OUTLINES.map((page) => (
-              <button
-                key={page.name}
-                onClick={() => handleOutlineSelect(page.color)}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all hover:scale-105 border-2 border-transparent hover:border-cyan-500"
-                title={page.name}
-              >
-                {page.icon ? (
+        <>
+          {/* Complete Button - Top Right */}
+          <button
+            onClick={handleComplete}
+            className="absolute top-6 right-6 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow-xl transition-all hover:scale-105 z-10"
+          >
+            ✓ Complete
+          </button>
+          
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-white text-center">Select Outline Color</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {PAGE_OUTLINES.map((page) => (
+                <button
+                  key={page.name}
+                  onClick={() => handleOutlineSelect(page.color)}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 border-2 ${
+                    outlineColor === page.color
+                      ? 'bg-cyan-600 border-cyan-400'
+                      : 'bg-gray-800 hover:bg-gray-700 border-transparent hover:border-cyan-500'
+                  }`}
+                  title={page.name}
+                >
                   <div className="relative">
                     <img 
                       src={page.icon} 
                       alt={page.name}
                       className="w-12 h-12 rounded-full object-cover"
                     />
-                    {page.color && (
-                      <div 
-                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-800"
-                        style={{ backgroundColor: page.color }}
-                      />
-                    )}
+                    <div 
+                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-800"
+                      style={{ backgroundColor: page.color }}
+                    />
                   </div>
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-                    <span className="text-2xl">✕</span>
-                  </div>
-                )}
-                <span className="text-xs text-white text-center leading-tight">
-                  {page.name === "Football Funnys" ? "Funnys" : 
-                   page.name === "Footy Feed" ? "Feed" :
-                   page.name === "Football Away Days" ? "Away Days" : "None"}
-                </span>
-              </button>
-            ))}
+                  <span className="text-xs text-white text-center leading-tight">
+                    {page.name === "Football Funnys" ? "Funnys" : 
+                     page.name === "Footy Feed" ? "Feed" :
+                     page.name === "Football Away Days" ? "Away Days" : page.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
-          
-          {/* Complete Button - Only show when outline is selected */}
-          {outlineColor !== null && (
-            <button
-              onClick={handleComplete}
-              className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105"
-            >
-              ✓ Complete
-            </button>
-          )}
-        </div>
+        </>
       )}
     </div>
   );
