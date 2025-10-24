@@ -196,10 +196,10 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
           href={post.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 z-10 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
           title="Open on Facebook"
         >
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="w-3 h-3" />
         </a>
       )}
       {/* Profile Header */}
@@ -334,14 +334,14 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
             <Button
               size="sm"
               variant="ghost"
-              className="absolute top-2 right-2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-11 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCopyImage(e);
               }}
               title="Copy image to clipboard"
             >
-              <ImageIcon className="h-4 w-4" />
+              <ImageIcon className="h-3 w-3" />
             </Button>
           )}
         </div>
