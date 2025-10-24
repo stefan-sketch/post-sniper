@@ -87,7 +87,7 @@ export const twitterRouter = router({
     .input(
       z.object({
         limit: z.number().optional().default(50),
-        timeFilter: z.enum(['2hr', '6hr', 'today']).optional().default('2hr'),
+        timeFilter: z.enum(['live', '2hr', '6hr', 'today']).optional().default('2hr'),
       })
     )
     .query(async ({ input }) => {
@@ -100,7 +100,10 @@ export const twitterRouter = router({
       const now = new Date();
       let timeThreshold: Date;
       
-      if (input.timeFilter === '2hr') {
+      if (input.timeFilter === 'live') {
+        // LIVE: Show all tweets from last 24 hours, sorted by newest first
+        timeThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      } else if (input.timeFilter === '2hr') {
         timeThreshold = new Date(now.getTime() - 2 * 60 * 60 * 1000);
       } else if (input.timeFilter === '6hr') {
         timeThreshold = new Date(now.getTime() - 6 * 60 * 60 * 1000);
@@ -110,11 +113,16 @@ export const twitterRouter = router({
         timeThreshold = today;
       }
       
+      // For LIVE, sort by newest first; for others, sort by engagement
       const tweets = await db
         .select()
         .from(twitterPosts)
         .where(sql`${twitterPosts.createdAt} >= ${timeThreshold.toISOString()}`)
-        .orderBy(desc(sql`${twitterPosts.likes} + ${twitterPosts.retweets} + ${twitterPosts.replies} + ${twitterPosts.views}`))
+        .orderBy(
+          input.timeFilter === 'live'
+            ? desc(twitterPosts.createdAt)
+            : desc(sql`${twitterPosts.likes} + ${twitterPosts.retweets} + ${twitterPosts.replies} + ${twitterPosts.views}`)
+        )
         .limit(input.limit);
 
       // Transform to match expected format

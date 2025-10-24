@@ -45,7 +45,7 @@ export default function Home() {
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
-  const [twitterTimeFilter, setTwitterTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
+  const [twitterTimeFilter, setTwitterTimeFilter] = useState<'live' | '2hr' | '6hr' | 'today'>('live');
   const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
@@ -1148,7 +1148,7 @@ export default function Home() {
                 </button>
                 {showTimeFilter && (
                   <div className="time-filter-dropdown absolute top-full mt-1 bg-black/90 border border-white/20 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)] backdrop-blur-sm">
-                    {(['2hr', '6hr', 'today'] as const).map((time) => (
+                    {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}
                         onClick={() => {
@@ -1159,7 +1159,7 @@ export default function Home() {
                           twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
                         }`}
                       >
-                        {time === 'today' ? 'Today' : time}
+                        {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
                       </button>
                     ))}
                   </div>
@@ -1628,11 +1628,11 @@ export default function Home() {
                     onClick={() => setShowTimeFilter(!showTimeFilter)}
                     className="time-filter-trigger px-3 py-1 rounded-full text-xs font-medium transition-all bg-white/10 hover:bg-white/20 text-white shadow-lg flex items-center gap-1 border border-white/20"
                   >
-                    {twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
+                    {twitterTimeFilter === 'live' ? 'LIVE' : twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
                   </button>
                   {showTimeFilter && (
                     <div className="time-filter-dropdown absolute top-full mt-1 bg-black/90 border border-white/20 rounded-lg shadow-xl z-50 min-w-[80px] backdrop-blur-sm">
-                      {(['2hr', '6hr', 'today'] as const).map((time) => (
+                      {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
                         <button
                           key={time}
                           onClick={() => {
@@ -1643,7 +1643,7 @@ export default function Home() {
                             twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
                           }`}
                         >
-                          {time === 'today' ? 'Today' : time}
+                          {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
                         </button>
                       ))}
                     </div>
