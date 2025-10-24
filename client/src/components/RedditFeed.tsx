@@ -209,10 +209,10 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
               href={post.permalink}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+              className="absolute top-2 right-2 z-10 p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600/50"
               title="Open on Reddit"
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3 h-3" />
             </a>
             
             <div className="p-4">
