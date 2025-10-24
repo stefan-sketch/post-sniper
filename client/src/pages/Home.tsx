@@ -1408,7 +1408,14 @@ export default function Home() {
                     
                     {/* Tweet Text */}
                     {cleanText && (
-                      <div className="px-4 pb-2">
+                      <div 
+                        className="px-4 pb-2 cursor-pointer hover:bg-white/5 transition-colors"
+                        onClick={() => {
+                          navigator.clipboard.writeText(cleanText);
+                          toast.success('Caption copied to clipboard');
+                        }}
+                        title="Click to copy caption"
+                      >
                         <p className="text-sm text-white/90">{cleanText}</p>
                       </div>
                     )}
@@ -1482,30 +1489,10 @@ export default function Home() {
                           <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
                           <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
                         </div>
-                        {timeAgo && (
-                          <span className="text-gray-500 text-xs">{timeAgo}</span>
-                        )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        {tweet.text && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                              onClick={() => {
-                                const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                                navigator.clipboard.writeText(cleanText);
-                                toast.success('Caption copied to clipboard');
-                              }}
-                              title="Copy caption"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-
-                          </>
-                        )}
-                      </div>
+                      {timeAgo && (
+                        <span className="text-gray-500 text-xs">{timeAgo}</span>
+                      )}
                     </div>
                     </div>
                   </div>
@@ -1865,7 +1852,14 @@ export default function Home() {
                   
                   {/* Tweet Text */}
                   {cleanText && (
-                    <div className="px-4 pb-2">
+                    <div 
+                      className="px-4 pb-2 cursor-pointer hover:bg-white/5 transition-colors"
+                      onClick={() => {
+                        navigator.clipboard.writeText(cleanText);
+                        toast.success('Caption copied to clipboard');
+                      }}
+                      title="Click to copy caption"
+                    >
                       <p className="text-sm text-white/90">{cleanText}</p>
                     </div>
                   )}
@@ -1950,27 +1944,10 @@ export default function Home() {
                         <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
                         <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
                       </div>
-                      {timeAgo && (
-                        <span className="text-gray-500 text-xs">{timeAgo}</span>
-                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      {tweet.text && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                          onClick={() => {
-                            const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                            navigator.clipboard.writeText(cleanText);
-                            toast.success('Caption copied to clipboard');
-                          }}
-                          title="Copy caption"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                    {timeAgo && (
+                      <span className="text-gray-500 text-xs">{timeAgo}</span>
+                    )}
                   </div>
                   </div>
                 </div>
