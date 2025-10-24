@@ -1236,6 +1236,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }}
                 onTweetEditingChange={setIsEditingTweet}
                 onCompleteClick={handleCompleteClick}
+                onOutlineColorChange={setTweetOutlineColor}
               />
             ) : !image ? (
               <div className="relative">
@@ -1272,33 +1273,6 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   <Sparkles className="h-3 w-3 mr-1" />
                   Canvas
                 </Button>
-                {/* Tweet Outline Color Selector - Only show for Footy Feed */}
-                {selectedPage === 'footy-feed' && (
-                  <div className="absolute top-11 left-2 flex gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setTweetOutlineColor('white')}
-                      className={`w-8 h-8 rounded border-2 transition-all ${
-                        tweetOutlineColor === 'white'
-                          ? 'border-white bg-white/20'
-                          : 'border-gray-600 hover:border-gray-400'
-                      }`}
-                      title="White outline"
-                    >
-                      <div className="w-full h-full rounded bg-white" />
-                    </button>
-                    <button
-                      onClick={() => setTweetOutlineColor('black')}
-                      className={`w-8 h-8 rounded border-2 transition-all ${
-                        tweetOutlineColor === 'black'
-                          ? 'border-white bg-gray-800'
-                          : 'border-gray-600 hover:border-gray-400'
-                      }`}
-                      title="Black outline"
-                    >
-                      <div className="w-full h-full rounded bg-black" />
-                    </button>
-                  </div>
-                )}
                 {/* Small Paste button in top-right - Hidden on iOS */}
                 {!/iPhone|iPad|iPod/.test(navigator.userAgent) && (
                   <Button

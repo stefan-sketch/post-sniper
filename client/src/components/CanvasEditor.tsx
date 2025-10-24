@@ -25,9 +25,10 @@ interface CanvasEditorProps {
   tweetOutlineColor?: 'white' | 'black';
   onTweetEditingChange?: (isEditing: boolean) => void;
   onCompleteClick?: (handler: () => void) => void;
+  onOutlineColorChange?: (color: 'white' | 'black') => void;
 }
 
-export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'white', onTweetEditingChange, onCompleteClick }: CanvasEditorProps) {
+export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'white', onTweetEditingChange, onCompleteClick, onOutlineColorChange }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasRegisteredHandler = useRef(false);
@@ -360,6 +361,39 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
           </div>
         )}
       </div>
+
+      {/* Outline Color Selector - Only show for Footy Feed after tweet upload */}
+      {step === "tweet" && tweetImage && selectedPage === 'footy-feed' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white">Outline Color</span>
+          </div>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => onOutlineColorChange?.('white')}
+              className={`w-16 h-16 rounded border-2 transition-all ${
+                tweetOutlineColor === 'white'
+                  ? 'border-white bg-white/20 scale-110'
+                  : 'border-gray-600 hover:border-gray-400'
+              }`}
+              title="White outline"
+            >
+              <div className="w-full h-full rounded bg-white" />
+            </button>
+            <button
+              onClick={() => onOutlineColorChange?.('black')}
+              className={`w-16 h-16 rounded border-2 transition-all ${
+                tweetOutlineColor === 'black'
+                  ? 'border-white bg-gray-800 scale-110'
+                  : 'border-gray-600 hover:border-gray-400'
+              }`}
+              title="Black outline"
+            >
+              <div className="w-full h-full rounded bg-black" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Scale Slider - Only show when tweet is uploaded */}
       {step === "tweet" && tweetImage && (
