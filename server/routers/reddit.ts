@@ -8,21 +8,28 @@ export const redditRouter = router({
     }))
     .query(async ({ input }) => {
       try {
+        console.log('[Reddit] Fetching posts from r/soccercirclejerk...');
+        
         // Fetch from r/soccercirclejerk using Reddit's JSON API (no auth needed)
         const response = await fetch(
           `https://www.reddit.com/r/soccercirclejerk/hot.json?limit=${input.limit}`,
           {
             headers: {
-              'User-Agent': 'PostSniper/1.0',
+              'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
             },
           }
         );
 
+        console.log('[Reddit] Response status:', response.status);
+
         if (!response.ok) {
-          throw new Error(`Reddit API error: ${response.statusText}`);
+          const errorText = await response.text();
+          console.error('[Reddit] API error:', response.status, errorText);
+          throw new Error(`Reddit API error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log('[Reddit] Successfully fetched', data.data?.children?.length || 0, 'posts');
         
         // Transform Reddit data to our format
         const posts = data.data.children.map((child: any) => {
