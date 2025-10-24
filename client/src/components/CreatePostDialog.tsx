@@ -1235,46 +1235,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     // Calculate preview font size
                     const previewFontSize = (fontSize / 800) * imgRef.current.clientWidth;
                     const boxWidth = (textBoxWidth / 100) * imgRef.current.clientWidth;
+                    const lineHeight = previewFontSize * 1.2;
                     
-                    // Create temporary canvas to measure text height
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                      ctx.font = `bold ${previewFontSize}px Impact, 'Arial Black', sans-serif`;
-                      const lineHeight = previewFontSize * 1.2;
-                      
-                      // Account for letter spacing in width calculation
-                      const effectiveWidth = boxWidth - (previewFontSize * 0.8); // Reduce by padding and letter spacing
-                      
-                      // Calculate wrapped lines
-                      const paragraphs = overlayText.split('\n');
-                      let lineCount = 0;
-                      paragraphs.forEach(paragraph => {
-                        if (!paragraph.trim()) {
-                          lineCount++;
-                          return;
-                        }
-                        const words = paragraph.split(' ');
-                        let currentLine = '';
-                        words.forEach((word) => {
-                          const testLine = currentLine + (currentLine ? ' ' : '') + word;
-                          // Measure with letter spacing effect (approximately 10% wider)
-                          const metrics = ctx.measureText(testLine);
-                          const effectiveTextWidth = metrics.width * 1.1; // Account for 0.1em letter spacing
-                          if (effectiveTextWidth > effectiveWidth && currentLine) {
-                            lineCount++;
-                            currentLine = word;
-                          } else {
-                            currentLine = testLine;
-                          }
-                        });
-                        if (currentLine) lineCount++;
-                      });
-                      
-                      // Auto-expand height based on content (like Canva)
-                      const boxHeight = Math.max(lineHeight * 1.5, lineCount * lineHeight + previewFontSize * 0.6);
-                      
-                      return (
+                    // Simple minimum height - will auto-expand with content
+                    const minBoxHeight = lineHeight * 1.5;
+                    
+                    return (
                         <div
                           className={`absolute select-none ${isEditingText ? 'border-2 border-cyan-500 bg-cyan-500/10 cursor-move' : 'cursor-move'}`}
                           style={{
@@ -1284,7 +1250,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             top: `calc(50% + ${(textBoxPosition.y - 50) * (imgRef.current.clientHeight / 100)}px)`,
                             transform: 'translate(-50%, -50%)',
                             width: `${boxWidth}px`,
-                            height: `${boxHeight}px`,
+                            minHeight: `${minBoxHeight}px`,
+                            height: 'auto',
                           }}
                           onClick={(e) => {
                             // If clicking the box itself (not the textarea), enable editing
@@ -1327,8 +1294,10 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               // Prevent dragging when clicking inside text
                               e.stopPropagation();
                             }}
-                            className="absolute inset-0 bg-transparent border-none outline-none resize-none text-center"
+                            className="bg-transparent border-none outline-none resize-none text-center"
                             style={{
+                              width: '100%',
+                              height: '100%',
                               fontSize: `${previewFontSize}px`,
                               fontFamily: 'Impact, "Arial Black", sans-serif',
                               fontWeight: 'bold',
@@ -1342,7 +1311,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               whiteSpace: 'pre-wrap',
                               wordWrap: 'break-word',
                               overflow: 'hidden',
-                              verticalAlign: 'middle',
                             }}
                             maxLength={200}
                           />
@@ -1420,8 +1388,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       )}
                         </div>
                       );
-                    }
-                    return null;
                   })()}
 
                   {/* Watermark Preview */}
