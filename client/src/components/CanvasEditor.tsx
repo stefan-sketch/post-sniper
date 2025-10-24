@@ -22,14 +22,21 @@ const PAGE_OUTLINES = [
 interface CanvasEditorProps {
   onComplete: (imageDataUrl: string) => void;
   selectedPage: string | null;
+  onTweetEditingChange?: (isEditing: boolean) => void;
 }
 
-export function CanvasEditor({ onComplete, selectedPage }: CanvasEditorProps) {
+export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<"background" | "tweet">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
+  
+  // Notify parent when tweet editing state changes
+  useEffect(() => {
+    const isEditingTweet = step === "tweet" && tweetImage !== null;
+    onTweetEditingChange?.(isEditingTweet);
+  }, [step, tweetImage, onTweetEditingChange]);
   
   // Auto-apply outline color based on selected page
   const getOutlineColorForPage = (pageId: string | null): string | null => {

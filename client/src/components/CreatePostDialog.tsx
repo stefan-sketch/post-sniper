@@ -73,6 +73,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
   const [canvasMode, setCanvasMode] = useState(false);
+  const [isEditingTweet, setIsEditingTweet] = useState(false);
 
 
 
@@ -769,13 +770,15 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 })}
               </div>
             </div>
-            <Button
-              onClick={handlePost}
-              disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-              className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUploading ? "Posting..." : "Post"}
-            </Button>
+            {!isEditingTweet && (
+              <Button
+                onClick={handlePost}
+                disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUploading ? "Posting..." : "Post"}
+              </Button>
+            )}
           </div>
 
           {/* Overlay Controls - Always visible, greyed out when no image */}
@@ -1110,7 +1113,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 onComplete={(imageDataUrl) => {
                   setImage(imageDataUrl);
                   setCanvasMode(false);
+                  setIsEditingTweet(false);
                 }}
+                onTweetEditingChange={setIsEditingTweet}
               />
             ) : !image ? (
               <div className="relative">
