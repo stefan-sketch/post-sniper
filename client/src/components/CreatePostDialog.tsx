@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen, Sparkles } from "lucide-react";
+import { Upload, RefreshCw, Droplet, WavesLadder, Type, Pen, Sparkles } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -795,7 +795,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <CropIcon className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4" />
                   )}
                 </Button>
 
@@ -815,7 +815,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 }`}
                 title={!selectedPage ? "Select a page first" : "Add watermark"}
               >
-                <ImageIcon className="h-4 w-4" />
+                <Droplet className="h-4 w-4" />
               </Button>
 
               {/* Gradient Button */}
@@ -834,7 +834,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 }`}
                 title="Add gradient overlay"
               >
-                <Palette className="h-4 w-4" />
+                <WavesLadder className="h-4 w-4" />
               </Button>
 
               {/* Text Button */}
