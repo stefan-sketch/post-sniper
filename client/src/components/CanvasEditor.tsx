@@ -42,17 +42,15 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
   }, [step, tweetImage, onTweetEditingChange]);
   
   // Auto-apply outline color based on selected page
-  const getOutlineColorForPage = (pageId: string | null): string | null => {
-    if (!pageId) return null;
-    switch (pageId) {
+  const outlineColor = useMemo(() => {
+    if (!selectedPage) return null;
+    switch (selectedPage) {
       case 'football-funnys': return '#FFD700'; // Yellow/Gold
       case 'footy-feed': return tweetOutlineColor === 'black' ? '#000000' : '#FFFFFF'; // User-selected
       case 'football-away-days': return '#8B0000'; // Burgundy
       default: return null;
     }
-  };
-  
-  const outlineColor = useMemo(() => getOutlineColorForPage(selectedPage), [selectedPage, tweetOutlineColor]);
+  }, [selectedPage, tweetOutlineColor]);
   const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
   const [tweetScale, setTweetScale] = useState(1.0); // Scale factor (0.1 to 2.0)
   const [isDragging, setIsDragging] = useState(false);
