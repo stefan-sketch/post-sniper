@@ -633,13 +633,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         y: Math.max(0, Math.min(100, yPercent)) 
       });
     } else if (isResizingOverlayImage) {
-      // Calculate distance from center to determine size
-      const centerX = resizeStartState.x;
-      const centerY = resizeStartState.y;
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
+      // Calculate distance from image center to mouse position
+      const centerX = overlayImagePosition.x;
+      const centerY = overlayImagePosition.y;
       const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
       const delta = currentDist - startDist;
-      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 3));
       setOverlayImageSize(newSize);
     }
   };
@@ -688,12 +688,13 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       });
     } else if (isResizingOverlayImage) {
       e.preventDefault();
-      const centerX = resizeStartState.x;
-      const centerY = resizeStartState.y;
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
+      // Calculate distance from image center to touch position
+      const centerX = overlayImagePosition.x;
+      const centerY = overlayImagePosition.y;
       const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
       const delta = currentDist - startDist;
-      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 3));
       setOverlayImageSize(newSize);
     }
   };
@@ -1247,19 +1248,28 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     if (ctx) {
-                      ctx.font = `${previewFontSize}px Impact, 'Arial Black', sans-serif`;
+                      ctx.font = `bold ${previewFontSize}px Impact, 'Arial Black', sans-serif`;
                       const lineHeight = previewFontSize * 1.2;
+                      
+                      // Account for letter spacing in width calculation
+                      const effectiveWidth = boxWidth - (previewFontSize * 0.8); // Reduce by padding and letter spacing
                       
                       // Calculate wrapped lines
                       const paragraphs = overlayText.split('\n');
                       let lineCount = 0;
                       paragraphs.forEach(paragraph => {
+                        if (!paragraph.trim()) {
+                          lineCount++;
+                          return;
+                        }
                         const words = paragraph.split(' ');
                         let currentLine = '';
                         words.forEach((word) => {
                           const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                          // Measure with letter spacing effect (approximately 10% wider)
                           const metrics = ctx.measureText(testLine);
-                          if (metrics.width > boxWidth && currentLine) {
+                          const effectiveTextWidth = metrics.width * 1.1; // Account for 0.1em letter spacing
+                          if (effectiveTextWidth > effectiveWidth && currentLine) {
                             lineCount++;
                             currentLine = word;
                           } else {
@@ -1270,7 +1280,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                       });
                       
                       // Auto-expand height based on content (like Canva)
-                      const boxHeight = Math.max(lineHeight * 1.5, lineCount * lineHeight + previewFontSize * 0.4);
+                      const boxHeight = Math.max(lineHeight * 1.5, lineCount * lineHeight + previewFontSize * 0.6);
                       
                       return (
                         <div
@@ -1340,7 +1350,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               whiteSpace: 'pre-wrap',
                               wordWrap: 'break-word',
                               overflow: 'hidden',
-                              
+                              verticalAlign: 'middle',
                             }}
                             maxLength={200}
                           />
