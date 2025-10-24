@@ -365,7 +365,7 @@ export default function Home() {
 
   // Detect new posts for animation - animate any post that's new to the user
   useEffect(() => {
-    if (livePosts.length > 0 && !isViewSwitching) {
+    if (livePosts.length > 0) {
       const currentPostIds = new Set(livePosts.map(p => p.id));
       
       // Find posts that are not in previous set (new to the user)
@@ -385,15 +385,12 @@ export default function Home() {
       }
       
       setPreviousPostIds(currentPostIds);
-    } else if (livePosts.length > 0 && isViewSwitching) {
-      // Update previousPostIds without triggering animation during view switch
-      setPreviousPostIds(new Set(livePosts.map(p => p.id)));
     }
-  }, [livePosts, isViewSwitching]);
+  }, [livePosts]);
 
   // Detect new popular posts for animation - animate any post that's new to the user
   useEffect(() => {
-    if (popularPosts.length > 0 && !isViewSwitching) {
+    if (popularPosts.length > 0) {
       const currentPostIds = new Set(popularPosts.map(p => p.id));
       
       // Find posts that are not in previous set (new to the user)
@@ -413,15 +410,12 @@ export default function Home() {
       }
       
       setPreviousPopularPostIds(currentPostIds);
-    } else if (popularPosts.length > 0 && isViewSwitching) {
-      // Update previousPopularPostIds without triggering animation during view switch
-      setPreviousPopularPostIds(new Set(popularPosts.map(p => p.id)));
     }
-  }, [popularPosts, isViewSwitching]);
+  }, [popularPosts]);
 
   // Detect new tweets for animation - animate any tweet that's new to the user
   useEffect(() => {
-    if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && !isViewSwitching) {
+    if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0) {
       const currentTweetIds = new Set(twitterQuery.data.tweets.map((t: any) => t.id));
       
       // Find tweets that are not in previous set (new to the user)
@@ -441,11 +435,8 @@ export default function Home() {
       }
       
       setPreviousTweetIds(currentTweetIds);
-    } else if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && isViewSwitching) {
-      // Update previousTweetIds without triggering animation during view switch
-      setPreviousTweetIds(new Set(twitterQuery.data.tweets.map((t: any) => t.id)));
     }
-  }, [twitterQuery.data?.tweets, isViewSwitching]);
+  }, [twitterQuery.data?.tweets]);
 
   // Handle scroll to top button visibility
   useEffect(() => {
