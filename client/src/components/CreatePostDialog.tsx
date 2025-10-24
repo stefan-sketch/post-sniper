@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Droplet, Layers, Type, Pen, Sparkles } from "lucide-react";
+import { Upload, RefreshCw, Droplet, Layers, Type, Sparkles } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -710,14 +710,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             <div className="flex items-center gap-3 flex-1">
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
               <div className="flex gap-2 flex-wrap relative">
-                {/* Animated prompt when no page is selected */}
-                {!selectedPage && (
-                  <div className="absolute -top-8 left-0 animate-bounce">
-                    <div className="bg-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                      ← Select a page
-                    </div>
-                  </div>
-                )}
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
@@ -730,6 +722,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         transition-all duration-200 hover:scale-[1.1]
                         ${isSelected 
                           ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
+                          : !selectedPage
+                          ? 'opacity-100 animate-pulse ring-2 ring-cyan-500 ring-offset-2 ring-offset-gray-900'
                           : 'opacity-60 hover:opacity-100'
                         }
                       `}
@@ -868,32 +862,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               >
                 <Type className="h-4 w-4" />
               </Button>
-
-              {/* Drawing Tool Button */}
-              <Button
-                type="button"
-                variant={drawingEnabled ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setDrawingEnabled(!drawingEnabled);
-                  if (!drawingEnabled) {
-                    setIsEditingText(false); // Exit text editing when starting to draw
-                  }
-                }}
-                disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 ${
-                  !image || cropMode
-                    ? "opacity-50 cursor-not-allowed"
-                    : drawingEnabled
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-                title="Draw on image"
-              >
-                <Pen className="h-4 w-4" />
-              </Button>
-
-
 
               {/* Overlay Image Button - DISABLED */}
               {/* <Button
