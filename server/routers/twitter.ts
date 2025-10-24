@@ -130,6 +130,13 @@ export const twitterRouter = router({
           const engagementB = (b.likes || 0) + (b.retweets || 0) + (b.replies || 0) + (b.views || 0);
           return engagementB - engagementA; // Descending order
         });
+        
+        // Debug: Log top 3 tweets with engagement data
+        console.log('[Twitter] Top 3 tweets by engagement:');
+        tweets.slice(0, 3).forEach((tweet, i) => {
+          const total = (tweet.likes || 0) + (tweet.retweets || 0) + (tweet.replies || 0) + (tweet.views || 0);
+          console.log(`  ${i + 1}. Likes: ${tweet.likes}, Retweets: ${tweet.retweets}, Replies: ${tweet.replies}, Views: ${tweet.views}, Total: ${total}`);
+        });
       }
       
       // Limit results after sorting
