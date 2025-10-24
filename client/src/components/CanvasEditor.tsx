@@ -1,12 +1,27 @@
 import { useRef, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
-const OUTLINE_COLORS = [
-  { name: "Blue (Facebook)", color: "#1877F2" },
-  { name: "Gold (Funnys)", color: "#FFD700" },
-  { name: "Orange (Away Days)", color: "#FF4500" },
-  { name: "None", color: null },
+const PAGE_OUTLINES = [
+  { 
+    name: "Football Funnys", 
+    color: "#FFD700", // Yellow/Gold
+    icon: "/page-icons/football-funnys.jpg"
+  },
+  { 
+    name: "Footy Feed", 
+    color: "#000000", // Black
+    icon: "/page-icons/footy-feed.jpg"
+  },
+  { 
+    name: "Football Away Days", 
+    color: "#8B0000", // Burgundy
+    icon: "/page-icons/football-away-days.jpg"
+  },
+  { 
+    name: "None", 
+    color: null,
+    icon: null
+  },
 ];
 
 interface CanvasEditorProps {
@@ -15,6 +30,7 @@ interface CanvasEditorProps {
 
 export function CanvasEditor({ onComplete }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<"background" | "tweet" | "outline">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
@@ -198,8 +214,8 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
   return (
     <div className="space-y-4">
-      {/* Canvas Preview */}
-      <div className="flex justify-center bg-gray-800 rounded-lg p-4">
+      {/* Canvas with Overlay Prompts */}
+      <div ref={containerRef} className="relative flex justify-center bg-gray-800 rounded-lg p-4">
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -211,9 +227,53 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseUp}
         />
+        
+        {/* Step 1: Upload Background - Centered in Canvas */}
+        {step === "background" && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleBackgroundUpload}
+                className="hidden"
+                id="canvas-bg-upload"
+              />
+              <button
+                onClick={() => document.getElementById("canvas-bg-upload")?.click()}
+                className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
+              >
+                <Upload className="h-6 w-6" />
+                Upload Background
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Upload Tweet - Centered in Canvas */}
+        {step === "tweet" && !tweetImage && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleTweetUpload}
+                className="hidden"
+                id="canvas-tweet-upload"
+              />
+              <button
+                onClick={() => document.getElementById("canvas-tweet-upload")?.click()}
+                className="px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105 flex items-center gap-3"
+              >
+                <Upload className="h-6 w-6" />
+                Upload Tweet
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Scale Slider */}
+      {/* Scale Slider - Only show when tweet is uploaded */}
       {(step === "tweet" || step === "outline") && tweetImage && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
@@ -235,67 +295,43 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
         </div>
       )}
 
-      {/* Step 1: Upload Background */}
-      {step === "background" && (
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-white">Step 1: Upload Background Image</h3>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleBackgroundUpload}
-            className="hidden"
-            id="canvas-bg-upload"
-          />
-          <Button
-            onClick={() => document.getElementById("canvas-bg-upload")?.click()}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Background
-          </Button>
-        </div>
-      )}
-
-      {/* Step 2: Upload Tweet */}
-      {step === "tweet" && (
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-white">Step 2: Upload Tweet Screenshot</h3>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleTweetUpload}
-            className="hidden"
-            id="canvas-tweet-upload"
-          />
-          <Button
-            onClick={() => document.getElementById("canvas-tweet-upload")?.click()}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Tweet
-          </Button>
-        </div>
-      )}
-
-      {/* Step 3: Select Outline Color */}
+      {/* Step 3: Select Outline with Page Icons */}
       {step === "outline" && (
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-white">Step 3: Select Outline Color</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {OUTLINE_COLORS.map((option) => (
-              <Button
-                key={option.name}
-                onClick={() => handleOutlineSelect(option.color)}
-                className="w-full"
-                variant="outline"
-                style={{
-                  borderColor: option.color || "#6b7280",
-                  borderWidth: "2px",
-                  color: option.color || "#9ca3af",
-                }}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-white text-center">Select Outline Color</h3>
+          <div className="grid grid-cols-4 gap-3">
+            {PAGE_OUTLINES.map((page) => (
+              <button
+                key={page.name}
+                onClick={() => handleOutlineSelect(page.color)}
+                className="flex flex-col items-center gap-2 p-3 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all hover:scale-105 border-2 border-transparent hover:border-cyan-500"
+                title={page.name}
               >
-                {option.name}
-              </Button>
+                {page.icon ? (
+                  <div className="relative">
+                    <img 
+                      src={page.icon} 
+                      alt={page.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    {page.color && (
+                      <div 
+                        className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-gray-800"
+                        style={{ backgroundColor: page.color }}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+                    <span className="text-2xl">✕</span>
+                  </div>
+                )}
+                <span className="text-xs text-white text-center leading-tight">
+                  {page.name === "Football Funnys" ? "Funnys" : 
+                   page.name === "Footy Feed" ? "Feed" :
+                   page.name === "Football Away Days" ? "Away Days" : "None"}
+                </span>
+              </button>
             ))}
           </div>
         </div>
