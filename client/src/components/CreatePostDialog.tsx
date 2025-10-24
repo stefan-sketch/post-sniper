@@ -710,9 +710,15 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
           <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
-                {/* Minimize and Close buttons */}
-                <div className="flex gap-1 ml-2">
+                {/* Close and Minimize buttons - Top Left */}
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => onOpenChange(false)}
+                    className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                    title="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                   {onMinimize && (
                     <button
                       onClick={onMinimize}
@@ -722,14 +728,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       <Minus className="w-4 h-4" />
                     </button>
                   )}
-                  <button
-                    onClick={() => onOpenChange(false)}
-                    className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
-                    title="Close"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
                 </div>
+                <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
               </div>
               <div className="flex gap-2 flex-wrap relative">
                 {PAGES.map((page) => {

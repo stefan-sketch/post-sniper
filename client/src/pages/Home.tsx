@@ -2114,12 +2114,10 @@ export default function Home() {
         {showCreatePost && isCreatePostMinimized && (
           <button
             onClick={() => setIsCreatePostMinimized(false)}
-            className="fixed bottom-6 right-6 z-[9998] p-4 rounded-full bg-[#1877F2] hover:bg-[#1664D8] text-white shadow-2xl transition-all hover:scale-110 animate-pulse"
+            className="fixed bottom-6 right-6 z-[9998] px-6 py-3 rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold shadow-2xl transition-all hover:scale-110 animate-pulse"
             title="Resume creating post"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            Continue Post
           </button>
         )}
       </Suspense>
