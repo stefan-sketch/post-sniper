@@ -24,7 +24,11 @@ interface RedditComment {
   created: number;
 }
 
-export function RedditFeed() {
+interface RedditFeedProps {
+  sort?: 'hot' | 'new' | 'top';
+}
+
+export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   const [posts, setPosts] = useState<RedditPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +49,7 @@ export function RedditFeed() {
 
         // Fetch directly from Reddit's JSON API (client-side)
         const response = await fetch(
-          'https://www.reddit.com/r/soccercirclejerk/hot.json?limit=25',
+          `https://www.reddit.com/r/soccercirclejerk/${sort}.json?limit=25${sort === 'top' ? '&t=day' : ''}`,
           {
             headers: {
               'Accept': 'application/json',
@@ -107,7 +111,7 @@ export function RedditFeed() {
     }
 
     fetchRedditPosts();
-  }, []);
+  }, [sort]);
 
   function toggleComments(post: RedditPost) {
     if (expandedPost === post.id) {

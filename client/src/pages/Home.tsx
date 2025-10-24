@@ -963,8 +963,11 @@ export default function Home() {
           className="flex flex-col h-full overflow-hidden"
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
-            <div className="flex items-center justify-center gap-2 flex-1">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <TrendingUp className="h-5 w-5 animate-pulse text-cyan-400" />
+            </div>
+            
+            <div className="flex items-center justify-center gap-2 flex-1">
               
               {/* Three Logo Buttons */}
               <div className="flex gap-1">
@@ -1012,8 +1015,10 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
+            </div>
             
-            {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) or Nothing (Reddit) */}
+            {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) or Sort (Reddit) */}
+            <div className="flex-shrink-0">
             {feedType === 'twitter' ? (
               <button
                 onClick={() => setTwitterPlaying(!twitterPlaying)}
@@ -1027,6 +1032,39 @@ export default function Home() {
                   <Play className="h-4 w-4 text-white" />
                 )}
               </button>
+            ) : feedType === 'reddit' ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-[#FF4500] hover:bg-[#FF4500]/80 text-white shadow-sm flex items-center gap-1"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                  </svg>
+                  {popularTimeFilter === 'today' ? 'Popular' : 'Newest'}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTimeFilter && (
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
+                    {(['today', '2hr'] as const).map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          setPopularTimeFilter(time);
+                          setShowTimeFilter(false);
+                        }}
+                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                        }`}
+                      >
+                        {time === 'today' ? 'Popular' : 'Newest'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : feedType === 'popular' ? (
               <div className="relative">
                 <button
@@ -1062,6 +1100,7 @@ export default function Home() {
               </div>
             ) : null}
             </div>
+            
             <div className="flex-shrink-0">
               {showPopularScrollTop && (
                 <button
@@ -1082,7 +1121,7 @@ export default function Home() {
           
           <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {feedType === 'reddit' ? (
-              <RedditFeed />
+              <RedditFeed sort={popularTimeFilter === 'today' ? 'top' : 'new'} />
             ) : feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
