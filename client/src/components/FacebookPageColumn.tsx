@@ -25,19 +25,15 @@ export default function FacebookPageColumn({ pageId, pageName, borderColor, hide
   const posts = postsQuery.data?.posts || [];
   const pageConfig = postsQuery.data?.pageConfig;
 
-  // Detect new posts for animation - only animate genuinely new posts (within last 30 seconds)
+  // Detect new posts for animation - animate any post that's new to the user
   useEffect(() => {
     if (posts.length > 0) {
       const currentPostIds = new Set(posts.map((p: any) => p.id));
-      const now = Date.now();
       
-      // Find posts that are both: 1) not in previous set, AND 2) posted within last 30 seconds
+      // Find posts that are not in previous set (new to the user)
       const newIds = new Set<string>();
       posts.forEach((post: any) => {
-        const postAge = now - new Date(post.postDate).getTime();
-        const isRecentPost = postAge < 30000; // 30 seconds
-        
-        if (!previousPostIds.has(post.id) && isRecentPost) {
+        if (!previousPostIds.has(post.id)) {
           newIds.add(post.id);
         }
       });

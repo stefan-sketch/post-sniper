@@ -363,19 +363,15 @@ export default function Home() {
     }));
   }, [pagesQuery.data]);
 
-  // Detect new posts for animation - only animate genuinely new posts (within last 30 seconds)
+  // Detect new posts for animation - animate any post that's new to the user
   useEffect(() => {
     if (livePosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(livePosts.map(p => p.id));
-      const now = Date.now();
       
-      // Find posts that are both: 1) not in previous set, AND 2) posted within last 30 seconds
+      // Find posts that are not in previous set (new to the user)
       const newIds = new Set<string>();
       livePosts.forEach(post => {
-        const postAge = now - new Date(post.postDate).getTime();
-        const isRecentPost = postAge < 30000; // 30 seconds
-        
-        if (!previousPostIds.has(post.id) && isRecentPost) {
+        if (!previousPostIds.has(post.id)) {
           newIds.add(post.id);
         }
       });
@@ -395,19 +391,15 @@ export default function Home() {
     }
   }, [livePosts, isViewSwitching]);
 
-  // Detect new popular posts for animation - only animate genuinely new posts (within last 30 seconds)
+  // Detect new popular posts for animation - animate any post that's new to the user
   useEffect(() => {
     if (popularPosts.length > 0 && !isViewSwitching) {
       const currentPostIds = new Set(popularPosts.map(p => p.id));
-      const now = Date.now();
       
-      // Find posts that are both: 1) not in previous set, AND 2) posted within last 30 seconds
+      // Find posts that are not in previous set (new to the user)
       const newIds = new Set<string>();
       popularPosts.forEach(post => {
-        const postAge = now - new Date(post.postDate).getTime();
-        const isRecentPost = postAge < 30000; // 30 seconds
-        
-        if (!previousPopularPostIds.has(post.id) && isRecentPost) {
+        if (!previousPopularPostIds.has(post.id)) {
           newIds.add(post.id);
         }
       });
@@ -427,19 +419,15 @@ export default function Home() {
     }
   }, [popularPosts, isViewSwitching]);
 
-  // Detect new tweets for animation - only animate genuinely new tweets (within last 30 seconds)
+  // Detect new tweets for animation - animate any tweet that's new to the user
   useEffect(() => {
     if (twitterQuery.data?.tweets && twitterQuery.data.tweets.length > 0 && !isViewSwitching) {
       const currentTweetIds = new Set(twitterQuery.data.tweets.map((t: any) => t.id));
-      const now = Date.now();
       
-      // Find tweets that are both: 1) not in previous set, AND 2) posted within last 30 seconds
+      // Find tweets that are not in previous set (new to the user)
       const newIds = new Set<string>();
       twitterQuery.data.tweets.forEach((tweet: any) => {
-        const tweetAge = now - new Date(tweet.createdAt).getTime();
-        const isRecentTweet = tweetAge < 30000; // 30 seconds
-        
-        if (!previousTweetIds.has(tweet.id) && isRecentTweet) {
+        if (!previousTweetIds.has(tweet.id)) {
           newIds.add(tweet.id);
         }
       });
