@@ -326,8 +326,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           });
         }
 
-        // Add overlay image if present (will be drawn synchronously after it loads) - DISABLED
-        /* if (overlayImage && imgRef.current && overlayImageOriginalSize.width > 0) {
+        // Add overlay image if present (will be drawn synchronously after it loads)
+        if (overlayImage && imgRef.current && overlayImageOriginalSize.width > 0) {
           const overlayImg = new Image();
           overlayImg.crossOrigin = 'anonymous';
           overlayImg.src = overlayImage;
@@ -392,7 +392,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               ctx.stroke();
             }
           }
-        } */
+        }
 
         // Add drawing rectangles if any
         if (rectangles.length > 0 && imgRef.current) {
@@ -436,7 +436,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, borderRadius]);
+  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, overlayImage, overlayImagePosition, overlayImageSize, overlayImageBorderRadius, overlayImageBorderWidth, overlayImageBorderColor, overlayImageOriginalSize, borderRadius]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -602,7 +602,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
-    } /* else if (isDraggingOverlayImage) {
+    } else if (isDraggingOverlayImage) {
       setOverlayImagePosition({ 
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
@@ -612,7 +612,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const deltaX = xPercent - resizeStartState.x;
       const newSize = Math.max(10, Math.min(200, resizeStartState.width + deltaX * 2));
       setOverlayImageSize(newSize);
-    } */
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -651,7 +651,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         x: Math.max(0, Math.min(100, xPercent)), 
         y: Math.max(0, Math.min(100, yPercent)) 
       });
-    } /* else if (isDraggingOverlayImage) {
+    } else if (isDraggingOverlayImage) {
       e.preventDefault();
       setOverlayImagePosition({ 
         x: Math.max(0, Math.min(100, xPercent)), 
@@ -663,7 +663,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       const deltaX = xPercent - resizeStartState.x;
       const newSize = Math.max(10, Math.min(200, resizeStartState.width + deltaX * 2));
       setOverlayImageSize(newSize);
-    } */
+    }
   };
 
   const handleMouseUp = () => {
@@ -691,8 +691,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setIsResizingFontSize(false);
     setIsResizingWidth(false);
     setIsDraggingWatermark(false);
-    // setIsDraggingOverlayImage(false);
-    // setIsResizingOverlayImage(false);
+    setIsDraggingOverlayImage(false);
+    setIsResizingOverlayImage(false);
   };
 
   return (
@@ -879,8 +879,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 <Pen className="h-4 w-4" />
               </Button>
 
-              {/* Overlay Image Button - DISABLED */}
-              {/* <Button
+              {/* Overlay Image Button */}
+              <Button
                 type="button"
                 variant={overlayImage ? "default" : "outline"}
                 size="sm"
@@ -905,7 +905,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 accept="image/*"
                 onChange={handleOverlayImageUpload}
                 className="hidden"
-              /> */}
+              />
             </div>
 
             {/* Drawing Color Picker - Show when drawing is enabled */}
@@ -991,8 +991,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
               </div>
             )}
 
-            {/* Overlay Image Controls - DISABLED */}
-            {/* {overlayImage && image && !cropMode && (
+            {/* Overlay Image Controls - Show when overlay image is added */}
+            {overlayImage && image && !cropMode && (
               <div className="space-y-2">
                 <div className="flex gap-3 items-center justify-center px-4">
                   <span className="text-sm text-gray-400 whitespace-nowrap">Scale:</span>
@@ -1085,7 +1085,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   </Button>
                 </div>
               </div>
-            )} */}
+            )}
           </div>
 
           {/* Image Upload/Preview */}
@@ -1411,8 +1411,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     />
                   )}
 
-                  {/* Overlay Image Preview - DISABLED */}
-                  {/* {overlayImage && imgRef.current && overlayImageOriginalSize.width > 0 && (() => {
+                  {/* Overlay Image Preview */}
+                  {overlayImage && imgRef.current && overlayImageOriginalSize.width > 0 && (() => {
                     const displayWidth = (overlayImageSize / 100) * overlayImageOriginalSize.width;
                     const displayHeight = (overlayImageSize / 100) * overlayImageOriginalSize.height;
                     const borderColorMap = {
@@ -1461,7 +1461,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
                       </div>
                     );
-                  })()} */}
+                  })()}
 
                   {/* Drawing Canvas Overlay - Top Layer */}
                   {imgRef.current && (
