@@ -3,6 +3,7 @@ import React from "react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getOptimizedImageUrl, generateSrcSet, getImageSizes } from "@/lib/imageOptimization";
 
 interface PostCardProps {
   post: {
@@ -294,7 +295,9 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
             <div className="absolute inset-0 bg-gray-800 animate-pulse" />
           )}
           <img 
-            src={post.image} 
+            src={getOptimizedImageUrl(post.image, 640)}
+            srcSet={generateSrcSet(post.image)}
+            sizes={getImageSizes('post')}
             alt="Post content"
             loading="lazy"
             decoding="async"

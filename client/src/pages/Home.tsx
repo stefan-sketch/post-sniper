@@ -1,17 +1,19 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon } from "lucide-react";
-import SettingsDialog from "@/components/SettingsDialog";
-import PagesSettingsDialog from "@/components/PagesSettingsDialog";
-import AlertsDialog from "@/components/AlertsDialog";
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
-import { CreatePostDialog } from "@/components/CreatePostDialog";
-import LiveFootballHub from "@/components/LiveFootballHub";
+
+// Lazy load heavy components for better initial load performance
+const SettingsDialog = lazy(() => import("@/components/SettingsDialog"));
+const PagesSettingsDialog = lazy(() => import("@/components/PagesSettingsDialog"));
+const AlertsDialog = lazy(() => import("@/components/AlertsDialog"));
+const CreatePostDialog = lazy(() => import("@/components/CreatePostDialog").then(m => ({ default: m.CreatePostDialog })));
+const LiveFootballHub = lazy(() => import("@/components/LiveFootballHub"));
 import { toast } from "sonner";
 
 export default function Home() {
@@ -818,7 +820,13 @@ export default function Home() {
               animation: (isViewSwitching || viewTransition === 'to-feed' || justSwitchedToFeed.current || wasMatchdayOpenBeforeSwitch.current) ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
             }}
           >
-            <LiveFootballHub />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+              </div>
+            }>
+              <LiveFootballHub />
+            </Suspense>
           </div>
         )}
 
@@ -2040,29 +2048,31 @@ export default function Home() {
       })()}
 
       {/* Dialogs - Rendered outside view conditionals to appear as overlays */}
-      <SettingsDialog 
-        open={showSettings} 
-        onOpenChange={setShowSettings}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onManualFetch={handleManualFetch}
-        isFetching={manualFetchMutation.isPending}
-      />
-      <PagesSettingsDialog 
-        open={showPagesSettings} 
-        onOpenChange={setShowPagesSettings}
-        onManualFetch={handleManualFetch}
-        isFetching={manualFetchMutation.isPending}
-      />
-      <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
-      <CreatePostDialog 
-        open={showCreatePost} 
-        onOpenChange={(open) => {
-          setShowCreatePost(open);
-          if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
-        }}
-        initialImage={droppedImage}
-      />
+      <Suspense fallback={null}>
+        <SettingsDialog 
+          open={showSettings} 
+          onOpenChange={setShowSettings}
+          isPlaying={isPlaying}
+          onTogglePlay={() => setIsPlaying(!isPlaying)}
+          onManualFetch={handleManualFetch}
+          isFetching={manualFetchMutation.isPending}
+        />
+        <PagesSettingsDialog 
+          open={showPagesSettings} 
+          onOpenChange={setShowPagesSettings}
+          onManualFetch={handleManualFetch}
+          isFetching={manualFetchMutation.isPending}
+        />
+        <AlertsDialog open={showAlerts} onOpenChange={setShowAlerts} />
+        <CreatePostDialog 
+          open={showCreatePost} 
+          onOpenChange={(open) => {
+            setShowCreatePost(open);
+            if (!open) setDroppedImage(null); // Clear dropped image when dialog closes
+          }}
+          initialImage={droppedImage}
+        />
+      </Suspense>
     </div>
   );
 }
