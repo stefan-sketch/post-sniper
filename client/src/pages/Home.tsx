@@ -755,7 +755,7 @@ export default function Home() {
             </div>
             <button
               onClick={handleViewSwitch}
-              className="hidden md:flex group relative p-1.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-cyan-500/30"
+              className="hidden md:flex group relative w-7 h-7 items-center justify-center rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-cyan-500/30"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
               {/* Icon with rotation animation */}
@@ -797,7 +797,7 @@ export default function Home() {
                     setFeedColumns(3);
                   }
                 }}
-                className={`hidden md:block group relative p-1.5 rounded-md backdrop-blur-sm transition-all duration-200 active:scale-95 border ${
+                className={`hidden md:flex items-center justify-center w-7 h-7 rounded-md backdrop-blur-sm transition-all duration-200 active:scale-95 border ${
                   feedColumns === 3 || isAnimatingOut
                     ? 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30'
                     : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:text-green-400 hover:bg-gray-800/80 hover:border-green-500/30'
@@ -827,7 +827,7 @@ export default function Home() {
             {/* Settings button - desktop only */}
             <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="hidden md:flex items-center justify-center p-1.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              className="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
               title="Settings"
             >
               <Settings className="h-3.5 w-3.5" />
@@ -841,7 +841,7 @@ export default function Home() {
                 setDroppedImage(null);
                 setShowCreatePost(true);
               }}
-              className="hidden md:flex items-center justify-center p-1.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              className="hidden md:flex items-center justify-center w-7 h-7 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
               title="Create Post"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -870,7 +870,7 @@ export default function Home() {
             {/* Settings button - mobile only, after API light */}
             <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="md:hidden flex items-center justify-center p-1.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-1"
+              className="md:hidden flex items-center justify-center w-7 h-7 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-1"
               title="Settings"
             >
               <Settings className="h-3.5 w-3.5" />
@@ -878,7 +878,7 @@ export default function Home() {
             {/* Alerts button - after settings */}
             <button
               onClick={() => setShowAlerts(true)}
-              className="relative flex items-center justify-center p-1.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-3"
+              className="relative flex items-center justify-center w-7 h-7 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-3"
               title="Notifications"
             >
               <Bell className="h-3.5 w-3.5" />
@@ -1113,7 +1113,7 @@ export default function Home() {
                 {/* Facebook Button */}
                 <button
                   onClick={() => handleFeedTypeChange('popular')}
-                  className={`h-8 w-8 rounded-md flex items-center justify-center transition-all border ${
+                  className={`h-7 w-7 rounded-md flex items-center justify-center transition-all border ${
                     feedType === 'popular' 
                       ? 'bg-[#1877F2] text-white border-[#1877F2]/50 shadow-lg shadow-[#1877F2]/30' 
                       : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
@@ -1128,7 +1128,7 @@ export default function Home() {
                 {/* X (Twitter) Button */}
                 <button
                   onClick={() => handleFeedTypeChange('twitter')}
-                  className={`h-8 w-8 rounded-md flex items-center justify-center transition-all border ${
+                  className={`h-7 w-7 rounded-md flex items-center justify-center transition-all border ${
                     feedType === 'twitter' 
                       ? 'bg-black text-white border-gray-600/50 shadow-lg shadow-black/30' 
                       : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
@@ -1143,7 +1143,7 @@ export default function Home() {
                 {/* Reddit Button */}
                 <button
                   onClick={() => handleFeedTypeChange('reddit')}
-                  className={`h-8 w-8 rounded-md flex items-center justify-center transition-all border ${
+                  className={`h-7 w-7 rounded-md flex items-center justify-center transition-all border ${
                     feedType === 'reddit' 
                       ? 'bg-[#FF4500] text-white border-[#FF4500]/50 shadow-lg shadow-[#FF4500]/30' 
                       : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:bg-gray-700/60 hover:text-white hover:border-gray-600/50'
