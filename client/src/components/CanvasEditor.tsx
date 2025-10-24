@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, ArrowLeft } from "lucide-react";
 
 const PAGE_OUTLINES = [
   { 
@@ -201,15 +201,18 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
 
   const handleOutlineSelect = (color: string | null) => {
     setOutlineColor(color);
-    
-    // Wait a moment for the outline to render, then generate final image
-    setTimeout(() => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const dataUrl = canvas.toDataURL("image/png");
-        onComplete(dataUrl);
-      }
-    }, 100);
+  };
+
+  const handleComplete = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const dataUrl = canvas.toDataURL("image/png");
+      onComplete(dataUrl);
+    }
+  };
+
+  const handleBackToOutline = () => {
+    setOutlineColor(null);
   };
 
   return (
@@ -248,6 +251,17 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Back to Outline Button - Top Left */}
+        {step === "outline" && outlineColor !== null && (
+          <button
+            onClick={handleBackToOutline}
+            className="absolute top-6 left-6 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium shadow-lg transition-all hover:scale-105 flex items-center gap-2 z-10"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Change Outline
+          </button>
         )}
 
         {/* Step 2: Upload Tweet - Centered in Canvas */}
@@ -334,6 +348,16 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
               </button>
             ))}
           </div>
+          
+          {/* Complete Button - Only show when outline is selected */}
+          {outlineColor !== null && (
+            <button
+              onClick={handleComplete}
+              className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-lg shadow-xl transition-all hover:scale-105"
+            >
+              ✓ Complete
+            </button>
+          )}
         </div>
       )}
     </div>
