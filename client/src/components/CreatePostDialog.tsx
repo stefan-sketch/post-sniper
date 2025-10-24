@@ -568,7 +568,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setTextBoxPosition({ x: 50, y: 50 });
     setTextBoxWidth(60);
     setFontSize(48);
-    setCropMode(true);
+    setCropMode(false);
     setCroppedImage(null);
     setCanvasMode(false);
     // Close dialog
@@ -722,8 +722,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                         transition-all duration-200 hover:scale-[1.1]
                         ${isSelected 
                           ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
-                          : !selectedPage
-                          ? 'opacity-100 animate-pulse ring-2 ring-cyan-500 ring-offset-2 ring-offset-gray-900'
                           : 'opacity-60 hover:opacity-100'
                         }
                       `}
