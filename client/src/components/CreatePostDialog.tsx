@@ -99,6 +99,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
         if (state.fontSize) setFontSize(state.fontSize);
         if (state.watermarkPosition) setWatermarkPosition(state.watermarkPosition);
         if (state.rectangles) setRectangles(state.rectangles);
+        if (state.tweetOutlineColor) setTweetOutlineColor(state.tweetOutlineColor);
       } catch (e) {
         console.error('Failed to load saved state:', e);
       }
@@ -119,9 +120,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       fontSize,
       watermarkPosition,
       rectangles,
+      tweetOutlineColor,
     };
     localStorage.setItem('createPostState', JSON.stringify(state));
-  }, [image, caption, selectedPage, useWatermark, overlayText, useGradient, textBoxPosition, textBoxWidth, fontSize, watermarkPosition, rectangles]);
+  }, [image, caption, selectedPage, useWatermark, overlayText, useGradient, textBoxPosition, textBoxWidth, fontSize, watermarkPosition, rectangles, tweetOutlineColor]);
 
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
