@@ -853,61 +853,47 @@ export default function Home() {
 
           {/* Center: SDL MEDIA title */}
           <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
-            {/* Settings button - desktop only */}
-            <button
-              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="hidden md:flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
-              title="Settings"
-            >
-              <Settings className="h-3.5 w-3.5" />
-            </button>
-            <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
-              SDL MEDIA
-            </h1>
-            {/* Create post button - desktop only */}
+            {/* SDL MEDIA logo as clickable upload button with animation */}
             <button
               onClick={() => {
                 setDroppedImage(null);
                 setShowCreatePost(true);
               }}
-              className="hidden md:flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              className="group flex items-center gap-2 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
               title="Create Post"
+              style={{ background: 'none', border: 'none', padding: 0 }}
             >
-              <Plus className="h-3.5 w-3.5" />
+              <h1 className="text-xl md:text-2xl font-bold text-white tracking-wider group-hover:text-[#1877F2] transition-colors duration-300" style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}>
+                SDL MEDIA
+              </h1>
             </button>
-          </div>
-
-          {/* Right: Settings + Notifications + Online Status (desktop) + Drag-drop icon (desktop only) */}
-          <div className="flex items-center gap-1">
-            {/* Online Status - hidden on mobile (shown on left), visible on desktop */}
-            <div className="hidden md:flex items-center gap-1.5 text-xs md:order-2 md:mr-1">
+            {/* Online Status light - desktop only, no text */}
+            <div className="hidden md:flex items-center">
               {settingsQuery.data?.lastAPIStatus === "success" ? (
-                <>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-green-400 font-medium hidden md:inline">Online</span>
-                </>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
               ) : (
-                <>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  <span className="text-red-400 font-medium hidden md:inline">Offline</span>
-                </>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               )}
             </div>
-            {/* Settings button - mobile only, after API light */}
+          </div>
+
+          {/* Right: Alerts + Settings + Drag-drop icon (desktop only) */}
+          <div className="flex items-center gap-1">
+            {/* Settings button - mobile only, after API light on left */}
             <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="md:hidden flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-1"
+              className="md:hidden flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
               title="Settings"
             >
               <Settings className="h-3.5 w-3.5" />
             </button>
-            {/* Alerts button - after settings */}
+            {/* Alerts button */}
             <button
               onClick={() => setShowAlerts(true)}
-              className="relative flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50 md:order-3"
+              className="relative flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
               title="Notifications"
             >
               <Bell className="h-3.5 w-3.5" />
@@ -916,6 +902,14 @@ export default function Home() {
                   {unreadCountQuery.data}
                 </span>
               )}
+            </button>
+            {/* Settings button - desktop only, after alerts */}
+            <button
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
+              className="hidden md:flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+              title="Settings"
+            >
+              <Settings className="h-3.5 w-3.5" />
             </button>
             {/* Drag-drop area - desktop only */}
             <div
