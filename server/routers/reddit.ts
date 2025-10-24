@@ -58,5 +58,57 @@ export const redditRouter = router({
         throw new Error('Failed to fetch Reddit posts');
       }
     }),
+
+  getComments: publicProcedure
+    .input(z.object({
+      permalink: z.string(),
+      limit: z.number().min(1).max(50).default(10),
+    }))
+    .query(async ({ input }) => {
+      try {
+        console.log('[Reddit] Fetching comments for:', input.permalink);
+        
+        const response = await fetch(
+          `https://www.reddit.com${input.permalink}.json?limit=${input.limit}`,
+          {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
+            },
+          }
+        );
+
+        console.log('[Reddit] Comments response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[Reddit] Comments API error:', response.status, errorText);
+          throw new Error(`Reddit API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Reddit returns [post, comments] array
+        const commentsData = data[1]?.data?.children || [];
+        
+        const comments = commentsData
+          .filter((child: any) => child.kind === 't1') // Filter out "more" objects
+          .map((child: any) => {
+            const comment = child.data;
+            return {
+              id: comment.id,
+              author: comment.author,
+              body: comment.body,
+              score: comment.score,
+              created: comment.created_utc * 1000,
+            };
+          });
+
+        console.log('[Reddit] Successfully fetched', comments.length, 'comments');
+        return comments;
+      } catch (error) {
+        console.error('Error fetching Reddit comments:', error);
+        throw new Error('Failed to fetch Reddit comments');
+      }
+    }),
 });
 

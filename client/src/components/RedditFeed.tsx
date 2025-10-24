@@ -1,5 +1,6 @@
 import { MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc";
 
 interface RedditPost {
   id: string;
@@ -21,7 +22,6 @@ interface RedditComment {
   body: string;
   score: number;
   created: number;
-  replies?: RedditComment[];
 }
 
 export function RedditFeed() {
@@ -29,8 +29,13 @@ export function RedditFeed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
-  const [comments, setComments] = useState<Record<string, RedditComment[]>>({});
-  const [loadingComments, setLoadingComments] = useState<string | null>(null);
+  const [currentPermalink, setCurrentPermalink] = useState<string | null>(null);
+
+  // Fetch comments using tRPC (server-side to avoid CORS)
+  const commentsQuery = trpc.reddit.getComments.useQuery(
+    { permalink: currentPermalink!, limit: 10 },
+    { enabled: !!currentPermalink }
+  );
 
   useEffect(() => {
     async function fetchRedditPosts() {
@@ -39,9 +44,8 @@ export function RedditFeed() {
         setError(null);
 
         // Fetch directly from Reddit's JSON API (client-side)
-        // Use old.reddit.com for better CORS support
         const response = await fetch(
-          'https://old.reddit.com/r/soccercirclejerk/hot.json?limit=25',
+          'https://www.reddit.com/r/soccercirclejerk/hot.json?limit=25',
           {
             headers: {
               'Accept': 'application/json',
@@ -58,6 +62,20 @@ export function RedditFeed() {
         // Transform Reddit data
         const redditPosts: RedditPost[] = data.data.children.map((child: any) => {
           const post = child.data;
+          
+          // Get the best quality image URL
+          let imageUrl = null;
+          if (post.preview?.images?.[0]?.source?.url) {
+            // Use the full resolution image from preview
+            imageUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+          } else if (post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.gif'))) {
+            // Direct image link
+            imageUrl = post.url;
+          } else if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' && post.thumbnail.startsWith('http')) {
+            // Fallback to thumbnail
+            imageUrl = post.thumbnail;
+          }
+          
           return {
             id: post.id,
             title: post.title,
@@ -67,10 +85,8 @@ export function RedditFeed() {
             comments: post.num_comments,
             created: post.created_utc * 1000,
             url: post.url,
-            permalink: `https://www.reddit.com${post.permalink}`,
-            thumbnail: post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' 
-              ? post.thumbnail 
-              : null,
+            permalink: post.permalink,
+            thumbnail: imageUrl,
             isVideo: post.is_video || false,
           };
         });
@@ -87,68 +103,15 @@ export function RedditFeed() {
     fetchRedditPosts();
   }, []);
 
-  async function fetchComments(post: RedditPost) {
-    console.log('[Reddit] fetchComments called for post:', post.id);
-    console.log('[Reddit] Current expandedPost:', expandedPost);
-    
+  function toggleComments(post: RedditPost) {
     if (expandedPost === post.id) {
-      // Collapse if already expanded
-      console.log('[Reddit] Collapsing post');
+      // Collapse
       setExpandedPost(null);
-      return;
-    }
-
-    // If comments already loaded, just expand
-    if (comments[post.id]) {
-      console.log('[Reddit] Comments already loaded, expanding');
+      setCurrentPermalink(null);
+    } else {
+      // Expand and fetch comments
       setExpandedPost(post.id);
-      return;
-    }
-
-    // Fetch comments
-    try {
-      console.log('[Reddit] Fetching comments from API');
-      setLoadingComments(post.id);
-      // Use old.reddit.com which has better CORS support
-      const response = await fetch(
-        `https://old.reddit.com${post.permalink}.json?limit=10`,
-        {
-          headers: {
-            'Accept': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch comments');
-      }
-
-      const data = await response.json();
-      
-      // Reddit returns [post, comments] array
-      const commentsData = data[1]?.data?.children || [];
-      
-      const parsedComments: RedditComment[] = commentsData
-        .filter((child: any) => child.kind === 't1') // Filter out "more" objects
-        .map((child: any) => {
-          const comment = child.data;
-          return {
-            id: comment.id,
-            author: comment.author,
-            body: comment.body,
-            score: comment.score,
-            created: comment.created_utc * 1000,
-          };
-        });
-
-      console.log('[Reddit] Fetched', parsedComments.length, 'comments');
-      setComments(prev => ({ ...prev, [post.id]: parsedComments }));
-      setExpandedPost(post.id);
-      console.log('[Reddit] Expanded post set to:', post.id);
-    } catch (err) {
-      console.error('Error fetching comments:', err);
-    } finally {
-      setLoadingComments(null);
+      setCurrentPermalink(post.permalink);
     }
   }
 
@@ -192,7 +155,8 @@ export function RedditFeed() {
           : `${Math.floor(hoursAgo / 24)}d ago`;
 
         const isExpanded = expandedPost === post.id;
-        const postComments = comments[post.id] || [];
+        const postComments = (isExpanded && commentsQuery.data) ? commentsQuery.data : [];
+        const isLoadingComments = isExpanded && commentsQuery.isLoading;
 
         return (
           <div
@@ -244,17 +208,12 @@ export function RedditFeed() {
 
                   <div className="flex items-center gap-4 text-xs text-gray-400">
                     <button
-                      onClick={(e) => {
-                        console.log('[Reddit] Comment button clicked for post:', post.id);
-                        e.preventDefault();
-                        e.stopPropagation();
-                        fetchComments(post);
-                      }}
-                      className="comments-button flex items-center gap-1 hover:text-white transition-colors"
+                      onClick={() => toggleComments(post)}
+                      className="flex items-center gap-1 hover:text-white transition-colors"
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span>{post.comments} comments</span>
-                      {loadingComments === post.id ? (
+                      {isLoadingComments ? (
                         <div className="w-3 h-3 border-2 border-gray-400 border-t-white rounded-full animate-spin ml-1" />
                       ) : isExpanded ? (
                         <ChevronUp className="w-3 h-3 ml-1" />
@@ -278,11 +237,15 @@ export function RedditFeed() {
             {/* Comments Section */}
             {isExpanded && (
               <div className="border-t border-gray-700 p-4 bg-gray-900/30">
-                {postComments.length === 0 ? (
+                {isLoadingComments ? (
+                  <p className="text-gray-400 text-sm text-center py-2">Loading comments...</p>
+                ) : commentsQuery.error ? (
+                  <p className="text-red-400 text-sm text-center py-2">Failed to load comments</p>
+                ) : postComments.length === 0 ? (
                   <p className="text-gray-400 text-sm text-center py-2">No comments yet</p>
                 ) : (
                   <div className="space-y-3">
-                    {postComments.map((comment) => {
+                    {postComments.map((comment: RedditComment) => {
                       const commentTime = Math.floor((Date.now() - comment.created) / 3600000);
                       const commentTimeAgo = commentTime < 1 
                         ? `${Math.floor((Date.now() - comment.created) / 60000)}m ago`
