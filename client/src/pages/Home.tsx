@@ -1441,17 +1441,27 @@ export default function Home() {
                             e.dataTransfer.effectAllowed = 'copy';
                           }}
                         />
-                        {/* Copy image button overlay - always visible on hover */}
+                        {/* Image action buttons overlay */}
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCopyTweetImage(tweet.image);
                             }}
-                            className="h-8 w-8 rounded bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
-                            title="Copy image to clipboard"
+                            className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                            title="Copy image"
                           >
-                            <ImageIcon className="h-4 w-4" />
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(tweet.image);
+                            }}
+                            className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                            title="Download image"
+                          >
+                            <Download className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>
@@ -1863,7 +1873,7 @@ export default function Home() {
                   {/* Tweet Image (if available) */}
                   {tweet.image && (
                     <div 
-                      className="w-full overflow-hidden cursor-pointer"
+                      className="w-full overflow-hidden cursor-pointer relative group"
                       onClick={(e) => {
                         e.stopPropagation();
                         setExpandedTwitterImage(tweet.image);
@@ -1881,6 +1891,47 @@ export default function Home() {
                           e.dataTransfer.effectAllowed = 'copy';
                         }}
                       />
+                      {/* Image action buttons overlay */}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyTweetImage(tweet.image);
+                          }}
+                          className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                          title="Copy image"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const handleDownload = async () => {
+                              try {
+                                const response = await fetch(tweet.image);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `tweet-${tweet.id}.jpg`;
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                                toast.success('Image downloaded!');
+                              } catch (error) {
+                                console.error('Download failed:', error);
+                                toast.error('Failed to download image');
+                              }
+                            };
+                            handleDownload();
+                          }}
+                          className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                          title="Download image"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   )}
                   

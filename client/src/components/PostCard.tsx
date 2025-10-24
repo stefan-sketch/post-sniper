@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, ImageIcon, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, ImageIcon, X, Download, Copy } from "lucide-react";
 import React from "react";
 import { createPortal } from "react-dom";
 // Removed date-fns import - using custom time formatting
@@ -95,6 +95,28 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
     if (post.message) {
       navigator.clipboard.writeText(post.message);
       toast.success("Caption copied to clipboard!");
+    }
+  };
+
+  const handleDownloadImage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (post.image) {
+      try {
+        const response = await fetch(post.image);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `post-${post.id}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("Image downloaded!");
+      } catch (error) {
+        console.error('Download failed:', error);
+        toast.error("Failed to download image");
+      }
     }
   };
 
@@ -314,18 +336,30 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
               e.dataTransfer.effectAllowed = 'copy';
             }}
           />
-          {/* Copy image button overlay */}
+          {/* Image action buttons overlay */}
           {!hideActions && (
-            <button
-              className="absolute top-2 right-2 z-10 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopyImage(e);
-              }}
-              title="Copy image to clipboard"
-            >
-              <ImageIcon className="h-3 w-3" />
-            </button>
+            <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyImage(e);
+                }}
+                title="Copy image"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </button>
+              <button
+                className="flex items-center justify-center w-7 h-7 rounded-md bg-gray-900/80 backdrop-blur-sm hover:bg-gray-800 text-gray-300 hover:text-white transition-all border border-gray-700/50 hover:border-gray-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownloadImage(e);
+                }}
+                title="Download image"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </button>
+            </div>
           )}
         </div>
       )}
