@@ -11,6 +11,7 @@ import { publerRouter } from "./routers/publer";
 import { twitterRouter } from "./routers/twitter";
 import { managedPagesRouter } from "./routers/managedPages";
 import { livescoresRouter } from "./routers/livescores";
+import { redditRouter } from "./routers/reddit";
 
 // Fixed user ID for public access
 const PUBLIC_USER_ID = "public";
@@ -23,6 +24,7 @@ export const appRouter = router({
   twitter: twitterRouter,
   managedPages: managedPagesRouter,
   livescores: livescoresRouter,
+  reddit: redditRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

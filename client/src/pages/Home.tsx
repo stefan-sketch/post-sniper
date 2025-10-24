@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
+import { RedditFeed } from "@/components/RedditFeed";
 
 // Lazy load heavy components for better initial load performance
 const SettingsDialog = lazy(() => import("@/components/SettingsDialog"));
@@ -1081,108 +1082,7 @@ export default function Home() {
           
           <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
             {feedType === 'reddit' ? (
-              <>
-                {/* Mock Reddit Posts */}
-                <div className="sticky top-0 z-10 relative h-0.5 bg-[#FF4500]/30 mb-3 overflow-hidden flex-shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF4500] to-transparent animate-pulse"></div>
-                </div>
-                {[
-                  {
-                    id: '1',
-                    title: 'Maccabi Tel Aviv 0-2 Midtjylland - Philip Billing 71\'',
-                    author: 'u/soccer_fan',
-                    subreddit: 'soccer',
-                    upvotes: 6835,
-                    comments: 251,
-                    created: Date.now() - 3600000,
-                    url: 'https://v.redd.it/t3oe1zd09xwf1',
-                    thumbnail: 'https://via.placeholder.com/140x140?text=Video'
-                  },
-                  {
-                    id: '2',
-                    title: 'Sheffield Wednesday file for administration',
-                    author: 'u/football_news',
-                    subreddit: 'soccer',
-                    upvotes: 363,
-                    comments: 126,
-                    created: Date.now() - 7200000,
-                    url: 'https://news.sky.com/story/sheffield-wednesday',
-                    thumbnail: 'https://via.placeholder.com/140x140?text=News'
-                  },
-                  {
-                    id: '3',
-                    title: 'Morgan Gibbs-White: "I feel like I can finally breathe. Happy to get our first win in 9..."',
-                    author: 'u/premier_league',
-                    subreddit: 'soccer',
-                    upvotes: 3701,
-                    comments: 344,
-                    created: Date.now() - 10800000,
-                    url: 'https://v.redd.it/2wkq34a5kxwf1',
-                    thumbnail: 'https://via.placeholder.com/140x140?text=Video'
-                  },
-                  {
-                    id: '4',
-                    title: 'Free Talk Friday',
-                    author: 'u/AutoModerator',
-                    subreddit: 'soccer',
-                    upvotes: 9,
-                    comments: 448,
-                    created: Date.now() - 14400000,
-                    url: 'https://www.reddit.com/r/soccer/comments/1oesr4z/free_talk_friday/',
-                    thumbnail: 'https://via.placeholder.com/140x140?text=Discussion'
-                  },
-                  {
-                    id: '5',
-                    title: 'Daily Discussion',
-                    author: 'u/AutoModerator',
-                    subreddit: 'soccer',
-                    upvotes: 26,
-                    comments: 719,
-                    created: Date.now() - 18000000,
-                    url: 'https://www.reddit.com/r/soccer/comments/1oe4246/daily_discussion/',
-                    thumbnail: 'https://via.placeholder.com/140x140?text=Discussion'
-                  }
-                ].map((redditPost) => (
-                  <div key={redditPost.id} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 hover:border-[#FF4500] transition-all">
-                    <div className="flex gap-3">
-                      {/* Upvote section */}
-                      <div className="flex flex-col items-center gap-1 text-xs">
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
-                        </svg>
-                        <span className="font-bold text-[#FF4500]">{redditPost.upvotes.toLocaleString()}</span>
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 20l-8-8h6V4h4v8h6z"/>
-                        </svg>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                          <span className="font-semibold text-[#FF4500]">r/{redditPost.subreddit}</span>
-                          <span>•</span>
-                          <span>{redditPost.author}</span>
-                          <span>•</span>
-                          <span>{Math.floor((Date.now() - redditPost.created) / 3600000)}h ago</span>
-                        </div>
-                        <h3 className="text-white font-semibold mb-2 line-clamp-2">{redditPost.title}</h3>
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                          <div className="flex items-center gap-1">
-                            <MessageCircle className="w-4 h-4" />
-                            <span>{redditPost.comments} comments</span>
-                          </div>
-                          <button className="flex items-center gap-1 hover:text-white transition-colors">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                            <span>Share</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </>
+              <RedditFeed />
             ) : feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
