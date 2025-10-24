@@ -4,11 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen, Sparkles } from "lucide-react";
+import { Upload, RefreshCw, Crop as CropIcon, Image as ImageIcon, Palette, Type, Pen } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
-import { CanvasEditor } from "./CanvasEditor";
+
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
@@ -70,8 +70,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [borderRadius, setBorderRadius] = useState(0); // Default border radius for rectangles
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
-  const [canvasMode, setCanvasMode] = useState(false);
-  const [triggerOverlayUpload, setTriggerOverlayUpload] = useState<File | null>(null);
+
+
 
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -701,7 +701,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`${canvasMode ? 'max-w-3xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6`} showCloseButton={false}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
         <div className="space-y-4">
           {/* Header with Page Pills and Post Button */}
           <div className="flex items-center justify-between gap-4 relative">
@@ -747,36 +747,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           {/* Overlay Controls - Always visible, greyed out when no image */}
           <div className="space-y-2">
             <div className="flex gap-2">
-              {/* Crop Button (hidden in canvas mode) / Tweet Overlay Button (in canvas mode) */}
-              {canvasMode ? (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setTriggerOverlayUpload(file);
-                      }
-                    }}
-                    className="hidden"
-                    id="canvas-overlay-crop-position"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('canvas-overlay-crop-position')?.click()}
-                    className="flex-1 transition-all duration-200 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500 hover:bg-cyan-500/10"
-                    title="Add Tweet Overlay"
-                  >
-                    {/* X.com icon */}
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  </Button>
-                </>
-              ) : (
+              {/* Crop Button */}
                 <Button
                   type="button"
                   variant={cropMode ? "default" : "outline"}
@@ -817,7 +788,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     <CropIcon className="h-4 w-4" />
                   )}
                 </Button>
-              )}
 
               {/* Watermark Button */}
               <Button
@@ -1126,7 +1096,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
           {/* Image Upload/Preview */}
           <div className="space-y-2">
-            {!image && !canvasMode ? (
+            {!image ? (
               <div className="relative">
                 <div
                   onDrop={handleDrop}
@@ -1144,19 +1114,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     className="hidden"
                   />
                 </div>
-                {/* Canvas button in top-left */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCanvasMode(true);
-                  }}
-                  className="absolute top-2 left-2 text-xs px-2 py-1 h-auto bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
-                >
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Canvas
-                </Button>
+
                 {/* Small Paste button in top-right - Hidden on iOS */}
                 {!/iPhone|iPad|iPod/.test(navigator.userAgent) && (
                   <Button
@@ -1172,17 +1130,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   </Button>
                 )}
               </div>
-            ) : canvasMode && !image ? (
-              <CanvasEditor
-                selectedPage={selectedPage}
-                onCanvasUpdate={(imageDataUrl) => {
-                  setImage(imageDataUrl);
-                  setCropMode(false);
-                  setCroppedImage(null);
-                }}
-                triggerOverlayUpload={triggerOverlayUpload}
-                onOverlayUploaded={() => setTriggerOverlayUpload(null)}
-              />
+
             ) : cropMode ? (
               <div className="space-y-2">
                 <ReactCrop
