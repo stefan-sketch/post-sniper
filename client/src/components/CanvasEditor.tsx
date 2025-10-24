@@ -18,16 +18,29 @@ interface CanvasEditorProps {
 
 export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUpload, onOverlayUploaded }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const backgroundInputRef = useRef<HTMLInputElement>(null);
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [overlayImage, setOverlayImage] = useState<HTMLImageElement | null>(null);
   const [overlayScale, setOverlayScale] = useState(50);
   const [overlayPosition, setOverlayPosition] = useState({ x: 540, y: 675 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [hasPromptedForBackground, setHasPromptedForBackground] = useState(false);
 
   const CANVAS_WIDTH = 1080;
   const CANVAS_HEIGHT = 1350;
   const BORDER_WIDTH = 8;
+
+  // Auto-prompt for background image when component mounts
+  useEffect(() => {
+    if (!hasPromptedForBackground && !backgroundImage) {
+      setHasPromptedForBackground(true);
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        backgroundInputRef.current?.click();
+      }, 100);
+    }
+  }, []);
 
   // Handle overlay upload triggered from tools button
   useEffect(() => {
@@ -67,9 +80,11 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Clear canvas
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+    // Draw background image first
     if (backgroundImage) {
       const imgAspect = backgroundImage.width / backgroundImage.height;
       const canvasAspect = CANVAS_WIDTH / CANVAS_HEIGHT;
@@ -91,6 +106,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       ctx.drawImage(backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
     }
 
+    // Draw overlay image on top
     if (overlayImage) {
       const scale = overlayScale / 100;
       const scaledWidth = overlayImage.width * scale;
@@ -98,6 +114,10 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       const x = overlayPosition.x - scaledWidth / 2;
       const y = overlayPosition.y - scaledHeight / 2;
 
+      // Draw the overlay image first
+      ctx.drawImage(overlayImage, x, y, scaledWidth, scaledHeight);
+
+      // Draw colored border on top of overlay if page is selected
       if (selectedPage) {
         const borderColor = PAGE_COLORS[selectedPage];
         if (borderColor) {
@@ -107,8 +127,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
         }
       }
 
-      ctx.drawImage(overlayImage, x, y, scaledWidth, scaledHeight);
-
+      // Draw selection border (dashed cyan) on top
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 5]);
@@ -184,15 +203,18 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
 
   return (
     <div className="flex gap-3 items-start">
-      {/* Background button on the LEFT (always visible) */}
+      {/* Hidden background input - auto-triggered on mount */}
+      <input
+        ref={backgroundInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleBackgroundUpload}
+        className="hidden"
+        id="canvas-bg"
+      />
+
+      {/* Background button on the LEFT (for changing background) */}
       <div className="flex flex-col gap-2">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleBackgroundUpload}
-          className="hidden"
-          id="canvas-bg"
-        />
         <label
           htmlFor="canvas-bg"
           className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
@@ -200,7 +222,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
               ? 'bg-green-500 hover:bg-green-600 text-white' 
               : 'bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700'
           }`}
-          title="Background Image"
+          title={backgroundImage ? "Change Background" : "Upload Background"}
         >
           <ImageIcon className="h-5 w-5" />
         </label>
