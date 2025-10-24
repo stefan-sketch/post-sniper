@@ -633,13 +633,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
         y: Math.max(0, Math.min(100, yPercent)) 
       });
     } else if (isResizingOverlayImage) {
-      // Calculate distance from image center to mouse position
-      const centerX = overlayImagePosition.x;
-      const centerY = overlayImagePosition.y;
-      const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
-      const delta = currentDist - startDist;
-      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 3));
+      // Simple resize based on horizontal movement
+      const deltaX = xPercent - resizeStartState.x;
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + deltaX * 2));
       setOverlayImageSize(newSize);
     }
   };
@@ -688,13 +684,9 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       });
     } else if (isResizingOverlayImage) {
       e.preventDefault();
-      // Calculate distance from image center to touch position
-      const centerX = overlayImagePosition.x;
-      const centerY = overlayImagePosition.y;
-      const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
-      const delta = currentDist - startDist;
-      const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 3));
+      // Simple resize based on horizontal movement
+      const deltaX = xPercent - resizeStartState.x;
+      const newSize = Math.max(10, Math.min(200, resizeStartState.width + deltaX * 2));
       setOverlayImageSize(newSize);
     }
   };
@@ -1519,8 +1511,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             const x = ((e.clientX - rect.left) / rect.width) * 100;
                             const y = ((e.clientY - rect.top) / rect.height) * 100;
                             setResizeStartState({ 
-                              x: overlayImagePosition.x, 
-                              y: overlayImagePosition.y, 
+                              x: x, 
+                              y: y, 
                               fontSize: 0, 
                               width: overlayImageSize 
                             });
@@ -1534,8 +1526,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             const x = ((touch.clientX - rect.left) / rect.width) * 100;
                             const y = ((touch.clientY - rect.top) / rect.height) * 100;
                             setResizeStartState({ 
-                              x: overlayImagePosition.x, 
-                              y: overlayImagePosition.y, 
+                              x: x, 
+                              y: y, 
                               fontSize: 0, 
                               width: overlayImageSize 
                             });
