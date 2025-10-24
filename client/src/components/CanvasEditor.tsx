@@ -3,19 +3,18 @@ import { Upload } from "lucide-react";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
-const PAGES: { id: PageId; name: string; shortName: string; profilePicture: string; borderColor: string }[] = [
-  { id: "footy-feed", name: "The Footy Feed", shortName: "Footy Feed", profilePicture: "/page-icons/footy-feed.jpg", borderColor: "#1877F2" }, // Facebook blue
-  { id: "football-funnys", name: "Football Funnys", shortName: "Funnys", profilePicture: "/page-icons/football-funnys.jpg", borderColor: "#FFD700" }, // Gold
-  { id: "football-away-days", name: "Football Away Days", shortName: "Away Days", profilePicture: "/page-icons/football-away-days.jpg", borderColor: "#FF4500" }, // Orange-red
-];
+const PAGE_COLORS: Record<PageId, string> = {
+  "footy-feed": "#1877F2", // Facebook blue
+  "football-funnys": "#FFD700", // Gold
+  "football-away-days": "#FF4500", // Orange-red
+};
 
 interface CanvasEditorProps {
   selectedPage: PageId | null;
-  onPageSelect: (pageId: PageId) => void;
   onCanvasUpdate: (imageDataUrl: string) => void;
 }
 
-export function CanvasEditor({ selectedPage, onPageSelect, onCanvasUpdate }: CanvasEditorProps) {
+export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [overlayImage, setOverlayImage] = useState<HTMLImageElement | null>(null);
@@ -89,9 +88,9 @@ export function CanvasEditor({ selectedPage, onPageSelect, onCanvasUpdate }: Can
 
       // Draw colored border if page is selected
       if (selectedPage) {
-        const pageConfig = PAGES.find(p => p.id === selectedPage);
-        if (pageConfig) {
-          ctx.strokeStyle = pageConfig.borderColor;
+        const borderColor = PAGE_COLORS[selectedPage];
+        if (borderColor) {
+          ctx.strokeStyle = borderColor;
           ctx.lineWidth = BORDER_WIDTH;
           ctx.strokeRect(x, y, scaledWidth, scaledHeight);
         }
@@ -195,7 +194,7 @@ export function CanvasEditor({ selectedPage, onPageSelect, onCanvasUpdate }: Can
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-6">
       {/* Canvas on the left */}
       <div className="flex-shrink-0">
         <div className="bg-gray-800 rounded-lg p-4">
@@ -204,7 +203,7 @@ export function CanvasEditor({ selectedPage, onPageSelect, onCanvasUpdate }: Can
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             className="border-2 border-gray-700 rounded cursor-move"
-            style={{ width: '400px', height: 'auto' }}
+            style={{ width: '450px', height: 'auto' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -213,134 +212,109 @@ export function CanvasEditor({ selectedPage, onPageSelect, onCanvasUpdate }: Can
         </div>
       </div>
 
-      {/* Tools on the right */}
-      <div className="flex-1 space-y-4">
-        {/* Page Selection */}
+      {/* Tools on the right - vertical layout */}
+      <div className="flex flex-col gap-4 w-64">
+        {/* Background Image Upload */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">
-            Select Page to Post
+            Background Image
           </label>
-          <div className="flex gap-2">
-            {PAGES.map((page) => {
-              const isSelected = selectedPage === page.id;
-              
-              return (
-                <button
-                  key={page.id}
-                  onClick={() => onPageSelect(page.id)}
-                  className={`
-                    flex items-center justify-center p-1 rounded-full
-                    transition-all duration-200 hover:scale-[1.1]
-                    ${isSelected 
-                      ? 'ring-2 ring-offset-2 ring-offset-gray-900' 
-                      : 'opacity-60 hover:opacity-100'
-                    }
-                  `}
-                  style={{
-                    ringColor: isSelected ? page.borderColor : undefined
-                  }}
-                  title={page.shortName}
-                >
-                  <img 
-                    src={page.profilePicture} 
-                    alt={page.shortName}
-                    className="w-12 h-12 rounded-full object-cover"
-                    style={{
-                      border: isSelected ? `3px solid ${page.borderColor}` : 'none'
-                    }}
-                  />
-                </button>
-              );
-            })}
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBackgroundUpload}
+              className="hidden"
+              id="canvas-background-upload"
+            />
+            <label
+              htmlFor="canvas-background-upload"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
+            >
+              <Upload className="h-4 w-4" />
+              {backgroundImage ? "Change" : "Upload"}
+            </label>
           </div>
-          {selectedPage && (
-            <p className="text-xs text-gray-400">
-              Tweet overlay will have a{' '}
-              <span style={{ color: PAGES.find(p => p.id === selectedPage)?.borderColor }}>
-                colored border
-              </span>
-              {' '}for {PAGES.find(p => p.id === selectedPage)?.shortName}
+          {backgroundImage && (
+            <p className="text-xs text-green-400">
+              ✓ {backgroundImage.width}x{backgroundImage.height}
             </p>
           )}
         </div>
 
-        {/* Upload Controls */}
-        <div className="space-y-3">
-          {/* Background Image Upload */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Background Image
+        {/* Overlay Image Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Tweet Overlay
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleOverlayUpload}
+              className="hidden"
+              id="canvas-overlay-upload"
+            />
+            <label
+              htmlFor="canvas-overlay-upload"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
+            >
+              <Upload className="h-4 w-4" />
+              {overlayImage ? "Change" : "Upload"}
             </label>
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleBackgroundUpload}
-                className="hidden"
-                id="canvas-background-upload"
-              />
-              <label
-                htmlFor="canvas-background-upload"
-                className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
-              >
-                <Upload className="h-4 w-4" />
-                {backgroundImage ? "Change Background" : "Upload Background"}
-              </label>
-            </div>
-            {backgroundImage && (
-              <p className="text-xs text-green-400">
-                ✓ Background loaded ({backgroundImage.width}x{backgroundImage.height})
-              </p>
-            )}
           </div>
-
-          {/* Overlay Image Upload */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Tweet Overlay
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleOverlayUpload}
-                className="hidden"
-                id="canvas-overlay-upload"
-              />
-              <label
-                htmlFor="canvas-overlay-upload"
-                className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
-              >
-                <Upload className="h-4 w-4" />
-                {overlayImage ? "Change Overlay" : "Upload Overlay"}
-              </label>
-            </div>
-            {overlayImage && (
-              <p className="text-xs text-green-400">
-                ✓ Overlay loaded ({overlayImage.width}x{overlayImage.height})
-              </p>
-            )}
-          </div>
+          {overlayImage && (
+            <p className="text-xs text-green-400">
+              ✓ {overlayImage.width}x{overlayImage.height}
+            </p>
+          )}
         </div>
 
         {/* Overlay Scale Slider */}
         {overlayImage && (
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-300">
-              Overlay Size: {overlayScale}%
+              Overlay Size
             </label>
-            <input
-              type="range"
-              min="10"
-              max="200"
-              step="5"
-              value={overlayScale}
-              onChange={(e) => setOverlayScale(Number(e.target.value))}
-              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-            />
-            <p className="text-xs text-gray-400">
-              Drag the overlay on the canvas to reposition it
+            <div className="space-y-1">
+              <input
+                type="range"
+                min="10"
+                max="200"
+                step="5"
+                value={overlayScale}
+                onChange={(e) => setOverlayScale(Number(e.target.value))}
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              />
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>10%</span>
+                <span className="text-white font-medium">{overlayScale}%</span>
+                <span>200%</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Drag overlay on canvas to reposition
             </p>
+          </div>
+        )}
+
+        {/* Border color indicator */}
+        {overlayImage && selectedPage && (
+          <div className="space-y-2 pt-2 border-t border-gray-700">
+            <label className="block text-xs font-medium text-gray-400">
+              Border Color
+            </label>
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-6 h-6 rounded border-2 border-gray-600"
+                style={{ backgroundColor: PAGE_COLORS[selectedPage] }}
+              />
+              <span className="text-sm text-gray-300">
+                {selectedPage === 'footy-feed' ? 'Facebook Blue' : 
+                 selectedPage === 'football-funnys' ? 'Gold' : 
+                 'Orange-Red'}
+              </span>
+            </div>
           </div>
         )}
       </div>

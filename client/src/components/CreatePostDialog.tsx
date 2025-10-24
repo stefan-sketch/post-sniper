@@ -699,7 +699,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
+      <DialogContent className={`${canvasMode ? 'max-w-5xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6`} showCloseButton={false}>
         <div className="space-y-4">
           {/* Header with Page Pills and Post Button */}
           <div className="flex items-center justify-between gap-4 relative">
@@ -1153,7 +1153,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 </div>
                 <CanvasEditor
                   selectedPage={selectedPage}
-                  onPageSelect={(pageId) => setSelectedPage(pageId)}
                   onCanvasUpdate={(imageDataUrl) => {
                     setImage(imageDataUrl);
                     setCropMode(false);
