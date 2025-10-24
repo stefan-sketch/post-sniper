@@ -567,6 +567,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
     setFontSize(48);
     setCropMode(true);
     setCroppedImage(null);
+    setCanvasMode(false);
     // Close dialog
     onOpenChange(false);
   };
