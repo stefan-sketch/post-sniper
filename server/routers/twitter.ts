@@ -124,18 +124,17 @@ export const twitterRouter = router({
         // Sort by newest first
         tweets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       } else {
-        // Sort by total engagement (likes + retweets + replies + views)
+        // Sort by likes only (most popular)
         tweets.sort((a, b) => {
-          const engagementA = (a.likes || 0) + (a.retweets || 0) + (a.replies || 0) + (a.views || 0);
-          const engagementB = (b.likes || 0) + (b.retweets || 0) + (b.replies || 0) + (b.views || 0);
-          return engagementB - engagementA; // Descending order
+          const likesA = a.likes || 0;
+          const likesB = b.likes || 0;
+          return likesB - likesA; // Descending order by likes
         });
         
-        // Debug: Log top 3 tweets with engagement data
-        console.log('[Twitter] Top 3 tweets by engagement:');
+        // Debug: Log top 3 tweets by likes
+        console.log('[Twitter] Top 3 tweets by likes:');
         tweets.slice(0, 3).forEach((tweet, i) => {
-          const total = (tweet.likes || 0) + (tweet.retweets || 0) + (tweet.replies || 0) + (tweet.views || 0);
-          console.log(`  ${i + 1}. Likes: ${tweet.likes}, Retweets: ${tweet.retweets}, Replies: ${tweet.replies}, Views: ${tweet.views}, Total: ${total}`);
+          console.log(`  ${i + 1}. Likes: ${tweet.likes}, Retweets: ${tweet.retweets}, Replies: ${tweet.replies}, Views: ${tweet.views}`);
         });
       }
       
