@@ -181,9 +181,8 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
 
   return (
     <div className="flex gap-3 items-start">
-      {/* Circular icon buttons on the LEFT */}
+      {/* Background button on the LEFT (always visible) */}
       <div className="flex flex-col gap-2">
-        {/* Background upload button */}
         <input
           type="file"
           accept="image/*"
@@ -201,26 +200,6 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
           title="Background Image"
         >
           <ImageIcon className="h-5 w-5" />
-        </label>
-
-        {/* Tweet overlay upload button */}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleOverlayUpload}
-          className="hidden"
-          id="canvas-overlay"
-        />
-        <label
-          htmlFor="canvas-overlay"
-          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
-            overlayImage 
-              ? 'bg-cyan-500 hover:bg-cyan-600 text-white' 
-              : 'bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700'
-          }`}
-          title="Tweet Overlay"
-        >
-          <Upload className="h-5 w-5" />
         </label>
 
         {/* Size slider - vertical, only when overlay exists */}
@@ -246,8 +225,8 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
         )}
       </div>
 
-      {/* Canvas on the RIGHT */}
-      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2">
+      {/* Canvas on the RIGHT with floating tweet button */}
+      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2 relative">
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -259,6 +238,27 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
+        
+        {/* Floating tweet overlay button - appears INSIDE canvas once background is uploaded */}
+        {backgroundImage && !overlayImage && (
+          <>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleOverlayUpload}
+              className="hidden"
+              id="canvas-overlay"
+            />
+            <label
+              htmlFor="canvas-overlay"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full flex flex-col items-center justify-center cursor-pointer transition-all bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-110"
+              title="Add Tweet Overlay"
+            >
+              <Upload className="h-6 w-6 mb-1" />
+              <span className="text-xs font-medium">Tweet</span>
+            </label>
+          </>
+        )}
       </div>
     </div>
   );
