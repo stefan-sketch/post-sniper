@@ -330,33 +330,28 @@ export default function LiveFootballHub() {
           </div>
         )}
 
-        {/* Match Minute / Kickoff Time / Full Time / Half Time - Bottom Right Corner */}
+        {/* Match Minute / Kickoff Time / Full Time / Half Time - Top Right Corner */}
         {isLive && (
-          <div className="absolute bottom-2 right-2 text-[10px] text-red-400 font-bold z-10">
+          <div className="absolute top-2 right-2 text-[10px] text-red-400 font-bold z-10">
             {match.minute > 90 ? `90+${match.minute - 90}'` : `${match.minute}'`}
           </div>
         )}
         {isHalfTime && (
-          <div className="absolute bottom-2 right-2 z-10 animate-pulse">
+          <div className="absolute top-2 right-2 z-10 animate-pulse">
             <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 24 24">
               <rect x="6" y="4" width="4" height="16" rx="1" />
               <rect x="14" y="4" width="4" height="16" rx="1" />
             </svg>
           </div>
         )}
-        {isUpcoming && (() => {
-          const countdown = getTimeUntilKickoff(match.kickoffTime);
-          return (
-            <div className={`absolute bottom-2 right-2 text-[10px] font-bold z-10 ${
-              countdown?.urgent ? 'text-red-400 animate-pulse' : 'text-gray-400'
-            }`}>
-              {countdown ? countdown.text : formatKickoffTime(match.kickoffTime)}
-            </div>
-          );
-        })()}
+        {isUpcoming && (
+          <div className="absolute top-2 right-2 text-[10px] font-semibold text-gray-400 z-10">
+            {formatKickoffTime(match.kickoffTime)}
+          </div>
+        )}
         {isFinished && (
-          <div className="absolute bottom-2 right-2 text-[10px] text-gray-400 font-semibold z-10">
-            Full Time
+          <div className="absolute top-2 right-2 text-[10px] text-gray-400 font-semibold z-10">
+            FT
           </div>
         )}
 
