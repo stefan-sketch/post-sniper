@@ -331,6 +331,15 @@ export class BackgroundJobService {
       console.log("[BackgroundJob] Successfully fetched and cached all posts");
       console.log(`[BackgroundJob] Summary: ${totalNewPosts} new posts, ${totalUpdatedPosts} updated posts, ${allFetchedPosts.length - totalNewPosts - totalUpdatedPosts} unchanged posts`);
       
+      // Fetch Twitter posts
+      try {
+        console.log("[BackgroundJob] Fetching Twitter posts...");
+        await this.fetchTwitterPosts();
+        console.log("[BackgroundJob] Twitter posts fetched successfully");
+      } catch (error) {
+        console.error("[BackgroundJob] Error fetching Twitter posts:", error);
+      }
+      
       // Set isFetchingFromAPI to false when done
       // TEMPORARILY DISABLED until migration runs
       // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
@@ -380,6 +389,91 @@ export class BackgroundJobService {
    * Calculate a hash of the fetched data to detect if it changed
    * Uses the sum of all post metrics (reactions, comments, shares) as a change detector
    */
+  private async fetchTwitterPosts() {
+    const TWITTER_API_KEY = process.env.TWITTER_API_KEY;
+    const TWITTER_LIST_ID = "1750840026051596582";
+    
+    if (!TWITTER_API_KEY) {
+      console.log("[BackgroundJob] Twitter API key not configured");
+      return;
+    }
+
+    const url = new URL("https://api.twitterapi.io/twitter/list/tweets");
+    url.searchParams.append("listId", TWITTER_LIST_ID);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        "x-api-key": TWITTER_API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("[BackgroundJob] Twitter API error:", error);
+      throw new Error(`Twitter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Store tweets in database
+    const { getDb } = await import("./db");
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not available");
+    }
+    
+    const { twitterPosts } = await import("../drizzle/schema");
+    
+    if (data.tweets && data.tweets.length > 0) {
+      let newTweets = 0;
+      let updatedTweets = 0;
+      
+      for (const tweet of data.tweets as any[]) {
+        // Skip replies (tweets starting with @)
+        if (tweet.text && tweet.text.trim().startsWith('@')) {
+          continue;
+        }
+        
+        // Get image if available (optional)
+        const image = tweet.extendedEntities?.media?.[0]?.media_url_https || 
+                     tweet.entities?.media?.[0]?.media_url_https || null;
+
+        const result = await db
+          .insert(twitterPosts)
+          .values({
+            id: tweet.id,
+            text: tweet.text,
+            image,
+            authorName: tweet.author?.name || "Unknown",
+            authorUsername: tweet.author?.userName || "",
+            authorAvatar: tweet.author?.profilePicture || "",
+            likes: tweet.likeCount || 0,
+            retweets: tweet.retweetCount || 0,
+            replies: tweet.replyCount || 0,
+            views: tweet.viewCount || 0,
+            url: tweet.url || `https://twitter.com/i/web/status/${tweet.id}`,
+            createdAt: new Date(tweet.createdAt),
+            updatedAt: new Date(),
+          })
+          .onConflictDoUpdate({
+            target: twitterPosts.id,
+            set: {
+              likes: tweet.likeCount || 0,
+              retweets: tweet.retweetCount || 0,
+              replies: tweet.replyCount || 0,
+              views: tweet.viewCount || 0,
+              updatedAt: new Date(),
+            },
+          });
+        
+        // Check if it was an insert or update (simplified - just count all as updates for now)
+        updatedTweets++;
+      }
+      
+      console.log(`[BackgroundJob] Twitter: Processed ${data.tweets.length} tweets (${updatedTweets} stored/updated)`);
+    }
+  }
+
   private calculateDataHash(posts: any[]): string {
     // Sum all metrics to create a signature of the current data state
     // Handle both API format (kpi.page_posts_reactions.value) and cached format (reactions)
