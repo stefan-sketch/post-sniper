@@ -55,7 +55,6 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
   }, [selectedPage, tweetOutlineColor]);
   const [tweetPosition, setTweetPosition] = useState({ x: 0.5, y: 0.5 }); // Percentage position (0-1)
   const [tweetScale, setTweetScale] = useState(1.0); // Scale factor (0.1 to 2.0)
-  const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const CANVAS_WIDTH = 1080;
