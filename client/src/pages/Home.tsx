@@ -963,7 +963,7 @@ export default function Home() {
           className="flex flex-col h-full overflow-hidden"
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2" style={{ minWidth: '120px' }}>
               <TrendingUp className="h-5 w-5 animate-pulse text-cyan-400" />
             </div>
             
@@ -1018,7 +1018,7 @@ export default function Home() {
             </div>
             
             {/* Conditional Button: Time Filter (Popular) or Play/Pause (Twitter) or Sort (Reddit) */}
-            <div className="flex-shrink-0">
+            <div className="flex justify-end" style={{ minWidth: '120px' }}>
             {feedType === 'twitter' ? (
               <button
                 onClick={() => setTwitterPlaying(!twitterPlaying)}
