@@ -39,8 +39,9 @@ export function RedditFeed() {
         setError(null);
 
         // Fetch directly from Reddit's JSON API (client-side)
+        // Use old.reddit.com for better CORS support
         const response = await fetch(
-          'https://www.reddit.com/r/soccercirclejerk/hot.json?limit=25',
+          'https://old.reddit.com/r/soccercirclejerk/hot.json?limit=25',
           {
             headers: {
               'Accept': 'application/json',
@@ -108,8 +109,9 @@ export function RedditFeed() {
     try {
       console.log('[Reddit] Fetching comments from API');
       setLoadingComments(post.id);
+      // Use old.reddit.com which has better CORS support
       const response = await fetch(
-        `https://www.reddit.com${post.permalink}.json?limit=10`,
+        `https://old.reddit.com${post.permalink}.json?limit=10`,
         {
           headers: {
             'Accept': 'application/json',
