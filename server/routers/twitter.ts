@@ -113,17 +113,27 @@ export const twitterRouter = router({
         timeThreshold = today;
       }
       
-      // For LIVE, sort by newest first; for others, sort by engagement
-      const tweets = await db
+      // Fetch tweets from database
+      let tweets = await db
         .select()
         .from(twitterPosts)
-        .where(sql`${twitterPosts.createdAt} >= ${timeThreshold.toISOString()}`)
-        .orderBy(
-          input.timeFilter === 'live'
-            ? desc(twitterPosts.createdAt)
-            : desc(sql`${twitterPosts.likes} + ${twitterPosts.retweets} + ${twitterPosts.replies} + ${twitterPosts.views}`)
-        )
-        .limit(input.limit);
+        .where(sql`${twitterPosts.createdAt} >= ${timeThreshold.toISOString()}`);
+      
+      // Sort in JavaScript for more reliable sorting
+      if (input.timeFilter === 'live') {
+        // Sort by newest first
+        tweets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } else {
+        // Sort by total engagement (likes + retweets + replies + views)
+        tweets.sort((a, b) => {
+          const engagementA = (a.likes || 0) + (a.retweets || 0) + (a.replies || 0) + (a.views || 0);
+          const engagementB = (b.likes || 0) + (b.retweets || 0) + (b.replies || 0) + (b.views || 0);
+          return engagementB - engagementA; // Descending order
+        });
+      }
+      
+      // Limit results after sorting
+      tweets = tweets.slice(0, input.limit);
 
       // Transform to match expected format
       const formattedTweets = tweets.map((tweet) => ({
