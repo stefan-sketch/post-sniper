@@ -50,7 +50,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
         setError(null);
 
         // Fetch from multiple subreddits
-        const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague'];
+        const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague', 'soccermemes'];
         const allPosts: RedditPost[] = [];
 
         for (const subreddit of subreddits) {
@@ -71,8 +71,10 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
             const data = await response.json();
         
-            // Transform Reddit data
-            const redditPosts: RedditPost[] = data.data.children.map((child: any) => {
+            // Transform Reddit data and filter out videos
+            const redditPosts: RedditPost[] = data.data.children
+              .filter((child: any) => !child.data.is_video && child.data.post_hint !== 'hosted:video')
+              .map((child: any) => {
           const post = child.data;
           
           // Get the best quality image URL
