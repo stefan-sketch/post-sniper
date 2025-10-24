@@ -1020,6 +1020,21 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
             {overlayImage && image && !cropMode && (
               <div className="space-y-2">
                 <div className="flex gap-3 items-center justify-center px-4">
+                  <span className="text-sm text-gray-400 whitespace-nowrap">Scale:</span>
+                  <input
+                    type="range"
+                    min="10"
+                    max="200"
+                    step="5"
+                    value={overlayImageSize}
+                    onChange={(e) => setOverlayImageSize(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    style={{ maxWidth: '150px' }}
+                  />
+                  <span className="text-sm text-white font-medium w-12 text-center">{overlayImageSize}%</span>
+                </div>
+
+                <div className="flex gap-3 items-center justify-center px-4">
                   <span className="text-sm text-gray-400 whitespace-nowrap">Curve:</span>
                   <input
                     type="range"
@@ -1251,7 +1266,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             transform: 'translate(-50%, -50%)',
                             width: `${boxWidth}px`,
                             minHeight: `${minBoxHeight}px`,
-                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
                           }}
                           onClick={(e) => {
                             // If clicking the box itself (not the textarea), enable editing
@@ -1297,7 +1313,8 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             className="bg-transparent border-none outline-none resize-none text-center"
                             style={{
                               width: '100%',
-                              height: '100%',
+                              flex: '1 1 auto',
+                              minHeight: '0',
                               fontSize: `${previewFontSize}px`,
                               fontFamily: 'Impact, "Arial Black", sans-serif',
                               fontWeight: 'bold',
@@ -1466,40 +1483,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
                           }}
                         />
-                        {/* Resize Handle - Bottom Right Corner */}
-                        <div
-                          className="absolute bottom-0 right-0 w-6 h-6 bg-white border-2 border-cyan-500 rounded-full cursor-nwse-resize shadow-lg"
-                          style={{ transform: 'translate(50%, 50%)' }}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const rect = imgRef.current!.getBoundingClientRect();
-                            const x = ((e.clientX - rect.left) / rect.width) * 100;
-                            const y = ((e.clientY - rect.top) / rect.height) * 100;
-                            setResizeStartState({ 
-                              x: x, 
-                              y: y, 
-                              fontSize: 0, 
-                              width: overlayImageSize 
-                            });
-                            setIsResizingOverlayImage(true);
-                          }}
-                          onTouchStart={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const rect = imgRef.current!.getBoundingClientRect();
-                            const touch = e.touches[0];
-                            const x = ((touch.clientX - rect.left) / rect.width) * 100;
-                            const y = ((touch.clientY - rect.top) / rect.height) * 100;
-                            setResizeStartState({ 
-                              x: x, 
-                              y: y, 
-                              fontSize: 0, 
-                              width: overlayImageSize 
-                            });
-                            setIsResizingOverlayImage(true);
-                          }}
-                        />
+
                       </div>
                     );
                   })()}
