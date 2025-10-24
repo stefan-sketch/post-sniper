@@ -334,7 +334,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
             <Button
               size="sm"
               variant="ghost"
-              className="absolute top-2 right-11 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
+              className="absolute top-2 right-2 flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100 border border-gray-700/50 hover:border-gray-600/50"
               onClick={(e) => {
                 e.stopPropagation();
                 handleCopyImage(e);
