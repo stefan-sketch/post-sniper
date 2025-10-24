@@ -184,19 +184,19 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
     <>
     <div 
       ref={cardRef}
-      className="glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full relative"
+      className="group glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full relative"
       style={{
         contain: 'layout style paint',  // CSS containment for better performance
         contentVisibility: 'auto',  // Render only when visible
       }}
     >
-      {/* Link button in top-right */}
+      {/* Link button in top-right - hover only */}
       {post.link && (
         <a
           href={post.link}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+          className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
           title="Open on Facebook"
         >
           <ExternalLink className="w-4 h-4" />

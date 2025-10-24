@@ -1299,13 +1299,13 @@ export default function Home() {
                       animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                     }}
                   >
-                    <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative" data-tweet-id={tweet.id}>
-                    {/* Link button in top-right */}
+                    <div className="group glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative" data-tweet-id={tweet.id}>
+                    {/* Link button in top-right - hover only */}
                     <a
                       href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+                      className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
                       title="Open on X (Twitter)"
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -1332,44 +1332,6 @@ export default function Home() {
                         <p className="text-sm text-white/90">{cleanText}</p>
                       </div>
                     )}
-                    
-                    {/* Engagement Stats */}
-                    <div className="px-4 pb-3 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-5">
-                        <div className="flex items-center gap-2">
-                          <Heart className="h-4 w-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-gray-300 font-medium">{tweet.engagement.likes.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Repeat2 className="h-4 w-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-gray-300 font-medium">{tweet.engagement.retweets.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
-                          <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {tweet.text && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
-                              onClick={() => {
-                                const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
-                                navigator.clipboard.writeText(cleanText);
-                                toast.success('Caption copied to clipboard');
-                              }}
-                              title="Copy caption"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-
-                          </>
-                        )}
-                      </div>
-                    </div>
                     
                     {/* Tweet Image (if available) */}
                     {tweet.image && (
@@ -1414,6 +1376,44 @@ export default function Home() {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Engagement Stats - positioned after image */}
+                    <div className="px-4 py-3 flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-2">
+                          <Heart className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.likes.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Repeat2 className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.retweets.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-gray-400" strokeWidth={2} />
+                          <span className="text-gray-300 font-medium">{tweet.engagement.replies.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {tweet.text && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-300"
+                              onClick={() => {
+                                const cleanText = tweet.text.replace(/https:\/\/t\.co\/\S+/g, '').trim();
+                                navigator.clipboard.writeText(cleanText);
+                                toast.success('Caption copied to clipboard');
+                              }}
+                              title="Copy caption"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+
+                          </>
+                        )}
+                      </div>
+                    </div>
                     </div>
                   </div>
                   );
@@ -1716,13 +1716,13 @@ export default function Home() {
                     animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                   }}
                 >
-                  <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative">
-                  {/* Link button in top-right */}
+                  <div className="group glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative">
+                  {/* Link button in top-right - hover only */}
                   <a
                     href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+                    className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all opacity-0 group-hover:opacity-100"
                     title="Open on X (Twitter)"
                   >
                     <ExternalLink className="w-4 h-4" />

@@ -76,6 +76,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [isEditingTweet, setIsEditingTweet] = useState(false);
   const [canvasCompleteHandler, setCanvasCompleteHandler] = useState<(() => void) | null>(null);
 
+  // Memoize the onCompleteClick callback to prevent infinite loops
+  const handleCompleteClick = useCallback((handler: () => void) => {
+    setCanvasCompleteHandler(() => handler);
+  }, []);
+
   // Load state from localStorage on mount
   useEffect(() => {
     const savedState = localStorage.getItem('createPostState');
@@ -1167,7 +1172,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   setCanvasCompleteHandler(null);
                 }}
                 onTweetEditingChange={setIsEditingTweet}
-                onCompleteClick={(handler) => setCanvasCompleteHandler(() => handler)}
+                onCompleteClick={handleCompleteClick}
               />
             ) : !image ? (
               <div className="relative">
