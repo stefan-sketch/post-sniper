@@ -2,7 +2,7 @@ import { publicProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { getDb } from "../db";
 import { twitterPosts } from "../../drizzle/schema";
-import { desc } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 
 const TWITTER_API_KEY = process.env.TWITTER_API_KEY;
 const TWITTER_LIST_ID = "1750840026051596582";
@@ -87,6 +87,7 @@ export const twitterRouter = router({
     .input(
       z.object({
         limit: z.number().optional().default(50),
+        timeFilter: z.enum(['2hr', '6hr', 'today']).optional().default('2hr'),
       })
     )
     .query(async ({ input }) => {
@@ -95,9 +96,22 @@ export const twitterRouter = router({
         return { tweets: [], hasNextPage: false, nextCursor: null };
       }
       
+      // Calculate time threshold based on filter
+      const now = new Date();
+      let timeThreshold: Date;
+      
+      if (input.timeFilter === '2hr') {
+        timeThreshold = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+      } else if (input.timeFilter === '6hr') {
+        timeThreshold = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+      } else { // 'today'
+        timeThreshold = new Date(now.setHours(0, 0, 0, 0));
+      }
+      
       const tweets = await db
         .select()
         .from(twitterPosts)
+        .where(sql`${twitterPosts.createdAt} >= ${timeThreshold.toISOString()}`)
         .orderBy(desc(twitterPosts.createdAt))
         .limit(input.limit);
 

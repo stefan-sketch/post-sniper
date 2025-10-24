@@ -45,6 +45,7 @@ export default function Home() {
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
+  const [twitterTimeFilter, setTwitterTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
@@ -93,7 +94,10 @@ export default function Home() {
 
   // Twitter: Fetch from database (always enabled)
   const twitterQuery = trpc.twitter.getListTweets.useQuery(
-    { limit: 50 }, 
+    { 
+      limit: 50,
+      timeFilter: twitterTimeFilter
+    }, 
     { 
       refetchInterval: isIOS ? 90000 : 60000, // Refresh UI every 90s on iOS, 60s on desktop (battery optimization)
       staleTime: 30000, // Consider data fresh for 30 seconds
@@ -1096,6 +1100,39 @@ export default function Home() {
                   </div>
                 )}
               </div>
+            ) : feedType === 'twitter' ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-sm flex items-center gap-1"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTimeFilter && (
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
+                    {(['2hr', '6hr', 'today'] as const).map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          setTwitterTimeFilter(time);
+                          setShowTimeFilter(false);
+                        }}
+                        className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          twitterTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                        }`}
+                      >
+                        {time === 'today' ? 'Today' : time}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : null}
               </div>
             </div>
@@ -1553,6 +1590,33 @@ export default function Home() {
                 <h2 className="text-lg font-semibold text-blue-400">
                   X Football Feed
                 </h2>
+                {/* Time filter dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowTimeFilter(!showTimeFilter)}
+                    className="px-3 py-1 rounded-full text-xs font-medium transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/50 flex items-center gap-1"
+                  >
+                    {twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
+                  </button>
+                  {showTimeFilter && (
+                    <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                      {(['2hr', '6hr', 'today'] as const).map((time) => (
+                        <button
+                          key={time}
+                          onClick={() => {
+                            setTwitterTimeFilter(time);
+                            setShowTimeFilter(false);
+                          }}
+                          className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            twitterTimeFilter === time ? 'text-secondary' : 'text-white/60'
+                          }`}
+                        >
+                          {time === 'today' ? 'Today' : time}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               {/* Blue pulsing underline */}
               <div className="w-full h-0.5 bg-blue-500 animate-pulse"></div>
