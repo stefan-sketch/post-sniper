@@ -602,12 +602,17 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     return pageConfig?.watermark;
   };
 
-  // Handle backdrop/ESC - minimize instead of close
+  // Check if there's any meaningful content
+  const hasContent = () => {
+    return !!image || !!caption.trim() || !!selectedPage || rectangles.length > 0 || !!overlayText.trim();
+  };
+
+  // Handle backdrop/ESC - minimize if content exists, otherwise close
   const handleBackdropClick = () => {
-    if (onMinimize) {
+    if (onMinimize && hasContent()) {
       onMinimize();
     } else {
-      onOpenChange(false);
+      handleClose();
     }
   };
 
@@ -784,7 +789,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   >
                     <X className="w-4 h-4" />
                   </button>
-                  {onMinimize && (
+                  {onMinimize && hasContent() && (
                     <button
                       onClick={onMinimize}
                       className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
