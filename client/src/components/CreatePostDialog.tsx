@@ -556,6 +556,16 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     return pageConfig?.watermark;
   };
 
+  // Handle backdrop/ESC - minimize instead of close
+  const handleBackdropClick = () => {
+    if (onMinimize) {
+      onMinimize();
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  // Handle X button - close and reset
   const handleClose = () => {
     // Reset all form state
     setImage(null);
@@ -703,7 +713,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleBackdropClick}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
         <div className="space-y-4">
           {/* Header with Page Pills and Post Button */}
@@ -713,9 +723,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 {/* Close and Minimize buttons - Top Left */}
                 <div className="flex gap-1">
                   <button
-                    onClick={() => onOpenChange(false)}
+                    onClick={handleClose}
                     className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
-                    title="Close"
+                    title="Close and discard"
                   >
                     <X className="w-4 h-4" />
                   </button>
