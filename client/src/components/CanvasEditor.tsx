@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Image as ImageIcon } from "lucide-react";
+import { Upload } from "lucide-react";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
@@ -25,22 +25,11 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
   const [overlayPosition, setOverlayPosition] = useState({ x: 540, y: 675 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [hasPromptedForBackground, setHasPromptedForBackground] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const CANVAS_WIDTH = 1080;
   const CANVAS_HEIGHT = 1350;
   const BORDER_WIDTH = 8;
-
-  // Auto-prompt for background image when component mounts
-  useEffect(() => {
-    if (!hasPromptedForBackground && !backgroundImage) {
-      setHasPromptedForBackground(true);
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        backgroundInputRef.current?.click();
-      }, 100);
-    }
-  }, []);
 
   // Handle overlay upload triggered from tools button
   useEffect(() => {
@@ -80,11 +69,11 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas
+    // Clear canvas with white background
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // Draw background image first
+    // Draw background image first (bottom layer)
     if (backgroundImage) {
       const imgAspect = backgroundImage.width / backgroundImage.height;
       const canvasAspect = CANVAS_WIDTH / CANVAS_HEIGHT;
@@ -106,7 +95,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       ctx.drawImage(backgroundImage, offsetX, offsetY, drawWidth, drawHeight);
     }
 
-    // Draw overlay image on top
+    // Draw overlay image on top (top layer)
     if (overlayImage) {
       const scale = overlayScale / 100;
       const scaledWidth = overlayImage.width * scale;
@@ -114,10 +103,10 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       const x = overlayPosition.x - scaledWidth / 2;
       const y = overlayPosition.y - scaledHeight / 2;
 
-      // Draw the overlay image first
+      // Draw the overlay image
       ctx.drawImage(overlayImage, x, y, scaledWidth, scaledHeight);
 
-      // Draw colored border on top of overlay if page is selected
+      // Draw colored border on top if page is selected
       if (selectedPage) {
         const borderColor = PAGE_COLORS[selectedPage];
         if (borderColor) {
@@ -127,7 +116,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
         }
       }
 
-      // Draw selection border (dashed cyan) on top
+      // Draw selection border (dashed cyan) on very top
       ctx.strokeStyle = '#06b6d4';
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 5]);
@@ -136,10 +125,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
     }
   };
 
-  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const loadImageFromFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -147,6 +133,32 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      loadImageFromFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      loadImageFromFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -203,66 +215,73 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
 
   return (
     <div className="flex gap-3 items-start">
-      {/* Hidden background input - auto-triggered on mount */}
-      <input
-        ref={backgroundInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleBackgroundUpload}
-        className="hidden"
-        id="canvas-bg"
-      />
+      {/* Size slider on the LEFT (only when overlay exists) */}
+      {overlayImage && (
+        <div className="flex flex-col items-center gap-1">
+          <input
+            type="range"
+            min="10"
+            max="200"
+            step="5"
+            value={overlayScale}
+            onChange={(e) => setOverlayScale(Number(e.target.value))}
+            className="h-32 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+            style={{
+              writingMode: 'bt-lr',
+              WebkitAppearance: 'slider-vertical',
+              width: '8px'
+            }}
+            title={`Size: ${overlayScale}%`}
+          />
+          <span className="text-xs text-gray-400">{overlayScale}%</span>
+        </div>
+      )}
 
-      {/* Background button on the LEFT (for changing background) */}
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="canvas-bg"
-          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
-            backgroundImage 
-              ? 'bg-green-500 hover:bg-green-600 text-white' 
-              : 'bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700'
-          }`}
-          title={backgroundImage ? "Change Background" : "Upload Background"}
-        >
-          <ImageIcon className="h-5 w-5" />
-        </label>
-
-        {/* Size slider - vertical, only when overlay exists */}
-        {overlayImage && (
-          <div className="flex flex-col items-center gap-1 mt-2">
-            <input
-              type="range"
-              min="10"
-              max="200"
-              step="5"
-              value={overlayScale}
-              onChange={(e) => setOverlayScale(Number(e.target.value))}
-              className="h-32 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-              style={{
-                writingMode: 'bt-lr',
-                WebkitAppearance: 'slider-vertical',
-                width: '8px'
-              }}
-              title={`Size: ${overlayScale}%`}
-            />
-            <span className="text-xs text-gray-400">{overlayScale}%</span>
-          </div>
-        )}
-      </div>
-
-      {/* Canvas on the RIGHT */}
-      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2">
+      {/* Canvas with drag-drop and upload button overlay */}
+      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2 relative">
+        <input
+          ref={backgroundInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleBackgroundUpload}
+          className="hidden"
+          id="canvas-bg-drop"
+        />
+        
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
-          className="border border-gray-700 rounded cursor-move"
+          className={`border rounded transition-all ${
+            isDragOver 
+              ? 'border-cyan-500 border-4' 
+              : 'border-gray-700'
+          } ${overlayImage ? 'cursor-move' : 'cursor-default'}`}
           style={{ width: '380px', height: 'auto' }}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         />
+        
+        {/* Upload button overlay - only show when no background */}
+        {!backgroundImage && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <label
+              htmlFor="canvas-bg-drop"
+              className="flex flex-col items-center gap-3 cursor-pointer pointer-events-auto bg-gray-900/80 backdrop-blur-sm px-8 py-6 rounded-lg border-2 border-dashed border-gray-600 hover:border-cyan-500 hover:bg-gray-900/90 transition-all"
+            >
+              <Upload className="w-12 h-12 text-gray-400" />
+              <div className="text-center">
+                <p className="text-white font-semibold mb-1">Upload Background</p>
+                <p className="text-gray-400 text-sm">or drag and drop</p>
+              </div>
+            </label>
+          </div>
+        )}
       </div>
     </div>
   );
