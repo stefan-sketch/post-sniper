@@ -114,7 +114,7 @@ export const twitterRouter = router({
         .select()
         .from(twitterPosts)
         .where(sql`${twitterPosts.createdAt} >= ${timeThreshold.toISOString()}`)
-        .orderBy(desc(twitterPosts.createdAt))
+        .orderBy(desc(sql`${twitterPosts.likes} + ${twitterPosts.retweets} + ${twitterPosts.replies} + ${twitterPosts.views}`))
         .limit(input.limit);
 
       // Transform to match expected format
