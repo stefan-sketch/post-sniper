@@ -1008,14 +1008,14 @@ export default function Home() {
               {feedType === 'twitter' ? (
               <button
                 onClick={() => setTwitterPlaying(!twitterPlaying)}
-                className="px-3 py-1 transition-all flex items-center justify-center"
-                style={{ minWidth: '60px', height: '28px' }}
+                className="px-2 py-0.5 rounded-full transition-all flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white shadow-sm"
+                style={{ height: '20px', minWidth: '40px' }}
                 title={twitterPlaying ? 'Pause Twitter updates' : 'Resume Twitter updates'}
               >
                 {twitterPlaying ? (
-                  <Pause className="h-4 w-4 text-white" />
+                  <Pause className="h-2.5 w-2.5" />
                 ) : (
-                  <Play className="h-4 w-4 text-white" />
+                  <Play className="h-2.5 w-2.5" />
                 )}
               </button>
             ) : feedType === 'reddit' ? (
@@ -2104,14 +2104,14 @@ export default function Home() {
       </Suspense>
       
       {/* Twitter Image Modal */}
-      {expandedTwitterImage && (
+      {expandedTwitterImage && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
           onClick={() => setExpandedTwitterImage(null)}
         >
           <button
             onClick={() => setExpandedTwitterImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all z-[10000]"
             title="Close"
           >
             <X className="w-6 h-6" />
@@ -2122,7 +2122,8 @@ export default function Home() {
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

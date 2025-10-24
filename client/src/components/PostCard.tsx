@@ -1,5 +1,6 @@
 import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, ExternalLink, X } from "lucide-react";
 import React from "react";
+import { createPortal } from "react-dom";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -348,14 +349,14 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
     </div>
     
     {/* Image Modal */}
-    {expandedImage && (
+    {expandedImage && createPortal(
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
         onClick={() => setExpandedImage(null)}
       >
         <button
           onClick={() => setExpandedImage(null)}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all z-[10000]"
           title="Close"
         >
           <X className="w-6 h-6" />
@@ -366,7 +367,8 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
           className="max-w-full max-h-full object-contain"
           onClick={(e) => e.stopPropagation()}
         />
-      </div>
+      </div>,
+      document.body
     )}
     </>
   );
