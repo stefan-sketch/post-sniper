@@ -1152,11 +1152,12 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   </Button>
                 </div>
                 <CanvasEditor
-                  onApply={(imageDataUrl) => {
+                  selectedPage={selectedPage}
+                  onPageSelect={(pageId) => setSelectedPage(pageId)}
+                  onCanvasUpdate={(imageDataUrl) => {
                     setImage(imageDataUrl);
                     setCropMode(false);
                     setCroppedImage(null);
-                    setCanvasMode(false);
                   }}
                 />
               </div>
