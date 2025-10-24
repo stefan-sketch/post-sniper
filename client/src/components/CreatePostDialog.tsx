@@ -583,6 +583,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       setCropMode(false);
       setCroppedImage(null);
       setCanvasMode(false);
+      setIsEditingTweet(false);
+      setCanvasCompleteHandler(null);
       // Reset drawing state
       setDrawingEnabled(false);
       setRectangles([]);
@@ -647,6 +649,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     setCropMode(false);
     setCroppedImage(null);
     setCanvasMode(false);
+    setIsEditingTweet(false);
+    setCanvasCompleteHandler(null);
     // Reset drawing state
     setDrawingEnabled(false);
     setRectangles([]);
