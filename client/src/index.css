@@ -194,7 +194,7 @@
       backdrop-filter: blur(12px);  /* Desktop: Higher quality */
       -webkit-backdrop-filter: blur(12px);  /* Desktop: Higher quality */
     }
-  }}
+  }
   
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
