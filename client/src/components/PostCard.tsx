@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, X } from "lucide-react";
+import { ThumbsUp, MessageCircle, Share2, Copy, ImageIcon, X, ExternalLink } from "lucide-react";
 import React from "react";
 // Removed date-fns import - using custom time formatting
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ interface PostCardProps {
 function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [isVisible, setIsVisible] = React.useState(false);
+  const [expandedImage, setExpandedImage] = React.useState<string | null>(null);
   const cardRef = React.useRef<HTMLDivElement>(null);
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
@@ -179,14 +180,27 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
   };
 
   return (
+    <>
     <div 
       ref={cardRef}
-      className="glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full"
+      className="glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full relative"
       style={{
         contain: 'layout style paint',  // CSS containment for better performance
         contentVisibility: 'auto',  // Render only when visible
       }}
     >
+      {/* Link button in top-right */}
+      {post.link && (
+        <a
+          href={post.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+          title="Open on Facebook"
+        >
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      )}
       {/* Profile Header */}
       {!hidePageHeader && (
       <div className="p-4 flex items-center gap-3">
@@ -288,7 +302,10 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
       {post.image && isVisible && (
         <div 
           className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
-          onClick={handleOpenPost}
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpandedImage(post.image!);
+          }}
         >
           {/* Blur placeholder while loading */}
           {!imageLoaded && (
@@ -329,6 +346,29 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
         </div>
       )}
     </div>
+    
+    {/* Image Modal */}
+    {expandedImage && (
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+        onClick={() => setExpandedImage(null)}
+      >
+        <button
+          onClick={() => setExpandedImage(null)}
+          className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+          title="Close"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <img 
+          src={expandedImage} 
+          alt="Expanded view"
+          className="max-w-full max-h-full object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )}
+    </>
   );
 }
 

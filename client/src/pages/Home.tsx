@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
-import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon } from "lucide-react";
+import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, Plus, ImagePlus, Download, Heart, Repeat2, MessageCircle, Copy, Trash2, ImageIcon, ExternalLink, X } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { RedditFeed } from "@/components/RedditFeed";
@@ -66,6 +66,7 @@ export default function Home() {
   const [showAllLivePosts, setShowAllLivePosts] = useState(false); // Track if "SEE MORE" clicked for Live posts
   const [showAllPopularPosts, setShowAllPopularPosts] = useState(false); // Track if "SEE MORE" clicked for Popular posts
   const [showAllTwitterPosts, setShowAllTwitterPosts] = useState(false); // Track if "SEE MORE" clicked for Twitter posts
+  const [expandedTwitterImage, setExpandedTwitterImage] = useState<string | null>(null); // Track expanded Twitter image
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const popularScrollRef = useRef<HTMLDivElement>(null);
   
@@ -1216,7 +1217,17 @@ export default function Home() {
                       animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                     }}
                   >
-                    <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors" data-tweet-id={tweet.id}>
+                    <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative" data-tweet-id={tweet.id}>
+                    {/* Link button in top-right */}
+                    <a
+                      href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+                      title="Open on X (Twitter)"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
                     {/* Profile Header */}
                     <div className="p-4 flex items-center gap-3">
                       <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
@@ -1283,24 +1294,9 @@ export default function Home() {
                         style={{
                           width: feedColumns === 3 || isAnimatingOut ? 'calc(100% + 1rem)' : '100%'
                         }}
-                        onClick={() => {
-                          // Deep link to X app on mobile, fallback to web on desktop
-                          const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
-                          const xAppUrl = `twitter://status?id=${tweet.id}`;
-                          
-                          // Detect if mobile
-                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                          
-                          if (isMobile) {
-                            // Try to open X app, fallback to web after timeout
-                            window.location.href = xAppUrl;
-                            setTimeout(() => {
-                              window.open(tweetUrl, '_blank');
-                            }, 500);
-                          } else {
-                            // Desktop: open in new tab
-                            window.open(tweetUrl, '_blank');
-                          }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedTwitterImage(tweet.image);
                         }}
                       >
                         <img 
@@ -1624,7 +1620,17 @@ export default function Home() {
                     animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
                   }}
                 >
-                  <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors">
+                  <div className="glass-card rounded-xl overflow-hidden hover:bg-white/5 transition-colors relative">
+                  {/* Link button in top-right */}
+                  <a
+                    href={`https://twitter.com/${tweet.author.username}/status/${tweet.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+                    title="Open on X (Twitter)"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
                   {/* Profile Header */}
                   <div className="p-4 flex items-center gap-3">
                     <img src={tweet.author.avatar} alt={tweet.author.name} className="w-10 h-10 rounded-full flex-shrink-0" loading="lazy" decoding="async" />
@@ -1648,24 +1654,9 @@ export default function Home() {
                   {tweet.image && (
                     <div 
                       className="w-full overflow-hidden cursor-pointer"
-                      onClick={() => {
-                        // Deep link to X app on mobile, fallback to web on desktop
-                        const tweetUrl = `https://twitter.com/${tweet.author.username}/status/${tweet.id}`;
-                        const xAppUrl = `twitter://status?id=${tweet.id}`;
-                        
-                        // Detect if mobile
-                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                        
-                        if (isMobile) {
-                          // Try to open X app, fallback to web after timeout
-                          window.location.href = xAppUrl;
-                          setTimeout(() => {
-                            window.open(tweetUrl, '_blank');
-                          }, 500);
-                        } else {
-                          // Desktop: open in new tab
-                          window.open(tweetUrl, '_blank');
-                        }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedTwitterImage(tweet.image);
                       }}
                     >
                       <img 
@@ -2103,6 +2094,28 @@ export default function Home() {
           initialImage={droppedImage}
         />
       </Suspense>
+      
+      {/* Twitter Image Modal */}
+      {expandedTwitterImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setExpandedTwitterImage(null)}
+        >
+          <button
+            onClick={() => setExpandedTwitterImage(null)}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+            title="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img 
+            src={expandedTwitterImage} 
+            alt="Expanded view"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
