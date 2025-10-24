@@ -41,6 +41,11 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
           console.log('Overlay image loaded:', img.width, 'x', img.height);
           setOverlayImage(img);
           setOverlayPosition({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 });
+          // Force redraw after state update
+          setTimeout(() => {
+            console.log('Forcing canvas redraw after overlay load');
+            drawCanvas();
+          }, 100);
           onOverlayUploaded?.();
         };
         img.src = event.target?.result as string;
@@ -257,7 +262,9 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
             isDragOver 
               ? 'border-cyan-500 border-4' 
               : 'border-gray-700'
-          } ${overlayImage ? 'cursor-move' : 'cursor-default'}`}
+          } ${overlayImage ? 'cursor-move' : 'cursor-default'} ${
+            !backgroundImage ? 'opacity-0' : 'opacity-100'
+          }`}
           style={{ width: '380px', height: 'auto' }}
           onDrop={handleDrop}
           onDragOver={handleDragOver}

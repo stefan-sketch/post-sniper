@@ -970,7 +970,7 @@ export default function Home() {
                 {/* Facebook Button */}
                 <button
                   onClick={() => setFeedType('popular')}
-                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'popular' 
                       ? 'bg-[#1877F2] text-white scale-110 shadow-lg shadow-[#1877F2]/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
@@ -985,7 +985,7 @@ export default function Home() {
                 {/* X (Twitter) Button */}
                 <button
                   onClick={() => setFeedType('twitter')}
-                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'twitter' 
                       ? 'bg-gray-900 text-white scale-110 shadow-lg shadow-gray-900/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
@@ -1000,7 +1000,7 @@ export default function Home() {
                 {/* Reddit Button */}
                 <button
                   onClick={() => setFeedType('reddit')}
-                  className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'reddit' 
                       ? 'bg-[#FF4500] text-white scale-110 shadow-lg shadow-[#FF4500]/50' 
                       : 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
