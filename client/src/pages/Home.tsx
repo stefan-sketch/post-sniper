@@ -49,6 +49,8 @@ export default function Home() {
   const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
   const [pendingFeedType, setPendingFeedType] = useState<'popular' | 'twitter' | 'reddit' | null>(null);
   const [isFeedTypeAnimating, setIsFeedTypeAnimating] = useState(false);
+  const [isTimeFilterAnimating, setIsTimeFilterAnimating] = useState(false);
+  const [pendingTimeFilter, setPendingTimeFilter] = useState<string | null>(null);
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
@@ -70,6 +72,41 @@ export default function Home() {
       // After slide-in animation completes (300ms), reset animating state
       setTimeout(() => {
         setIsFeedTypeAnimating(false);
+      }, 300);
+    }, 300);
+  };
+
+  // Handle animated time filter switching
+  const handlePopularTimeFilterChange = (newFilter: '2hr' | '6hr' | 'today') => {
+    if (newFilter === popularTimeFilter || isTimeFilterAnimating) return;
+    
+    setPendingTimeFilter(newFilter);
+    setIsTimeFilterAnimating(true);
+    setShowTimeFilter(false);
+    
+    setTimeout(() => {
+      setPopularTimeFilter(newFilter);
+      setPendingTimeFilter(null);
+      
+      setTimeout(() => {
+        setIsTimeFilterAnimating(false);
+      }, 300);
+    }, 300);
+  };
+
+  const handleTwitterTimeFilterChange = (newFilter: 'live' | '2hr' | '6hr' | 'today') => {
+    if (newFilter === twitterTimeFilter || isTimeFilterAnimating) return;
+    
+    setPendingTimeFilter(newFilter);
+    setIsTimeFilterAnimating(true);
+    setShowTimeFilter(false);
+    
+    setTimeout(() => {
+      setTwitterTimeFilter(newFilter);
+      setPendingTimeFilter(null);
+      
+      setTimeout(() => {
+        setIsTimeFilterAnimating(false);
       }, 300);
     }, 300);
   };
@@ -884,6 +921,13 @@ export default function Home() {
       {/* Feed View */}
       <div 
         className={`flex-1 flex flex-col overflow-hidden ${currentView === 'feed' ? '' : 'hidden'}`}
+        style={{
+          animation: viewTransition === 'to-feed'
+            ? 'slideInFromRight 0.5s ease-in-out'
+            : viewTransition === 'to-pages'
+              ? 'slideOutToRight 0.5s ease-in-out forwards'
+              : 'none'
+        }}
       >
       {currentView === 'feed' && (
         <>
@@ -984,7 +1028,18 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div ref={liveScrollRef} className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
+          <div 
+            ref={liveScrollRef} 
+            className={`space-y-3 relative overflow-y-auto flex-1 pr-2 hide-scrollbar ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
+            style={{ 
+              touchAction: 'pan-y',
+              animation: isTimeFilterAnimating && pendingTimeFilter
+                ? 'slideOutToRight 0.3s ease-in-out forwards'
+                : isTimeFilterAnimating
+                  ? 'slideInFromRight 0.3s ease-in-out'
+                  : 'none'
+            }}
+          >
             {postsQuery.isLoading && (
               <div className="glass-card p-6 rounded-xl text-center">
                 <p className="text-muted-foreground">Loading posts...</p>
@@ -1106,10 +1161,7 @@ export default function Home() {
                     {(['today', '2hr'] as const).map((time) => (
                       <button
                         key={time}
-                        onClick={() => {
-                          setPopularTimeFilter(time);
-                          setShowTimeFilter(false);
-                        }}
+                        onClick={() => handlePopularTimeFilterChange(time)}
                         className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                           popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
                         }`}
@@ -1139,10 +1191,7 @@ export default function Home() {
                     {(['2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}
-                        onClick={() => {
-                          setPopularTimeFilter(time);
-                          setShowTimeFilter(false);
-                        }}
+                        onClick={() => handlePopularTimeFilterChange(time)}
                         className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                           popularTimeFilter === time ? 'text-secondary' : 'text-white/60'
                         }`}
@@ -1172,10 +1221,7 @@ export default function Home() {
                     {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}
-                        onClick={() => {
-                          setTwitterTimeFilter(time);
-                          setShowTimeFilter(false);
-                        }}
+                        onClick={() => handleTwitterTimeFilterChange(time)}
                         className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                           twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
                         }`}
@@ -1199,9 +1245,9 @@ export default function Home() {
             className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
             style={{ 
               touchAction: 'pan-y',
-              animation: isFeedTypeAnimating && pendingFeedType 
+              animation: (isFeedTypeAnimating && pendingFeedType) || (isTimeFilterAnimating && pendingTimeFilter)
                 ? 'slideOutToRight 0.3s ease-in-out forwards' 
-                : isFeedTypeAnimating 
+                : (isFeedTypeAnimating || isTimeFilterAnimating)
                   ? 'slideInFromRight 0.3s ease-in-out' 
                   : 'none'
             }}
@@ -1592,10 +1638,7 @@ export default function Home() {
                     {(['2hr', '6hr', 'today'] as const).map((time) => (
                       <button
                         key={time}
-                        onClick={() => {
-                          setPopularTimeFilter(time);
-                          setShowTimeFilter(false);
-                        }}
+                        onClick={() => handlePopularTimeFilterChange(time)}
                         className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg transition-colors ${
                           popularTimeFilter === time ? 'bg-green-500/20 text-green-400' : 'text-white'
                         }`}
@@ -1670,10 +1713,7 @@ export default function Home() {
                       {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
                         <button
                           key={time}
-                          onClick={() => {
-                            setTwitterTimeFilter(time);
-                            setShowTimeFilter(false);
-                          }}
+                          onClick={() => handleTwitterTimeFilterChange(time)}
                           className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                             twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
                           }`}
@@ -1863,6 +1903,13 @@ export default function Home() {
       {/* Pages View */}
       <div 
         className={`flex-1 flex flex-col overflow-hidden ${currentView === 'pages' ? '' : 'hidden'}`}
+        style={{
+          animation: viewTransition === 'to-pages'
+            ? 'slideInFromRight 0.5s ease-in-out'
+            : viewTransition === 'to-feed'
+              ? 'slideOutToRight 0.5s ease-in-out forwards'
+              : 'none'
+        }}
       >
       {currentView === 'pages' && (
         /* Pages View - 3 Facebook Pages */
