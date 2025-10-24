@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Upload, Check } from "lucide-react";
+import { Upload, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface CanvasEditorProps {
-  onClose: () => void;
-  onSave: (imageDataUrl: string) => void;
+  onApply: (imageDataUrl: string) => void;
 }
 
-export function CanvasEditor({ onClose, onSave }: CanvasEditorProps) {
+export function CanvasEditor({ onApply }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [overlayImage, setOverlayImage] = useState<HTMLImageElement | null>(null);
@@ -175,146 +174,123 @@ export function CanvasEditor({ onClose, onSave }: CanvasEditorProps) {
     setIsDragging(false);
   };
 
-  const handleSave = () => {
+  const handleApply = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     // Export canvas as data URL
     const dataUrl = canvas.toDataURL('image/png');
-    onSave(dataUrl);
-    toast.success("Canvas saved!");
+    onApply(dataUrl);
+    toast.success("Canvas applied!");
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <h2 className="text-xl font-bold text-white">Canvas Editor (1080x1350)</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Upload Controls */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Background Image Upload */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
-                Background Image
-              </label>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBackgroundUpload}
-                  className="hidden"
-                  id="background-upload"
-                />
-                <label
-                  htmlFor="background-upload"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500"
-                >
-                  <Upload className="h-5 w-5" />
-                  {backgroundImage ? "Change Background" : "Upload Background"}
-                </label>
-              </div>
-              {backgroundImage && (
-                <p className="text-xs text-green-400">
-                  ✓ Background loaded ({backgroundImage.width}x{backgroundImage.height})
-                </p>
-              )}
-            </div>
-
-            {/* Overlay Image Upload */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
-                Tweet Overlay
-              </label>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleOverlayUpload}
-                  className="hidden"
-                  id="overlay-upload"
-                />
-                <label
-                  htmlFor="overlay-upload"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500"
-                >
-                  <Upload className="h-5 w-5" />
-                  {overlayImage ? "Change Overlay" : "Upload Overlay"}
-                </label>
-              </div>
-              {overlayImage && (
-                <p className="text-xs text-green-400">
-                  ✓ Overlay loaded ({overlayImage.width}x{overlayImage.height})
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Overlay Scale Slider */}
-          {overlayImage && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">
-                Overlay Size: {overlayScale}%
-              </label>
-              <input
-                type="range"
-                min="10"
-                max="200"
-                step="5"
-                value={overlayScale}
-                onChange={(e) => setOverlayScale(Number(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-              />
-              <p className="text-xs text-gray-400">
-                Drag the overlay on the canvas to reposition it
-              </p>
-            </div>
-          )}
-
-          {/* Canvas */}
-          <div className="flex justify-center bg-gray-800 rounded-lg p-4">
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              className="max-w-full h-auto border-2 border-gray-700 rounded cursor-move"
-              style={{ maxHeight: '500px' }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
+    <div className="space-y-4">
+      {/* Upload Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Background Image Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Background Image
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBackgroundUpload}
+              className="hidden"
+              id="canvas-background-upload"
             />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 justify-end">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="border-gray-700 text-gray-300 hover:text-white hover:border-gray-600"
+            <label
+              htmlFor="canvas-background-upload"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
             >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!backgroundImage && !overlayImage}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white"
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Use Canvas
-            </Button>
+              <Upload className="h-4 w-4" />
+              {backgroundImage ? "Change Background" : "Upload Background"}
+            </label>
           </div>
+          {backgroundImage && (
+            <p className="text-xs text-green-400">
+              ✓ Background loaded ({backgroundImage.width}x{backgroundImage.height})
+            </p>
+          )}
         </div>
+
+        {/* Overlay Image Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Tweet Overlay
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleOverlayUpload}
+              className="hidden"
+              id="canvas-overlay-upload"
+            />
+            <label
+              htmlFor="canvas-overlay-upload"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg cursor-pointer transition-colors border-2 border-dashed border-gray-600 hover:border-cyan-500 text-sm"
+            >
+              <Upload className="h-4 w-4" />
+              {overlayImage ? "Change Overlay" : "Upload Overlay"}
+            </label>
+          </div>
+          {overlayImage && (
+            <p className="text-xs text-green-400">
+              ✓ Overlay loaded ({overlayImage.width}x{overlayImage.height})
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Overlay Scale Slider */}
+      {overlayImage && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">
+            Overlay Size: {overlayScale}%
+          </label>
+          <input
+            type="range"
+            min="10"
+            max="200"
+            step="5"
+            value={overlayScale}
+            onChange={(e) => setOverlayScale(Number(e.target.value))}
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+          />
+          <p className="text-xs text-gray-400">
+            Drag the overlay on the canvas to reposition it
+          </p>
+        </div>
+      )}
+
+      {/* Canvas */}
+      <div className="flex justify-center bg-gray-800 rounded-lg p-4">
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          className="max-w-full h-auto border-2 border-gray-700 rounded cursor-move"
+          style={{ maxHeight: '500px' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        />
+      </div>
+
+      {/* Apply Button */}
+      <div className="flex justify-center">
+        <Button
+          onClick={handleApply}
+          disabled={!backgroundImage && !overlayImage}
+          className="bg-cyan-500 hover:bg-cyan-600 text-white px-6"
+        >
+          <Check className="h-4 w-4 mr-2" />
+          Apply to Image
+        </Button>
       </div>
     </div>
   );

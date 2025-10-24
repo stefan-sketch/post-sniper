@@ -70,7 +70,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
   const [borderRadius, setBorderRadius] = useState(0); // Default border radius for rectangles
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
-  const [showCanvasEditor, setShowCanvasEditor] = useState(false);
+  const [canvasMode, setCanvasMode] = useState(false);
 
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [resizeStartState, setResizeStartState] = useState({ x: 0, y: 0, fontSize: 48, width: 60 });
@@ -1092,7 +1092,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
           {/* Image Upload/Preview */}
           <div className="space-y-2">
-            {!image ? (
+            {!image && !canvasMode ? (
               <div className="relative">
                 <div
                   onDrop={handleDrop}
@@ -1116,7 +1116,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowCanvasEditor(true);
+                    setCanvasMode(true);
                   }}
                   className="absolute top-2 left-2 text-xs px-2 py-1 h-auto bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                 >
@@ -1137,6 +1137,28 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                     Paste
                   </Button>
                 )}
+              </div>
+            ) : canvasMode && !image ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">Canvas Editor (1080x1350)</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCanvasMode(false)}
+                    className="text-xs"
+                  >
+                    Back to Upload
+                  </Button>
+                </div>
+                <CanvasEditor
+                  onApply={(imageDataUrl) => {
+                    setImage(imageDataUrl);
+                    setCropMode(false);
+                    setCroppedImage(null);
+                    setCanvasMode(false);
+                  }}
+                />
               </div>
             ) : cropMode ? (
               <div className="space-y-2">
@@ -1591,20 +1613,6 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
         </div>
       </DialogContent>
-
-      {/* Canvas Editor Modal */}
-      {showCanvasEditor && (
-        <CanvasEditor
-          onClose={() => setShowCanvasEditor(false)}
-          onSave={(imageDataUrl) => {
-            setImage(imageDataUrl);
-            setCropMode(false);
-            setCroppedImage(null);
-            setShowCanvasEditor(false);
-            toast.success("Canvas image loaded!");
-          }}
-        />
-      )}
     </Dialog>
   );
 }
