@@ -636,7 +636,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       // Calculate distance from center to determine size
       const centerX = resizeStartState.x;
       const centerY = resizeStartState.y;
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - resizeStartState.x, 2) + Math.pow(resizeStartState.y - resizeStartState.y, 2));
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
       const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
       const delta = currentDist - startDist;
       const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
@@ -690,7 +690,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
       e.preventDefault();
       const centerX = resizeStartState.x;
       const centerY = resizeStartState.y;
-      const startDist = Math.sqrt(Math.pow(resizeStartState.x - resizeStartState.x, 2) + Math.pow(resizeStartState.y - resizeStartState.y, 2));
+      const startDist = Math.sqrt(Math.pow(resizeStartState.x - centerX, 2) + Math.pow(resizeStartState.y - centerY, 2));
       const currentDist = Math.sqrt(Math.pow(xPercent - centerX, 2) + Math.pow(yPercent - centerY, 2));
       const delta = currentDist - startDist;
       const newSize = Math.max(10, Math.min(200, resizeStartState.width + delta * 2));
@@ -1340,9 +1340,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                               whiteSpace: 'pre-wrap',
                               wordWrap: 'break-word',
                               overflow: 'hidden',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
+                              
                             }}
                             maxLength={200}
                           />
