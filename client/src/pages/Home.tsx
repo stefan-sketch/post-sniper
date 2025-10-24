@@ -47,11 +47,32 @@ export default function Home() {
   const [popularTimeFilter, setPopularTimeFilter] = useState<'2hr' | '6hr' | 'today'>('2hr');
   const [twitterTimeFilter, setTwitterTimeFilter] = useState<'live' | '2hr' | '6hr' | 'today'>('live');
   const [feedType, setFeedType] = useState<'popular' | 'twitter' | 'reddit'>('popular');
+  const [pendingFeedType, setPendingFeedType] = useState<'popular' | 'twitter' | 'reddit' | null>(null);
+  const [isFeedTypeAnimating, setIsFeedTypeAnimating] = useState(false);
   const [showTimeFilter, setShowTimeFilter] = useState(false);
   const [selectedPageFilters, setSelectedPageFilters] = useState<Set<string>>(new Set()); // Set of selected page IDs
   const [showPageFilter, setShowPageFilter] = useState(false);
   const [newPostIds, setNewPostIds] = useState<Set<string>>(new Set());
   const [previousPostIds, setPreviousPostIds] = useState<Set<string>>(new Set());
+
+  // Handle animated feed type switching
+  const handleFeedTypeChange = (newType: 'popular' | 'twitter' | 'reddit') => {
+    if (newType === feedType || isFeedTypeAnimating) return;
+    
+    setPendingFeedType(newType);
+    setIsFeedTypeAnimating(true);
+    
+    // After slide-out animation completes (300ms), change feed type
+    setTimeout(() => {
+      setFeedType(newType);
+      setPendingFeedType(null);
+      
+      // After slide-in animation completes (300ms), reset animating state
+      setTimeout(() => {
+        setIsFeedTypeAnimating(false);
+      }, 300);
+    }, 300);
+  };
   const [newPopularPostIds, setNewPopularPostIds] = useState<Set<string>>(new Set());
   const [previousPopularPostIds, setPreviousPopularPostIds] = useState<Set<string>>(new Set());
   const [newTweetIds, setNewTweetIds] = useState<Set<string>>(new Set());
@@ -1024,7 +1045,7 @@ export default function Home() {
               <div className="flex gap-2 items-center">
                 {/* Facebook Button */}
                 <button
-                  onClick={() => setFeedType('popular')}
+                  onClick={() => handleFeedTypeChange('popular')}
                   className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'popular' 
                       ? 'bg-[#1877F2] text-white shadow-lg shadow-[#1877F2]/50' 
@@ -1039,7 +1060,7 @@ export default function Home() {
 
                 {/* X (Twitter) Button */}
                 <button
-                  onClick={() => setFeedType('twitter')}
+                  onClick={() => handleFeedTypeChange('twitter')}
                   className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'twitter' 
                       ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/50' 
@@ -1054,7 +1075,7 @@ export default function Home() {
 
                 {/* Reddit Button */}
                 <button
-                  onClick={() => setFeedType('reddit')}
+                  onClick={() => handleFeedTypeChange('reddit')}
                   className={`h-7 w-7 rounded-full flex items-center justify-center transition-all ${
                     feedType === 'reddit' 
                       ? 'bg-[#FF4500] text-white shadow-lg shadow-[#FF4500]/50' 
@@ -1173,7 +1194,18 @@ export default function Home() {
             <div style={{ minWidth: feedColumns === 3 || isAnimatingOut ? '0' : '120px', visibility: feedColumns === 3 || isAnimatingOut ? 'hidden' : 'visible' }}></div>
           </div>
           
-          <div ref={popularScrollRef} className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} style={{ touchAction: 'pan-y' }}>
+          <div 
+            ref={popularScrollRef} 
+            className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
+            style={{ 
+              touchAction: 'pan-y',
+              animation: isFeedTypeAnimating && pendingFeedType 
+                ? 'slideOutToRight 0.3s ease-in-out forwards' 
+                : isFeedTypeAnimating 
+                  ? 'slideInFromRight 0.3s ease-in-out' 
+                  : 'none'
+            }}
+          >
             {feedType === 'reddit' ? (
               <RedditFeed sort={popularTimeFilter === 'today' ? 'top' : 'new'} />
             ) : feedType === 'popular' ? (
