@@ -755,24 +755,21 @@ export default function Home() {
             </div>
             <button
               onClick={handleViewSwitch}
-              className="hidden md:flex group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-gray-400 hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95"
+              className="hidden md:flex group relative p-1.5 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-cyan-400 hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-cyan-500/30"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
             >
-              {/* Animated glow ring */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500/0 via-cyan-500/50 to-cyan-500/0 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"></div>
-              
               {/* Icon with rotation animation */}
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
+                width="16" 
+                height="16" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round"
-                className="relative z-10 transition-transform duration-500 group-hover:rotate-180"
+                className="transition-transform duration-300 group-hover:rotate-180"
               >
                 <polyline points="17 1 21 5 17 9"/>
                 <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
@@ -800,25 +797,22 @@ export default function Home() {
                     setFeedColumns(3);
                   }
                 }}
-                className="hidden md:block group relative p-2 rounded-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm text-white hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/20 active:scale-95"
+                className={`hidden md:block group relative p-1.5 rounded-lg backdrop-blur-sm transition-all duration-200 active:scale-95 border ${
+                  feedColumns === 3 || isAnimatingOut
+                    ? 'bg-green-500/20 text-green-400 border-green-500/40 hover:bg-green-500/30'
+                    : 'bg-gray-800/60 text-gray-400 border-gray-700/50 hover:text-green-400 hover:bg-gray-800/80 hover:border-green-500/30'
+                }`}
                 title={feedColumns === 2 ? 'Show Live Football Hub' : 'Hide Live Football Hub'}
               >
-                {/* Animated glow ring */}
-                <div className={`absolute inset-0 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity duration-300 ${
-                  feedColumns === 3 || isAnimatingOut
-                    ? 'from-white/50 via-white/80 to-white/50 opacity-100 animate-pulse'
-                    : 'from-white/0 via-white/50 to-white/0 group-hover:opacity-100'
-                }`}></div>
-                
                 {/* Football Icon */}
                 <svg 
-                  className="relative z-10 text-white transition-all duration-300"
-                  width="20" 
-                  height="20" 
+                  className="transition-all duration-300"
+                  width="16" 
+                  height="16" 
                   viewBox="0 0 24 24" 
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                 >
                   {/* Football/Soccer ball */}
                   <circle cx="12" cy="12" r="10" />
