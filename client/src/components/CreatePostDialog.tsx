@@ -699,7 +699,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`${canvasMode ? 'max-w-5xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6`} showCloseButton={false}>
+      <DialogContent className={`${canvasMode ? 'max-w-3xl' : 'max-w-2xl'} max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6`} showCloseButton={false}>
         <div className="space-y-4">
           {/* Header with Page Pills and Post Button */}
           <div className="flex items-center justify-between gap-4 relative">
@@ -1139,27 +1139,14 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 )}
               </div>
             ) : canvasMode && !image ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Canvas Editor (1080x1350)</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCanvasMode(false)}
-                    className="text-xs"
-                  >
-                    Back to Upload
-                  </Button>
-                </div>
-                <CanvasEditor
-                  selectedPage={selectedPage}
-                  onCanvasUpdate={(imageDataUrl) => {
-                    setImage(imageDataUrl);
-                    setCropMode(false);
-                    setCroppedImage(null);
-                  }}
-                />
-              </div>
+              <CanvasEditor
+                selectedPage={selectedPage}
+                onCanvasUpdate={(imageDataUrl) => {
+                  setImage(imageDataUrl);
+                  setCropMode(false);
+                  setCroppedImage(null);
+                }}
+              />
             ) : cropMode ? (
               <div className="space-y-2">
                 <ReactCrop
