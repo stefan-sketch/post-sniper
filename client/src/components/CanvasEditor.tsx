@@ -29,6 +29,7 @@ interface CanvasEditorProps {
 export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, onCompleteClick }: CanvasEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hasRegisteredHandler = useRef(false);
   const [step, setStep] = useState<"background" | "tweet">("background");
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
   const [tweetImage, setTweetImage] = useState<HTMLImageElement | null>(null);
@@ -223,10 +224,16 @@ export function CanvasEditor({ onComplete, selectedPage, onTweetEditingChange, o
     }
   }, [onComplete]);
 
-  // Expose handleComplete to parent
+  // Expose handleComplete to parent - only once to prevent infinite updates
   useEffect(() => {
-    if (onCompleteClick && step === "tweet" && tweetImage) {
+    if (onCompleteClick && step === "tweet" && tweetImage && !hasRegisteredHandler.current) {
       onCompleteClick(handleComplete);
+      hasRegisteredHandler.current = true;
+    }
+    
+    // Reset when leaving tweet editing mode
+    if (step !== "tweet" || !tweetImage) {
+      hasRegisteredHandler.current = false;
     }
   }, [step, tweetImage, onCompleteClick, handleComplete]);
 
