@@ -1,58 +1,48 @@
 import { publicProcedure, router } from "../_core/trpc";
 import { z } from "zod";
+import { getDb } from "../db";
+import { redditPosts } from "../../drizzle/schema";
+import { desc } from "drizzle-orm";
 
 export const redditRouter = router({
   getPosts: publicProcedure
     .input(z.object({
-      limit: z.number().min(1).max(100).default(25),
+      limit: z.number().min(1).max(100).default(30),
     }))
     .query(async ({ input }) => {
       try {
-        console.log('[Reddit] Fetching posts from r/soccercirclejerk...');
+        console.log('[Reddit] Fetching posts from database...');
         
-        // Fetch from r/soccercirclejerk using Reddit's JSON API (no auth needed)
-        const response = await fetch(
-          `https://www.reddit.com/r/soccercirclejerk/hot.json?limit=${input.limit}`,
-          {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
-            },
-          }
-        );
-
-        console.log('[Reddit] Response status:', response.status);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('[Reddit] API error:', response.status, errorText);
-          throw new Error(`Reddit API error: ${response.status} ${response.statusText}`);
+        const db = await getDb();
+        if (!db) {
+          throw new Error('Database not available');
         }
 
-        const data = await response.json();
-        console.log('[Reddit] Successfully fetched', data.data?.children?.length || 0, 'posts');
-        
-        // Transform Reddit data to our format
-        const posts = data.data.children.map((child: any) => {
-          const post = child.data;
-          return {
-            id: post.id,
-            title: post.title,
-            author: post.author,
-            subreddit: post.subreddit,
-            upvotes: post.ups,
-            comments: post.num_comments,
-            created: post.created_utc * 1000, // Convert to milliseconds
-            url: post.url,
-            permalink: `https://www.reddit.com${post.permalink}`,
-            thumbnail: post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' 
-              ? post.thumbnail 
-              : null,
-            isVideo: post.is_video || false,
-            postHint: post.post_hint || null,
-          };
-        });
+        // Fetch posts from database, sorted by creation time
+        const posts = await db
+          .select()
+          .from(redditPosts)
+          .orderBy(desc(redditPosts.createdAt))
+          .limit(input.limit);
 
-        return posts;
+        console.log(`[Reddit] Successfully fetched ${posts.length} posts from database`);
+        
+        // Transform to match frontend format
+        return posts.map(post => ({
+          id: post.id,
+          title: post.title,
+          author: post.author,
+          subreddit: post.subreddit,
+          upvotes: post.upvotes || 0,
+          comments: post.comments || 0,
+          created: post.createdAt.getTime(),
+          url: post.url || '',
+          permalink: post.permalink || '',
+          thumbnail: post.thumbnail,
+          isVideo: post.isVideo || false,
+          postType: post.postType || 'text',
+          domain: post.domain,
+        }));
       } catch (error) {
         console.error('Error fetching Reddit posts:', error);
         throw new Error('Failed to fetch Reddit posts');

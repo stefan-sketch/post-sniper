@@ -1,5 +1,5 @@
 import { MessageCircle, ChevronDown, ChevronUp, ExternalLink, X } from 'lucide-react';
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { trpc } from "@/lib/trpc";
 
@@ -32,12 +32,12 @@ interface RedditFeedProps {
 }
 
 export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
-  const [posts, setPosts] = useState<RedditPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [currentPermalink, setCurrentPermalink] = useState<string | null>(null);
+
+  // Fetch posts from database using tRPC
+  const postsQuery = trpc.reddit.getPosts.useQuery({ limit: 30 });
 
   // Fetch comments using tRPC (server-side to avoid CORS)
   const commentsQuery = trpc.reddit.getComments.useQuery(
@@ -45,124 +45,32 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
     { enabled: !!currentPermalink }
   );
 
-  useEffect(() => {
-    async function fetchRedditPosts() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Fetch from multiple subreddits
-        const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague', 'soccermemes'];
-        const allPosts: RedditPost[] = [];
-
-        for (const subreddit of subreddits) {
-          try {
-            const response = await fetch(
-              `https://www.reddit.com/r/${subreddit}/${sort}.json?limit=10${sort === 'top' ? '&t=day' : ''}`,
-              {
-                headers: {
-                  'Accept': 'application/json',
-                },
-              }
-            );
-
-            if (!response.ok) {
-              console.warn(`Failed to fetch r/${subreddit}: ${response.status}`);
-              continue;
-            }
-
-            const data = await response.json();
-        
-            // Transform Reddit data - include all posts except videos
-            const redditPosts: RedditPost[] = data.data.children
-              .filter((child: any) => !child.data.is_video && child.data.post_hint !== 'hosted:video')
-              .map((child: any) => {
-          const post = child.data;
-          
-          // Get the best quality image URL
-          let imageUrl = null;
-          
-          // Try to get the highest resolution from resolutions array
-          if (post.preview?.images?.[0]?.resolutions?.length > 0) {
-            const resolutions = post.preview.images[0].resolutions;
-            // Get the highest resolution (last in array)
-            imageUrl = resolutions[resolutions.length - 1].url.replace(/&amp;/g, '&');
-          } else if (post.preview?.images?.[0]?.source?.url) {
-            // Use the source image from preview
-            imageUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
-          } else if (post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.gif') || post.url.endsWith('.jpeg'))) {
-            // Direct image link
-            imageUrl = post.url;
-          } else if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' && post.thumbnail.startsWith('http')) {
-            // Fallback to thumbnail (last resort)
-            imageUrl = post.thumbnail;
-          }
-          
-          // Determine post type and extract domain for links
-          let postType: 'image' | 'link' | 'text' = 'text';
-          let domain: string | undefined;
-          
-          if (imageUrl) {
-            postType = 'image';
-          } else if (post.url && !post.url.includes(`reddit.com/r/${post.subreddit}`)) {
-            // External link
-            postType = 'link';
-            try {
-              const urlObj = new URL(post.url);
-              domain = urlObj.hostname.replace('www.', '');
-            } catch (e) {
-              domain = post.domain || 'external link';
-            }
-          }
-          
-              return {
-                id: post.id,
-                title: post.title,
-                author: post.author,
-                subreddit: post.subreddit,
-                upvotes: post.ups,
-                comments: post.num_comments,
-                created: post.created_utc * 1000,
-                url: post.url,
-                permalink: post.permalink,
-                thumbnail: imageUrl,
-                isVideo: post.is_video || false,
-                postType,
-                domain,
-              };
-            });
-
-            allPosts.push(...redditPosts);
-          } catch (err) {
-            console.warn(`Error fetching r/${subreddit}:`, err);
-          }
-        }
-
-        // Sort all posts by creation time (newest first) or upvotes (for hot/top)
-        const sortedPosts = allPosts.sort((a, b) => {
-          if (sort === 'new') {
-            return b.created - a.created;
-          } else if (sort === 'top') {
-            return b.upvotes - a.upvotes;
-          } else {
-            // For 'hot', use a combination of upvotes and recency
-            const aScore = a.upvotes / Math.pow((Date.now() - a.created) / 3600000 + 2, 1.5);
-            const bScore = b.upvotes / Math.pow((Date.now() - b.created) / 3600000 + 2, 1.5);
-            return bScore - aScore;
-          }
-        });
-
-        setPosts(sortedPosts.slice(0, 30)); // Limit to 30 total posts
-      } catch (err) {
-        console.error('Error fetching Reddit posts:', err);
-        setError('Failed to load Reddit posts');
-      } finally {
-        setLoading(false);
-      }
+  // Sort posts based on sort prop
+  const sortedPosts = React.useMemo(() => {
+    if (!postsQuery.data) return [];
+    
+    const posts = [...postsQuery.data] as RedditPost[];
+    
+    if (sort === 'new') {
+      return posts.sort((a, b) => b.created - a.created);
+    } else if (sort === 'top') {
+      return posts.sort((a, b) => b.upvotes - a.upvotes);
+    } else {
+      // For 'hot', use a combination of upvotes and recency
+      return posts.sort((a, b) => {
+        const aScore = a.upvotes / Math.pow((Date.now() - a.created) / 3600000 + 2, 1.5);
+        const bScore = b.upvotes / Math.pow((Date.now() - b.created) / 3600000 + 2, 1.5);
+        return bScore - aScore;
+      });
     }
+  }, [postsQuery.data, sort]);
 
-    fetchRedditPosts();
-  }, [sort]);
+  // Remove the old useEffect that was fetching from Reddit API
+  // Now we just use the data from tRPC query
+  const posts = sortedPosts;
+  const loading = postsQuery.isLoading;
+  const error = postsQuery.error?.message || null;
+
 
   function toggleComments(post: RedditPost) {
     if (expandedPost === post.id) {

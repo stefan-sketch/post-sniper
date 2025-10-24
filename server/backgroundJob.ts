@@ -340,6 +340,15 @@ export class BackgroundJobService {
         console.error("[BackgroundJob] Error fetching Twitter posts:", error);
       }
       
+      // Fetch Reddit posts
+      try {
+        console.log("[BackgroundJob] Fetching Reddit posts...");
+        await this.fetchRedditPosts();
+        console.log("[BackgroundJob] Reddit posts fetched successfully");
+      } catch (error) {
+        console.error("[BackgroundJob] Error fetching Reddit posts:", error);
+      }
+      
       // Set isFetchingFromAPI to false when done
       // TEMPORARILY DISABLED until migration runs
       // await upsertUserSettings({ userId: PUBLIC_USER_ID, isFetchingFromAPI: false });
@@ -472,6 +481,124 @@ export class BackgroundJobService {
       
       console.log(`[BackgroundJob] Twitter: Processed ${data.tweets.length} tweets (${updatedTweets} stored/updated)`);
     }
+  }
+
+  /**
+   * Fetch Reddit posts from multiple subreddits and store in database
+   */
+  private async fetchRedditPosts() {
+    console.log("[BackgroundJob] Fetching Reddit posts...");
+    
+    const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague', 'soccermemes'];
+    
+    // Store posts in database
+    const { getDb } = await import("./db");
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database not available");
+    }
+    
+    const { redditPosts } = await import("../drizzle/schema");
+    
+    let totalProcessed = 0;
+    let totalStored = 0;
+    
+    for (const subreddit of subreddits) {
+      try {
+        const response = await fetch(
+          `https://www.reddit.com/r/${subreddit}/hot.json?limit=10`,
+          {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.warn(`[BackgroundJob] Failed to fetch r/${subreddit}: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json();
+        
+        if (data.data?.children) {
+          for (const child of data.data.children) {
+            const post = child.data;
+            
+            // Skip videos
+            if (post.is_video || post.post_hint === 'hosted:video') {
+              continue;
+            }
+            
+            totalProcessed++;
+            
+            // Get the best quality image URL
+            let imageUrl = null;
+            
+            if (post.preview?.images?.[0]?.resolutions?.length > 0) {
+              const resolutions = post.preview.images[0].resolutions;
+              imageUrl = resolutions[resolutions.length - 1].url.replace(/&amp;/g, '&');
+            } else if (post.preview?.images?.[0]?.source?.url) {
+              imageUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+            } else if (post.url && (post.url.endsWith('.jpg') || post.url.endsWith('.png') || post.url.endsWith('.gif') || post.url.endsWith('.jpeg'))) {
+              imageUrl = post.url;
+            } else if (post.thumbnail && post.thumbnail !== 'self' && post.thumbnail !== 'default' && post.thumbnail.startsWith('http')) {
+              imageUrl = post.thumbnail;
+            }
+            
+            // Determine post type and extract domain for links
+            let postType: 'image' | 'link' | 'text' = 'text';
+            let domain: string | undefined;
+            
+            if (imageUrl) {
+              postType = 'image';
+            } else if (post.url && !post.url.includes(`reddit.com/r/${post.subreddit}`)) {
+              postType = 'link';
+              try {
+                const urlObj = new URL(post.url);
+                domain = urlObj.hostname.replace('www.', '');
+              } catch (e) {
+                domain = post.domain || 'external link';
+              }
+            }
+            
+            // Insert or update post
+            await db
+              .insert(redditPosts)
+              .values({
+                id: post.id,
+                title: post.title,
+                author: post.author,
+                subreddit: post.subreddit,
+                upvotes: post.ups || 0,
+                comments: post.num_comments || 0,
+                url: post.url,
+                permalink: `https://www.reddit.com${post.permalink}`,
+                thumbnail: imageUrl,
+                isVideo: false,
+                postType,
+                domain,
+                createdAt: new Date(post.created_utc * 1000),
+                updatedAt: new Date(),
+              })
+              .onConflictDoUpdate({
+                target: redditPosts.id,
+                set: {
+                  upvotes: post.ups || 0,
+                  comments: post.num_comments || 0,
+                  updatedAt: new Date(),
+                },
+              });
+            
+            totalStored++;
+          }
+        }
+      } catch (err) {
+        console.warn(`[BackgroundJob] Error fetching r/${subreddit}:`, err);
+      }
+    }
+    
+    console.log(`[BackgroundJob] Reddit: Processed ${totalProcessed} posts from ${subreddits.length} subreddits (${totalStored} stored/updated)`);
   }
 
   private calculateDataHash(posts: any[]): string {

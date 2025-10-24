@@ -160,3 +160,30 @@ export const twitterPosts = pgTable("twitter_posts", {
 export type TwitterPost = typeof twitterPosts.$inferSelect;
 export type InsertTwitterPost = typeof twitterPosts.$inferInsert;
 
+/**
+ * Reddit posts cache - stores posts from monitored subreddits
+ */
+export const redditPosts = pgTable("reddit_posts", {
+  id: varchar("id", { length: 64 }).primaryKey(), // Reddit post ID
+  title: text("title").notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  subreddit: varchar("subreddit", { length: 255 }).notNull(),
+  upvotes: integer("upvotes").default(0),
+  comments: integer("comments").default(0),
+  url: text("url"),
+  permalink: text("permalink"),
+  thumbnail: text("thumbnail"),
+  isVideo: boolean("isVideo").default(false),
+  postType: varchar("postType", { length: 32 }).default("text"), // 'image', 'link', 'text'
+  domain: varchar("domain", { length: 255 }),
+  createdAt: timestamp("createdAt").notNull(),
+  fetchedAt: timestamp("fetchedAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
+}, (table) => ({
+  createdAtIdx: index("idx_reddit_posts_created_at").on(table.createdAt.desc()),
+  subredditIdx: index("idx_reddit_posts_subreddit").on(table.subreddit),
+}));
+
+export type RedditPost = typeof redditPosts.$inferSelect;
+export type InsertRedditPost = typeof redditPosts.$inferInsert;
+
