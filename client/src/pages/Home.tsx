@@ -36,6 +36,7 @@ export default function Home() {
   const [viewTransition, setViewTransition] = useState<'none' | 'to-pages' | 'to-feed'>('none'); // Track view transition direction
   const [isViewSwitching, setIsViewSwitching] = useState(false); // Prevent post animations during view switch
   const justSwitchedToFeed = useRef(false); // Track if we just switched to feed view to prevent MATCHDAY animation
+  const wasMatchdayOpenBeforeSwitch = useRef(false); // Track if MATCHDAY was open before switching to Pages
 
   // For mobile dropdown
   const [minutesSinceUpdate, setMinutesSinceUpdate] = useState(0);
@@ -584,7 +585,10 @@ export default function Home() {
                 const newView = currentView === 'feed' ? 'pages' : 'feed';
                 setIsViewSwitching(true);
                 setViewTransition(newView === 'pages' ? 'to-pages' : 'to-feed');
-                if (newView === 'feed') {
+                if (newView === 'pages') {
+                  // Save MATCHDAY state before switching to Pages
+                  wasMatchdayOpenBeforeSwitch.current = feedColumns === 3;
+                } else if (newView === 'feed') {
                   justSwitchedToFeed.current = true;
                 }
                 setTimeout(() => {
@@ -593,10 +597,11 @@ export default function Home() {
                   // Keep isViewSwitching true longer to prevent post animations during transition
                   setTimeout(() => {
                     setIsViewSwitching(false);
-                    // Reset justSwitchedToFeed after animations complete
+                    // Reset flags after animations complete
                     if (newView === 'feed') {
                       setTimeout(() => {
                         justSwitchedToFeed.current = false;
+                        wasMatchdayOpenBeforeSwitch.current = false;
                       }, 100);
                     }
                   }, 600);
@@ -810,7 +815,7 @@ export default function Home() {
           <div 
             className="flex flex-col h-full overflow-hidden"
             style={{
-              animation: (isViewSwitching || viewTransition === 'to-feed' || justSwitchedToFeed.current) ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
+              animation: (isViewSwitching || viewTransition === 'to-feed' || justSwitchedToFeed.current || wasMatchdayOpenBeforeSwitch.current) ? 'none' : (isAnimatingOut ? 'slideOutToLeft 0.5s ease-in-out forwards' : 'slideInFromLeft 0.5s ease-in-out')
             }}
           >
             <LiveFootballHub />
@@ -1939,6 +1944,7 @@ export default function Home() {
                     setIsViewSwitching(true);
                     setViewTransition('to-feed');
                     justSwitchedToFeed.current = true;
+                    // Note: On mobile, MATCHDAY is never visible, so no need to track state
                     setTimeout(() => {
                       setCurrentView('feed');
                       setViewTransition('none');
