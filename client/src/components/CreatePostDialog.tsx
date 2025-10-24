@@ -572,13 +572,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       setCompletedCrop(undefined);
       setCaption("");
       setSelectedPage(null);
-      setUseWatermark(true);
+      setUseWatermark(false);
       setOverlayText("");
       setUseGradient(false);
       setTextBoxPosition({ x: 50, y: 50 });
       setTextBoxWidth(60);
       setFontSize(48);
       setWatermarkPosition({ x: 85, y: 10 });
+      setCropMode(false);
+      setCroppedImage(null);
+      setCanvasMode(false);
+      // Reset drawing state
+      setDrawingEnabled(false);
+      setRectangles([]);
+      setCurrentRect(null);
+      setDrawingColor('yellow');
+      setStrokeWidth(4);
+      setBorderRadius(0);
       
       // Close dialog after short delay to show success message
       setTimeout(() => {
