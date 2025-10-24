@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Droplet, WavesLadder, Type, Pen, Sparkles } from "lucide-react";
+import { Upload, RefreshCw, Droplet, Layers, Type, Pen, Sparkles } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -834,7 +834,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 }`}
                 title="Add gradient overlay"
               >
-                <WavesLadder className="h-4 w-4" />
+                <Layers className="h-4 w-4" />
               </Button>
 
               {/* Text Button */}
