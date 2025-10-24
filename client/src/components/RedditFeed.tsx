@@ -87,20 +87,26 @@ export function RedditFeed() {
   }, []);
 
   async function fetchComments(post: RedditPost) {
+    console.log('[Reddit] fetchComments called for post:', post.id);
+    console.log('[Reddit] Current expandedPost:', expandedPost);
+    
     if (expandedPost === post.id) {
       // Collapse if already expanded
+      console.log('[Reddit] Collapsing post');
       setExpandedPost(null);
       return;
     }
 
     // If comments already loaded, just expand
     if (comments[post.id]) {
+      console.log('[Reddit] Comments already loaded, expanding');
       setExpandedPost(post.id);
       return;
     }
 
     // Fetch comments
     try {
+      console.log('[Reddit] Fetching comments from API');
       setLoadingComments(post.id);
       const response = await fetch(
         `https://www.reddit.com${post.permalink}.json?limit=10`,
@@ -133,8 +139,10 @@ export function RedditFeed() {
           };
         });
 
+      console.log('[Reddit] Fetched', parsedComments.length, 'comments');
       setComments(prev => ({ ...prev, [post.id]: parsedComments }));
       setExpandedPost(post.id);
+      console.log('[Reddit] Expanded post set to:', post.id);
     } catch (err) {
       console.error('Error fetching comments:', err);
     } finally {
@@ -235,6 +243,7 @@ export function RedditFeed() {
                   <div className="flex items-center gap-4 text-xs text-gray-400">
                     <button
                       onClick={(e) => {
+                        console.log('[Reddit] Comment button clicked for post:', post.id);
                         e.preventDefault();
                         e.stopPropagation();
                         fetchComments(post);
