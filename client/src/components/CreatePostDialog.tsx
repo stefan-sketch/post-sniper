@@ -747,47 +747,77 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           {/* Overlay Controls - Always visible, greyed out when no image */}
           <div className="space-y-2">
             <div className="flex gap-2">
-              {/* Crop Button */}
-              <Button
-                type="button"
-                variant={cropMode ? "default" : "outline"}
-                size="sm"
-                onClick={async () => {
-                  if (image) {
-                    if (!cropMode) {
-                      // Enter crop mode
-                      setCropMode(true);
-                      setCrop({
-                        unit: '%',
-                        x: 0,
-                        y: 0,
-                        width: 100,
-                        height: 100,
-                      });
-                    } else {
-                      // Confirm crop
-                      await handleConfirmCrop();
+              {/* Crop Button (hidden in canvas mode) / Tweet Overlay Button (in canvas mode) */}
+              {canvasMode ? (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setTriggerOverlayUpload(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="canvas-overlay-crop-position"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('canvas-overlay-crop-position')?.click()}
+                    className="flex-1 transition-all duration-200 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500 hover:bg-cyan-500/10"
+                    title="Add Tweet Overlay"
+                  >
+                    {/* X.com icon */}
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant={cropMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={async () => {
+                    if (image) {
+                      if (!cropMode) {
+                        // Enter crop mode
+                        setCropMode(true);
+                        setCrop({
+                          unit: '%',
+                          x: 0,
+                          y: 0,
+                          width: 100,
+                          height: 100,
+                        });
+                      } else {
+                        // Confirm crop
+                        await handleConfirmCrop();
+                      }
                     }
-                  }
-                }}
-                disabled={!image}
-                className={`flex-1 transition-all duration-200 relative z-50 ${
-                  !image
-                    ? "opacity-50 cursor-not-allowed"
-                    : cropMode
-                    ? "bg-green-400 hover:bg-green-300 text-white shadow-2xl shadow-green-400/80 ring-4 ring-green-300/70 hover:shadow-green-300/90 hover:scale-110 animate-pulse"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-                title={cropMode ? "Confirm crop" : "Crop image"}
-              >
-                {cropMode ? (
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <CropIcon className="h-4 w-4" />
-                )}
-              </Button>
+                  }}
+                  disabled={!image}
+                  className={`flex-1 transition-all duration-200 relative z-50 ${
+                    !image
+                      ? "opacity-50 cursor-not-allowed"
+                      : cropMode
+                      ? "bg-green-400 hover:bg-green-300 text-white shadow-2xl shadow-green-400/80 ring-4 ring-green-300/70 hover:shadow-green-300/90 hover:scale-110 animate-pulse"
+                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                  }`}
+                  title={cropMode ? "Confirm crop" : "Crop image"}
+                >
+                  {cropMode ? (
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <CropIcon className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
 
               {/* Watermark Button */}
               <Button
@@ -883,33 +913,7 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
                 <Pen className="h-4 w-4" />
               </Button>
 
-              {/* Tweet Overlay Button - Only in Canvas Mode */}
-              {canvasMode && (
-                <>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setTriggerOverlayUpload(file);
-                      }
-                    }}
-                    className="hidden"
-                    id="canvas-overlay-tools"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('canvas-overlay-tools')?.click()}
-                    className="flex-1 transition-all duration-200 border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500 hover:bg-cyan-500/10"
-                    title="Add Tweet Overlay"
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
+
 
               {/* Overlay Image Button - DISABLED */}
               {/* <Button

@@ -38,6 +38,7 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate, triggerOverlayUploa
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
+          console.log('Overlay image loaded:', img.width, 'x', img.height);
           setOverlayImage(img);
           setOverlayPosition({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 });
           onOverlayUploaded?.();
