@@ -630,6 +630,13 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     setCropMode(false);
     setCroppedImage(null);
     setCanvasMode(false);
+    // Reset drawing state
+    setDrawingEnabled(false);
+    setRectangles([]);
+    setCurrentRect(null);
+    setDrawingColor('yellow');
+    setStrokeWidth(4);
+    setBorderRadius(0);
     // Close dialog
     onOpenChange(false);
   };
@@ -1203,6 +1210,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   setCanvasMode(false);
                   setIsEditingTweet(false);
                   setCanvasCompleteHandler(null);
+                  // Reset drawing state when returning from canvas mode
+                  setDrawingEnabled(false);
+                  setRectangles([]);
+                  setCurrentRect(null);
                 }}
                 onTweetEditingChange={setIsEditingTweet}
                 onCompleteClick={handleCompleteClick}
@@ -1231,6 +1242,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
+                    // Reset drawing state when switching to canvas mode
+                    setDrawingEnabled(false);
+                    setRectangles([]);
+                    setCurrentRect(null);
                     setCanvasMode(true);
                   }}
                   className="absolute top-2 left-2 text-xs px-2 py-1 h-auto bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
