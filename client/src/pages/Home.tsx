@@ -603,6 +603,31 @@ export default function Home() {
     }
   }, [twitterQuery.data?.tweets]);
 
+  // Animate all posts when switching from Pages to Feed
+  useEffect(() => {
+    if (currentView === 'feed' && viewTransition === 'to-feed' && !isViewSwitching) {
+      // Mark all current posts as new to trigger printer animation
+      const allLivePostIds = new Set(postsQuery.data?.posts.map(p => p.id) || []);
+      const allPopularPostIds = new Set(popularPosts.map(p => p.id));
+      const allTweetIds = new Set(twitterQuery.data?.tweets.map(t => t.id) || []);
+      
+      if (allLivePostIds.size > 0) {
+        setNewPostIds(allLivePostIds);
+        setTimeout(() => setNewPostIds(new Set()), 2000);
+      }
+      
+      if (allPopularPostIds.size > 0) {
+        setNewPopularPostIds(allPopularPostIds);
+        setTimeout(() => setNewPopularPostIds(new Set()), 2000);
+      }
+      
+      if (allTweetIds.size > 0) {
+        setNewTweetIds(allTweetIds);
+        setTimeout(() => setNewTweetIds(new Set()), 2000);
+      }
+    }
+  }, [currentView, viewTransition, isViewSwitching, postsQuery.data?.posts, popularPosts, twitterQuery.data?.tweets]);
+
   // Handle scroll to top button visibility
   useEffect(() => {
     const handleLiveScroll = () => {
