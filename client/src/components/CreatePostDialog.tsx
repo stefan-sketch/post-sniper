@@ -781,21 +781,21 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             <div className="flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 {/* Close and Minimize buttons - Top Left */}
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <button
                     onClick={handleClose}
-                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    className="flex items-center justify-center w-8 h-8 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                     title="Close and discard"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                   {onMinimize && hasContent() && (
                     <button
                       onClick={onMinimize}
-                      className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                      className="flex items-center justify-center w-8 h-8 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                       title="Minimize"
                     >
-                      <Minus className="w-4 h-4" />
+                      <Minus className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
