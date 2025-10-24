@@ -1,4 +1,4 @@
-import { MessageCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { MessageCircle, ChevronDown, ChevronUp, ExternalLink, X } from 'lucide-react';
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 
@@ -33,6 +33,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [currentPermalink, setCurrentPermalink] = useState<string | null>(null);
 
   // Fetch comments using tRPC (server-side to avoid CORS)
@@ -171,8 +172,19 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
         return (
           <div
             key={post.id}
-            className="bg-gray-800/50 rounded-lg border border-gray-700 hover:border-[#FF4500] transition-all"
+            className="bg-gray-800/50 rounded-lg border border-gray-700 hover:border-[#FF4500] transition-all relative"
           >
+            {/* Link button in top-right */}
+            <a
+              href={post.permalink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute top-3 right-3 z-10 p-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-gray-400 hover:text-white transition-all"
+              title="Open on Reddit"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+            
             <div className="p-4">
               <div className="flex gap-3">
                 {/* Upvote section */}
@@ -195,21 +207,15 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
                     <span>•</span>
                     <span>{timeAgo}</span>
                   </div>
-                  <a 
-                    href={post.permalink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <h3 className="text-white font-semibold mb-2 line-clamp-3 hover:text-[#FF4500] transition-colors">{post.title}</h3>
-                  </a>
+                  <h3 className="text-white font-semibold mb-2 line-clamp-3 pr-8">{post.title}</h3>
                   
                   {/* Image if available */}
                   {post.thumbnail && (
                     <img 
                       src={post.thumbnail} 
                       alt=""
-                      className="w-full max-h-96 object-contain rounded mb-2 bg-gray-900"
+                      className="w-full max-h-96 object-contain rounded mb-2 bg-gray-900 cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setExpandedImage(post.thumbnail)}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -319,6 +325,28 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
           </div>
         );
       })}
+      
+      {/* Image Modal */}
+      {expandedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setExpandedImage(null)}
+        >
+          <button
+            onClick={() => setExpandedImage(null)}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all"
+            title="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <img 
+            src={expandedImage} 
+            alt="Expanded view"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }
