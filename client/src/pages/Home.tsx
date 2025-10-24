@@ -1543,7 +1543,18 @@ export default function Home() {
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'live' ? (
           <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex items-center justify-between px-4 mb-2">
+              {/* Football icon for MATCHDAY - Left side */}
+              <button
+                onClick={() => setMobileView('matchday')}
+                className="flex items-center justify-center p-2 text-gray-400 hover:text-green-500 transition-all"
+                title="MATCHDAY"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+                </svg>
+              </button>
+              
               <h2 className="text-lg font-semibold text-[#1877F2] flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -1644,11 +1655,26 @@ export default function Home() {
         ) : mobileView === 'popular' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-                <h2 className="text-lg font-semibold text-green-400">
-                  Popular Posts
-                </h2>
+              <div className="flex items-center justify-between w-full px-4 mb-2">
+                {/* Football icon for MATCHDAY - Left side */}
+                <button
+                  onClick={() => setMobileView('matchday')}
+                  className="flex items-center justify-center p-2 text-gray-400 hover:text-green-500 transition-all"
+                  title="MATCHDAY"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+                  </svg>
+                </button>
+                
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
+                  <h2 className="text-lg font-semibold text-green-400">
+                    Popular Posts
+                  </h2>
+                </div>
+                
+                <div className="w-9" />
                 <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
@@ -1719,13 +1745,28 @@ export default function Home() {
         ) : mobileView === 'twitter' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                <h2 className="text-lg font-semibold text-blue-400">
-                  X Football Feed
-                </h2>
+              <div className="flex items-center justify-between w-full px-4 mb-2">
+                {/* Football icon for MATCHDAY - Left side */}
+                <button
+                  onClick={() => setMobileView('matchday')}
+                  className="flex items-center justify-center p-2 text-gray-400 hover:text-green-500 transition-all"
+                  title="MATCHDAY"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+                  </svg>
+                </button>
+                
+                <div className="flex items-center gap-3">
+                  <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  <h2 className="text-lg font-semibold text-blue-400">
+                    X Football Feed
+                  </h2>
+                </div>
+                
+                <div className="w-9" />
                 {/* Time filter dropdown */}
                 <div className="relative">
                   <button
@@ -1921,12 +1962,27 @@ export default function Home() {
         ) : mobileView === 'reddit' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
-              <h2 className="text-lg font-semibold text-[#FF4500] flex items-center gap-2 mb-2">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-                </svg>
-                Reddit
-              </h2>
+              <div className="flex items-center justify-between w-full px-4 mb-2">
+                {/* Football icon for MATCHDAY - Left side */}
+                <button
+                  onClick={() => setMobileView('matchday')}
+                  className="flex items-center justify-center p-2 text-gray-400 hover:text-green-500 transition-all"
+                  title="MATCHDAY"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+                  </svg>
+                </button>
+                
+                <h2 className="text-lg font-semibold text-[#FF4500] flex items-center gap-2">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+                  </svg>
+                  Reddit
+                </h2>
+                
+                <div className="w-9" />
+              </div>
               <div className="w-full h-0.5 bg-[#FF4500] animate-pulse"></div>
             </div>
             <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
@@ -1935,6 +1991,24 @@ export default function Home() {
           </div>
         ) : mobileView === 'matchday' ? (
           <div className="flex flex-col h-full overflow-hidden">
+            {/* MATCHDAY Header with Close Button */}
+            <div className="flex items-center justify-between px-4 mb-2">
+              <h2 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+                </svg>
+                MATCHDAY
+              </h2>
+              <button
+                onClick={() => setMobileView('live')}
+                className="flex items-center justify-center p-2 text-gray-400 hover:text-red-500 transition-all"
+                title="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             <Suspense fallback={
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
@@ -2096,17 +2170,6 @@ export default function Home() {
       {/* Bottom Navigation Bar - Feed View */}
       {currentView === 'feed' && createPortal(
         <>
-          {/* Floating MATCHDAY Button - Above Footer */}
-          <button
-            onClick={() => setMobileView('matchday')}
-            className="md:hidden fixed bottom-20 right-4 z-[9998] flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg transition-all active:scale-90"
-            style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
-            title="MATCHDAY"
-          >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
-            </svg>
-          </button>
           
           <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
             <div className="flex items-center justify-between px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
