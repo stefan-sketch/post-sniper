@@ -709,7 +709,15 @@ export function CreatePostDialog({ open, onOpenChange, initialImage }: CreatePos
           <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-1">
               <h2 className="text-xl font-bold text-white whitespace-nowrap">Create Post</h2>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap relative">
+                {/* Animated prompt when no page is selected */}
+                {!selectedPage && (
+                  <div className="absolute -top-8 left-0 animate-bounce">
+                    <div className="bg-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                      ← Select a page
+                    </div>
+                  </div>
+                )}
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   

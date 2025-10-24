@@ -52,8 +52,8 @@ export function CanvasEditor({ onComplete }: CanvasEditorProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear with white background
-    ctx.fillStyle = "white";
+    // Clear with black background
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // Draw background image (if exists)
