@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { Upload } from "lucide-react";
+import { Upload, Image as ImageIcon } from "lucide-react";
 
 type PageId = "footy-feed" | "football-funnys" | "football-away-days";
 
 const PAGE_COLORS: Record<PageId, string> = {
-  "footy-feed": "#1877F2", // Facebook blue
-  "football-funnys": "#FFD700", // Gold
-  "football-away-days": "#FF4500", // Orange-red
+  "footy-feed": "#1877F2",
+  "football-funnys": "#FFD700",
+  "football-away-days": "#FF4500",
 };
 
 interface CanvasEditorProps {
@@ -180,67 +180,52 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
   };
 
   return (
-    <div className="flex gap-3">
-      {/* Canvas */}
-      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2">
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className="border border-gray-700 rounded cursor-move"
-          style={{ width: '320px', height: 'auto' }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+    <div className="flex gap-3 items-start">
+      {/* Circular icon buttons on the LEFT */}
+      <div className="flex flex-col gap-2">
+        {/* Background upload button */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleBackgroundUpload}
+          className="hidden"
+          id="canvas-bg"
         />
-      </div>
+        <label
+          htmlFor="canvas-bg"
+          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
+            backgroundImage 
+              ? 'bg-green-500 hover:bg-green-600 text-white' 
+              : 'bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700'
+          }`}
+          title="Background Image"
+        >
+          <ImageIcon className="h-5 w-5" />
+        </label>
 
-      {/* Compact tools */}
-      <div className="flex flex-col gap-2 w-48">
-        {/* Background Upload */}
-        <div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleBackgroundUpload}
-            className="hidden"
-            id="canvas-bg"
-          />
-          <label
-            htmlFor="canvas-bg"
-            className="flex items-center gap-2 px-2 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded cursor-pointer transition-colors border border-gray-700 hover:border-cyan-500 text-xs"
-          >
-            <Upload className="h-3 w-3" />
-            <span>Background{backgroundImage && ' ✓'}</span>
-          </label>
-        </div>
+        {/* Tweet overlay upload button */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleOverlayUpload}
+          className="hidden"
+          id="canvas-overlay"
+        />
+        <label
+          htmlFor="canvas-overlay"
+          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all ${
+            overlayImage 
+              ? 'bg-cyan-500 hover:bg-cyan-600 text-white' 
+              : 'bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700'
+          }`}
+          title="Tweet Overlay"
+        >
+          <Upload className="h-5 w-5" />
+        </label>
 
-        {/* Overlay Upload */}
-        <div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleOverlayUpload}
-            className="hidden"
-            id="canvas-overlay"
-          />
-          <label
-            htmlFor="canvas-overlay"
-            className="flex items-center gap-2 px-2 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded cursor-pointer transition-colors border border-gray-700 hover:border-cyan-500 text-xs"
-          >
-            <Upload className="h-3 w-3" />
-            <span>Tweet{overlayImage && ' ✓'}</span>
-          </label>
-        </div>
-
-        {/* Size Slider */}
+        {/* Size slider - vertical, only when overlay exists */}
         {overlayImage && (
-          <div className="space-y-1 pt-1">
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>Size</span>
-              <span className="text-white">{overlayScale}%</span>
-            </div>
+          <div className="flex flex-col items-center gap-1 mt-2">
             <input
               type="range"
               min="10"
@@ -248,10 +233,32 @@ export function CanvasEditor({ selectedPage, onCanvasUpdate }: CanvasEditorProps
               step="5"
               value={overlayScale}
               onChange={(e) => setOverlayScale(Number(e.target.value))}
-              className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              className="h-32 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+              style={{
+                writingMode: 'bt-lr',
+                WebkitAppearance: 'slider-vertical',
+                width: '8px'
+              }}
+              title={`Size: ${overlayScale}%`}
             />
+            <span className="text-xs text-gray-400">{overlayScale}%</span>
           </div>
         )}
+      </div>
+
+      {/* Canvas on the RIGHT */}
+      <div className="flex-shrink-0 bg-gray-800 rounded-lg p-2">
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          className="border border-gray-700 rounded cursor-move"
+          style={{ width: '380px', height: 'auto' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        />
       </div>
     </div>
   );
