@@ -952,7 +952,7 @@ export default function Home() {
           className="flex flex-col h-full overflow-hidden"
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
-            <div className="flex items-center gap-2" style={{ minWidth: '120px' }}>
+            <div className="flex items-center gap-2" style={{ minWidth: feedColumns === 3 || isAnimatingOut ? '0' : '120px', visibility: feedColumns === 3 || isAnimatingOut ? 'hidden' : 'visible' }}>
               <TrendingUp className="h-5 w-5 animate-pulse text-cyan-400" />
             </div>
             
@@ -1025,13 +1025,14 @@ export default function Home() {
               <div className="relative">
                 <button
                   onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="px-2.5 py-0.5 rounded-full text-xs font-medium transition-all bg-[#FF4500] hover:bg-[#FF4500]/80 text-white shadow-sm flex items-center gap-1"
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium transition-all bg-[#FF4500] hover:bg-[#FF4500]/80 text-white shadow-sm flex items-center gap-0.5"
+                  style={{ height: '20px' }}
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
                   </svg>
                   {popularTimeFilter === 'today' ? 'Popular' : 'Newest'}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
