@@ -105,7 +105,9 @@ export const twitterRouter = router({
       } else if (input.timeFilter === '6hr') {
         timeThreshold = new Date(now.getTime() - 6 * 60 * 60 * 1000);
       } else { // 'today'
-        timeThreshold = new Date(now.setHours(0, 0, 0, 0));
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        timeThreshold = today;
       }
       
       const tweets = await db
