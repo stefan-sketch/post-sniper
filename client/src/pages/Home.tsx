@@ -31,7 +31,8 @@ export default function Home() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [isCreatePostMinimized, setIsCreatePostMinimized] = useState(false);
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
-  const [mobileView, setMobileView] = useState<'live' | 'popular' | 'twitter' | 'reddit' | 'matchday'>('live');
+  const [mobileView, setMobileView] = useState<'facebook' | 'twitter' | 'reddit' | 'matchday'>('facebook');
+  const [facebookView, setFacebookView] = useState<'live' | 'popular'>('live');
 
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
@@ -763,36 +764,19 @@ export default function Home() {
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: API Status (mobile) + View Toggle + Column Toggle */}
+          {/* Left: Switch + Settings (iOS layout) */}
           <div className="flex items-center gap-2">
-            {/* Online Status - far left on mobile, hidden on desktop */}
-            <div className="flex md:hidden items-center gap-1.5 text-xs">
-              {settingsQuery.data?.lastAPIStatus === "success" ? (
-                <>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-green-400 font-medium">Online</span>
-                </>
-              ) : (
-                <>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  <span className="text-red-400 font-medium">Offline</span>
-                </>
-              )}
-            </div>
+            {/* Switch button - small icon, far left */}
             <button
               onClick={handleViewSwitch}
-              className="hidden md:flex group relative items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors duration-200 active:scale-95"
+              className="group relative flex items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors duration-200 active:scale-95"
               title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
               style={{ background: 'none', border: 'none', padding: 0 }}
             >
-              {/* Icon with rotation animation */}
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
+                width="18" 
+                height="18" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
@@ -806,6 +790,16 @@ export default function Home() {
                 <polyline points="7 23 3 19 7 15"/>
                 <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
               </svg>
+            </button>
+            
+            {/* Settings button - small icon, next to switch */}
+            <button
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
+              className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
+              title="Settings"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <Settings className="h-[18px] w-[18px]" />
             </button>
 
             {/* Football Toggle - Desktop only, Feed view only */}
@@ -869,8 +863,8 @@ export default function Home() {
                 SDL MEDIA
               </h1>
             </button>
-            {/* Online Status light - desktop only, no text */}
-            <div className="hidden md:flex items-center">
+            {/* Online Status light - always visible, no text */}
+            <div className="flex items-center">
               {settingsQuery.data?.lastAPIStatus === "success" ? (
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -882,40 +876,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right: Alerts + Settings + Drag-drop icon (desktop only) */}
+          {/* Right: Drag-drop icon (desktop only) */}
           <div className="flex items-center gap-1">
-            {/* Settings button - mobile only, after API light on left */}
-            <button
-              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="md:hidden flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
-              title="Settings"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <Settings className="h-5 w-5" />
-            </button>
-            {/* Alerts button */}
-            <button
-              onClick={() => setShowAlerts(true)}
-              className="relative flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
-              title="Notifications"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <Bell className="h-5 w-5" />
-              {(unreadCountQuery.data || 0) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-semibold">
-                  {unreadCountQuery.data}
-                </span>
-              )}
-            </button>
-            {/* Settings button - desktop only, after alerts */}
-            <button
-              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="hidden md:flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
-              title="Settings"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <Settings className="h-5 w-5" />
-            </button>
             {/* Drag-drop area - desktop only */}
             <div
               onDrop={async (e) => {
@@ -1512,7 +1474,7 @@ export default function Home() {
 
       {/* Mobile: Single Column with Switchable View */}
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
-        {mobileView === 'live' ? (
+        {mobileView === 'facebook' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-between px-4 mb-2">
               {/* Football icon for MATCHDAY - Left side */}
@@ -1526,7 +1488,32 @@ export default function Home() {
                 </svg>
               </button>
               
-              {/* Facebook LIVE with integrated dropdown */}
+              {/* Facebook with LIVE/POPULAR toggle */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setFacebookView('live')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                    facebookView === 'live' 
+                      ? 'bg-[#1877F2] text-white' 
+                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  LIVE
+                </button>
+                <button
+                  onClick={() => setFacebookView('popular')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                    facebookView === 'popular' 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  POPULAR
+                </button>
+              </div>
+              
+              {/* Page filter dropdown - only for LIVE view */}
+              {facebookView === 'live' && (
               <div className="relative">
                 <button
                   onClick={() => setShowPageFilter(!showPageFilter)}
@@ -1535,8 +1522,7 @@ export default function Home() {
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  LIVE
+                  </svg>                  Filter
                 </button>
                 {showPageFilter && (
                   <div className="page-filter-dropdown absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] p-2 flex flex-wrap gap-2 max-w-[calc(100vw-2rem)]">
@@ -1577,8 +1563,9 @@ export default function Home() {
                       );
                     })}
                   </div>
-                )}
+                 )}
               </div>
+              )}
             </div>
             {/* Printer line - thin red line where new posts emerge from */}
             <div className="relative h-0.5 bg-red-500/30 mb-2 overflow-hidden">
@@ -1590,12 +1577,12 @@ export default function Home() {
                   <p className="text-muted-foreground">Loading posts...</p>
                 </div>
               )}
-              {!postsQuery.isLoading && livePosts.length === 0 && (
+              {!postsQuery.isLoading && (facebookView === 'live' ? livePosts : popularPosts).length === 0 && (
                 <div className="glass-card p-6 rounded-xl text-center">
                   <p className="text-muted-foreground">No posts yet. Configure pages in Settings.</p>
                 </div>
               )}
-              {livePosts.map((post) => {
+              {(facebookView === 'live' ? livePosts : popularPosts).map((post) => {
                 const isNew = newPostIds.has(post.id);
                 const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
                   ? post.reactions - post.previousReactions 
