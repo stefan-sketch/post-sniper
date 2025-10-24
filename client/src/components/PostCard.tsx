@@ -30,8 +30,32 @@ interface PostCardProps {
 
 function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions, hidePageHeader }: PostCardProps) {
   const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
   const comments = post.kpi?.page_posts_comments_count?.value || 0;
   const shares = post.kpi?.page_posts_shares_count?.value || 0;
+
+  // Intersection Observer for lazy loading
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: '50px',  // Load 50px before entering viewport
+        threshold: 0.01,
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
   
   // Custom time formatting that switches at halfway points
   const getTimeAgo = (date: Date): string => {
@@ -151,7 +175,12 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
 
   return (
     <div 
+      ref={cardRef}
       className="glass-card rounded-xl overflow-hidden transition-all mb-4 max-w-full"
+      style={{
+        contain: 'layout style paint',  // CSS containment for better performance
+        contentVisibility: 'auto',  // Render only when visible
+      }}
     >
       {/* Profile Header */}
       {!hidePageHeader && (
@@ -251,7 +280,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
       </div>
 
       {/* Post Image */}
-      {post.image && (
+      {post.image && isVisible && (
         <div 
           className="relative w-full overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
           onClick={handleOpenPost}

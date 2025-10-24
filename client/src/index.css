@@ -181,17 +181,17 @@
 
 @layer utilities {
   /* Glassmorphism effects */
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .glass-panel {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);  /* Reduced from 10px for iOS performance */
+    -webkit-backdrop-filter: blur(6px);  /* Reduced from 10px for iOS performance */
     border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+  }}
   
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(8px);  /* Reduced from 16px for iOS performance */
+    -webkit-backdrop-filter: blur(8px);  /* Reduced from 16px for iOS performance */
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     contain: layout style paint;  /* CSS containment for better performance */
@@ -221,6 +221,8 @@
     scroll-behavior: smooth;  /* Smooth scrolling */
     will-change: scroll-position;  /* Optimize scroll performance */
     transform: translateZ(0);  /* Force GPU acceleration */
+    overscroll-behavior: contain;  /* Prevent scroll chaining */
+    touch-action: pan-y;  /* Optimize touch scrolling */
   }
   
   .hide-scrollbar::-webkit-scrollbar,
