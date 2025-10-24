@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { Upload, RefreshCw, Droplet, Layers, Type, Sparkles, X, Minus } from "lucide-react";
+import { Upload, RefreshCw, Droplet, Layers, Type, Sparkles, X, Minus, Download } from "lucide-react";
 import ReactCrop, { Crop, PixelCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { toast } from "sonner";
@@ -509,6 +509,52 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     setCroppedImage(null);
   };
 
+  const handleDownload = async () => {
+    // Use cropped image if available, otherwise use original image
+    const imageToDownload = croppedImage || image;
+    
+    if (!imageToDownload) {
+      toast.error("Please select an image first");
+      return;
+    }
+
+    if (!selectedPage) {
+      toast.error("Please select a page to determine aspect ratio");
+      return;
+    }
+
+    try {
+      // Start with the cropped image (or original if not cropped)
+      let processedImage = imageToDownload;
+      
+      // Apply overlays (gradient and text)
+      processedImage = await applyOverlays(processedImage) || processedImage;
+
+      // Apply watermark if enabled
+      if (useWatermark && selectedPage) {
+        const pageConfig = PAGES.find((p) => p.id === selectedPage);
+        if (pageConfig) {
+          processedImage = await applyWatermark(processedImage, pageConfig.watermark);
+        }
+      }
+
+      // Create a download link
+      const link = document.createElement('a');
+      const pageName = PAGES.find(p => p.id === selectedPage)?.shortName || 'page';
+      link.download = `${pageName}-${Date.now()}.jpg`;
+      link.href = processedImage;
+      link.click();
+
+      toast.success(`Image downloaded for ${pageName}!`);
+
+      // Close dialog
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download image");
+    }
+  };
+
   const handlePost = async () => {
     // Use cropped image if available, otherwise use original image
     const imageToPost = croppedImage || image;
@@ -847,13 +893,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
             </div>
             {!isEditingTweet && (
-              <Button
-                onClick={handlePost}
-                disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isUploading ? "Posting..." : "Post"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleDownload}
+                  disabled={!image || !selectedPage || cropMode}
+                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Download image in aspect ratio"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={handlePost}
+                  disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                  className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? "Posting..." : "Post"}
+                </Button>
+              </div>
             )}
             {isEditingTweet && canvasCompleteHandler && (
               <Button
