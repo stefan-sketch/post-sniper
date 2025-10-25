@@ -1104,7 +1104,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <RefreshCw className="h-3 w-3" />
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path d="M23 19v-2h-2V7c0-1.1-.9-2-2-2H9v2h10v10h2zM1 5v2h2v10c0 1.1.9 2 2 2h10v-2H5V7H3V5H1z"/>
+                      <path d="M7 1v6h6"/>
+                      <path d="M17 23v-6h-6"/>
+                    </svg>
                   )}
                 </Button>
 
@@ -1144,7 +1148,10 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   }`}
                   title="Add gradient overlay"
                 >
-                  <Layers className="h-3 w-3" />
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="M3 10 Q8 15, 12 10 T21 10" fill="currentColor" opacity="0.3" />
+                  </svg>
                 </Button>
                 {showGradientDropdown && !cropMode && image && (
                   <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[9999] min-w-[120px]">
