@@ -910,70 +910,34 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
   return (
     <Dialog open={open} onOpenChange={handleBackdropClick}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
-        {/* macOS-style window controls - absolute positioned top-left */}
-        <div className="absolute top-4 left-4 flex gap-2 z-10">
-          <button
-            onClick={handleClose}
-            className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
-            title="Close and discard"
-            style={{ background: 'none', border: 'none', padding: 0 }}
-          >
-            <X className="w-4 h-4" strokeWidth={2.5} />
-          </button>
-          <button
-            onClick={onMinimize}
-            className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
-            title="Minimize"
-            style={{ background: 'none', border: 'none', padding: 0 }}
-          >
-            <Minus className="w-4 h-4" strokeWidth={2.5} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {/* Header with Page Pills and Post Button */}
-          <div className="flex items-center justify-between gap-4 relative">
-            <div className="flex items-center gap-3 flex-1">
-              <div className="flex gap-2 flex-wrap relative ml-16">
-                {PAGES.map((page) => {
-                  const isSelected = selectedPage === page.id;
-                  
-                  return (
-                    <button
-                      key={page.id}
-                      onClick={() => selectPage(page.id)}
-                      className={`
-                        flex items-center justify-center p-1 rounded-full
-                        transition-all duration-200 hover:scale-[1.1]
-                        ${isSelected 
-                          ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
-                          : 'opacity-60 hover:opacity-100'
-                        }
-                      `}
-                      title={page.shortName}
-                    >
-                      <img 
-                        src={page.profilePicture} 
-                        alt={page.shortName}
-                        className="w-7 h-7 rounded-full object-cover"
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {!isEditingTweet && (
-              <div className="flex gap-3 items-center">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-4" showCloseButton={false}>
+        <div className="space-y-3">
+          {/* Compact Header - Two Row Design */}
+          <div className="space-y-2">
+            {/* Row 1: Window controls (left) and Post button (right) */}
+            <div className="flex items-center justify-between">
+              {/* Left: X and - */}
+              <div className="flex gap-2">
                 <button
-                  onClick={handleDownload}
-                  disabled={!image || !selectedPage || cropMode}
-                  className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Download image in aspect ratio"
+                  onClick={handleClose}
+                  className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
+                  title="Close and discard"
                   style={{ background: 'none', border: 'none', padding: 0 }}
                 >
-                  <Download className="h-4 w-4" strokeWidth={2.5} />
+                  <X className="w-4 h-4" strokeWidth={2.5} />
                 </button>
+                <button
+                  onClick={onMinimize}
+                  className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
+                  title="Minimize"
+                  style={{ background: 'none', border: 'none', padding: 0 }}
+                >
+                  <Minus className="w-4 h-4" strokeWidth={2.5} />
+                </button>
+              </div>
+
+              {/* Right: Post button */}
+              {!isEditingTweet && (
                 <div className="relative flex">
                   <button
                     onClick={() => handlePost()}
@@ -1023,16 +987,61 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     </div>
                   )}
                 </div>
+              )}
+              {isEditingTweet && canvasCompleteHandler && (
+                <button
+                  onClick={canvasCompleteHandler}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 active:scale-95"
+                >
+                  Complete
+                </button>
+              )}
+            </div>
+
+            {/* Row 2: Page selector (left) and Download (right) */}
+            <div className="flex items-center justify-between">
+              {/* Left: Page icons */}
+              <div className="flex gap-2">
+                {PAGES.map((page) => {
+                  const isSelected = selectedPage === page.id;
+                  
+                  return (
+                    <button
+                      key={page.id}
+                      onClick={() => selectPage(page.id)}
+                      className={`
+                        flex items-center justify-center p-1 rounded-full
+                        transition-all duration-200 hover:scale-[1.1]
+                        ${isSelected 
+                          ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
+                          : 'opacity-60 hover:opacity-100'
+                        }
+                      `}
+                      title={page.shortName}
+                    >
+                      <img 
+                        src={page.profilePicture} 
+                        alt={page.shortName}
+                        className="w-7 h-7 rounded-full object-cover"
+                      />
+                    </button>
+                  );
+                })}
               </div>
-            )}
-            {isEditingTweet && canvasCompleteHandler && (
-              <Button
-                onClick={canvasCompleteHandler}
-                className="bg-green-500 hover:bg-green-600 text-white px-6 transition-all duration-200 hover:scale-[1.02]"
-              >
-                Complete
-              </Button>
-            )}
+
+              {/* Right: Download button */}
+              {!isEditingTweet && (
+                <button
+                  onClick={handleDownload}
+                  disabled={!image || !selectedPage || cropMode}
+                  className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Download image in aspect ratio"
+                  style={{ background: 'none', border: 'none', padding: 0 }}
+                >
+                  <Download className="h-4 w-4" strokeWidth={2.5} />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Overlay Controls - Always visible, greyed out when no image */}
