@@ -1048,24 +1048,25 @@ export default function Home() {
                     {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
-                        className="flex items-center gap-1 bg-purple-500/20 border border-purple-400/30 rounded-lg px-2 py-1"
+                        className="flex items-center gap-1.5 bg-purple-500/20 border border-purple-400/30 rounded-lg px-3 py-1.5"
+                        style={{ minHeight: '28px' }}
                       >
                         {/* Home Team */}
-                        <div className="flex items-center gap-0.5">
+                        <div className="flex items-center gap-1">
                           {goal.homeBadge && (
                             <img 
                               src={goal.homeBadge} 
                               alt={goal.homeTeam}
-                              className="w-3.5 h-3.5 object-contain"
+                              className="w-4 h-4 object-contain"
                             />
                           )}
-                          <span className="text-xs font-semibold text-white">
+                          <span className="text-sm font-semibold text-white">
                             {goal.homeTeam.length > 8 ? goal.homeTeam.substring(0, 8) : goal.homeTeam}
                           </span>
                         </div>
                         
                         {/* Score - highlight scoring team in green */}
-                        <div className="text-xs font-black px-1">
+                        <div className="text-sm font-black px-1.5">
                           <span className={goal.scoringTeam === 'home' ? 'text-green-400' : 'text-white'}>
                             {goal.homeScore}
                           </span>
@@ -1076,21 +1077,21 @@ export default function Home() {
                         </div>
                         
                         {/* Away Team */}
-                        <div className="flex items-center gap-0.5">
-                          <span className="text-xs font-semibold text-white">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-semibold text-white">
                             {goal.awayTeam.length > 8 ? goal.awayTeam.substring(0, 8) : goal.awayTeam}
                           </span>
                           {goal.awayBadge && (
                             <img 
                               src={goal.awayBadge} 
                               alt={goal.awayTeam}
-                              className="w-3.5 h-3.5 object-contain"
+                              className="w-4 h-4 object-contain"
                             />
                           )}
                         </div>
                         
                         {/* Blinking GOAL text */}
-                        <span className="text-xs font-black text-yellow-400 animate-pulse ml-0.5">GOAL!</span>
+                        <span className="text-sm font-black text-yellow-400 animate-pulse ml-1">GOAL!</span>
                       </div>
                     ))}
                   </div>
