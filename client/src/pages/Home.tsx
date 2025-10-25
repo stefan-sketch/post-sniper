@@ -11,6 +11,7 @@ import { RedditFeed } from "@/components/RedditFeed";
 import { ImageModal } from "@/components/ImageModal";
 import { PostCardSkeletonList } from "@/components/PostCardSkeleton";
 import { TwitterPostSkeletonList } from "@/components/TwitterPostSkeleton";
+import { useGoalCelebration } from "@/contexts/GoalCelebrationContext";
 
 // Lazy load heavy components for better initial load performance
 const SettingsDialog = lazy(() => import("@/components/SettingsDialog"));
@@ -23,6 +24,7 @@ import { toast } from "sonner";
 export default function Home() {
   // No authentication required - public access
   const utils = trpc.useUtils();
+  const { currentGoal } = useGoalCelebration();
   
   // Detect iOS devices
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1038,18 +1040,27 @@ export default function Home() {
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
-              {/* Facebook LIVE with integrated dropdown */}
+              {/* Facebook LIVE with integrated dropdown - or Goal Score */}
               <div className="relative">
-                <button
-                  onClick={() => setShowPageFilter(!showPageFilter)}
-                  className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  style={{ lineHeight: '1.5rem', margin: 0, padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  LIVE
-                </button>
+                {currentGoal ? (
+                  /* Goal Score Animation */
+                  <div className="flex items-center gap-2 animate-bounce">
+                    <div className="text-2xl font-black text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse">
+                      ⚽ {currentGoal.homeScore} - {currentGoal.awayScore}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPageFilter(!showPageFilter)}
+                    className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    style={{ lineHeight: '1.5rem', margin: 0, padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    LIVE
+                  </button>
+                )}
                 {showPageFilter && (
                   <div className="page-filter-dropdown absolute top-full left-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[100] p-2 flex flex-wrap gap-2 max-w-[calc(100vw-2rem)]">
                     {availablePages.map((page) => {

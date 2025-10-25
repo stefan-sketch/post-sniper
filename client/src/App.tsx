@@ -5,6 +5,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { GoalCelebrationProvider } from "./contexts/GoalCelebrationContext";
 import Home from "./pages/Home";
 import Login, { checkAuth } from "./pages/Login";
 import ComingSoon from "./pages/ComingSoon";
@@ -59,10 +60,12 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <GoalCelebrationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </GoalCelebrationProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

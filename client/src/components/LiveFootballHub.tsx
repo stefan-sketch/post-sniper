@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { trpc } from '../lib/trpc';
+import { useGoalCelebration } from '../contexts/GoalCelebrationContext';
 
 type Competition = 'Champions League' | 'Europa League' | 'Premier League' | 'Championship';
 
@@ -47,6 +48,7 @@ const competitionColors: Record<Competition, string> = {
 };
 
 export default function LiveFootballHub() {
+  const { celebrateGoal } = useGoalCelebration();
   const [matches, setMatches] = useState<Match[]>([]);
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<Competition>>(new Set());
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -141,6 +143,19 @@ export default function LiveFootballHub() {
           previousScoresRef.current.set(newMatch.id, newTotal);
           // Trigger celebration animation
           setCelebratingGoals(prev => new Set(prev).add(newMatch.id));
+          
+          // Trigger Facebook LIVE logo replacement for Premier League goals only
+          if (newMatch.competition === 'Premier League' && scoringTeam) {
+            celebrateGoal({
+              matchId: newMatch.id,
+              homeTeam: newMatch.homeTeam,
+              awayTeam: newMatch.awayTeam,
+              homeScore: newMatch.homeScore,
+              awayScore: newMatch.awayScore,
+              scoringTeam: scoringTeam,
+              timestamp: Date.now(),
+            });
+          }
           // Remove from celebration after 5 seconds
           setTimeout(() => {
             setCelebratingGoals(prev => {
@@ -516,6 +531,24 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
         <div className="flex items-center justify-center gap-2 flex-1">
+          {/* Test Goal Button (for demo) */}
+          <button
+            onClick={() => {
+              celebrateGoal({
+                matchId: 'test-123',
+                homeTeam: 'Arsenal',
+                awayTeam: 'Chelsea',
+                homeScore: 2,
+                awayScore: 1,
+                scoringTeam: 'home',
+                timestamp: Date.now(),
+              });
+            }}
+            className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+            title="Test goal celebration animation"
+          >
+            Test Goal ⚽
+          </button>
           {/* Integrated MATCHDAY + Filter dropdown */}
           <div className="relative">
             <button
