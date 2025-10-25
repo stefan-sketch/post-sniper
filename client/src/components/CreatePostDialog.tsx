@@ -919,7 +919,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   className="bg-gray-700 hover:bg-gray-600 text-white px-4 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Download image in aspect ratio"
                 >
-                  <Download className="h-4 w-4" />
+                  <Download className="h-3.5 w-3.5" />
                 </Button>
                 <div className="relative flex">
                   <Button
@@ -1019,11 +1019,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   title={cropMode ? "Confirm crop" : "Crop image"}
                 >
                   {cropMode ? (
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <RefreshCw className="h-3.5 w-3.5" />
+                    <RefreshCw className="h-3 w-3" />
                   )}
                 </Button>
 
@@ -1043,7 +1043,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title={!selectedPage ? "Select a page first" : "Add watermark"}
               >
-                <Droplet className="h-3.5 w-3.5" />
+                <Droplet className="h-3 w-3" />
               </Button>
 
               {/* Gradient Button */}
@@ -1062,7 +1062,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title="Add gradient overlay"
               >
-                <Layers className="h-3.5 w-3.5" />
+                <Layers className="h-3 w-3" />
               </Button>
 
               {/* Text Button */}
@@ -1094,7 +1094,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }`}
                 title="Add text overlay"
               >
-                <Type className="h-3.5 w-3.5" />
+                <Type className="h-3 w-3" />
               </Button>
 
               {/* Box Drawing Button */}
@@ -1144,11 +1144,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 }
               >
                 {drawingEnabled && rectangles.length > 0 ? (
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="18" height="18" strokeWidth="2" rx="2" />
                   </svg>
                 )}
@@ -1324,7 +1324,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer"
                   onClick={() => document.getElementById("image-upload")?.click()}
                 >
-                  <Upload className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                  <Upload className="mx-auto h-8 w-8 text-gray-500 mb-3" />
                   <p className="text-gray-400 mb-2">Drop an image here or click to upload</p>
                   <input
                     id="image-upload"
