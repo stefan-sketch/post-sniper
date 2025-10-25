@@ -9,6 +9,8 @@ import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { RedditFeed } from "@/components/RedditFeed";
 import { ImageModal } from "@/components/ImageModal";
+import { PostCardSkeletonList } from "@/components/PostCardSkeleton";
+import { TwitterPostSkeletonList } from "@/components/TwitterPostSkeleton";
 
 // Lazy load heavy components for better initial load performance
 const SettingsDialog = lazy(() => import("@/components/SettingsDialog"));
@@ -1099,9 +1101,7 @@ export default function Home() {
             }}
           >
             {postsQuery.isLoading && (
-              <div className="glass-card p-6 rounded-xl text-center">
-                <p className="text-muted-foreground">Loading posts...</p>
-              </div>
+              <PostCardSkeletonList count={3} />
             )}
             {!postsQuery.isLoading && livePosts.length === 0 && (
               <div className="glass-card p-6 rounded-xl text-center">
@@ -1285,9 +1285,7 @@ export default function Home() {
             ) : feedType === 'popular' ? (
               <>
                 {postsQuery.isLoading && (
-                  <div className="glass-card p-6 rounded-xl text-center">
-                    <p className="text-muted-foreground">Loading posts...</p>
-                  </div>
+                  <PostCardSkeletonList count={3} />
                 )}
                 {!postsQuery.isLoading && popularPosts.length === 0 && (
                   <div className="glass-card p-6 rounded-xl text-center">
@@ -1337,9 +1335,7 @@ export default function Home() {
             ) : (
               <>
                 {twitterQuery.isLoading && (
-                  <div className="glass-card p-6 rounded-xl text-center">
-                    <p className="text-muted-foreground">Loading tweets...</p>
-                  </div>
+                  <TwitterPostSkeletonList count={3} />
                 )}
                 {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                   <div className="glass-card p-6 rounded-xl text-center">
@@ -1667,9 +1663,7 @@ export default function Home() {
             </div>
             <div className="space-y-3 relative overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {postsQuery.isLoading && (
-                <div className="glass-card p-6 rounded-xl text-center">
-                  <p className="text-muted-foreground">Loading posts...</p>
-                </div>
+                <PostCardSkeletonList count={3} />
               )}
               {!postsQuery.isLoading && (facebookView === 'live' ? livePosts : popularPosts).length === 0 && (
                 <div className="glass-card p-6 rounded-xl text-center">
@@ -1741,9 +1735,7 @@ export default function Home() {
             </div>
             <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {twitterQuery.isLoading && (
-                <div className="glass-card p-6 rounded-xl text-center">
-                  <p className="text-muted-foreground">Loading tweets...</p>
-                </div>
+                <TwitterPostSkeletonList count={3} />
               )}
               {!twitterQuery.isLoading && (!twitterQuery.data?.tweets || twitterQuery.data.tweets.length === 0) && (
                 <div className="glass-card p-6 rounded-xl text-center">

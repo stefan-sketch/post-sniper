@@ -1,7 +1,7 @@
 import { MessageCircle, ChevronDown, ChevronUp, ExternalLink, X } from 'lucide-react';
-import React, { useState } from "react";
-import { createPortal } from "react-dom";
-import { trpc } from "@/lib/trpc";
+import React, { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { RedditPostSkeletonList } from './RedditPostSkeleton';
 
 interface RedditPost {
   id: string;
@@ -105,9 +105,7 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
   if (loading) {
     return (
-      <div className="glass-card p-6 rounded-xl text-center">
-        <p className="text-muted-foreground">Loading Reddit posts...</p>
-      </div>
+      <RedditPostSkeletonList count={3} />
     );
   }
 
