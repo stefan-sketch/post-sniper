@@ -152,6 +152,8 @@ export default function LiveFootballHub() {
               awayTeam: newMatch.awayTeam,
               homeScore: newMatch.homeScore,
               awayScore: newMatch.awayScore,
+              homeBadge: newMatch.homeTeamLogo,
+              awayBadge: newMatch.awayTeamLogo,
               scoringTeam: scoringTeam,
               timestamp: Date.now(),
             });
