@@ -947,7 +947,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
 
               {/* Center: Page selector in a box */}
-              <div className="flex gap-2 px-3 bg-gray-800/40 rounded-md border border-gray-700/50 justify-between items-center" style={{ height: '28px' }}>
+              <div className="flex px-3 bg-gray-800/40 rounded-md border border-gray-700/50 justify-evenly items-center" style={{ height: '28px' }}>
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
@@ -994,14 +994,16 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     <button
                       onClick={() => handlePost()}
                       disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-3 py-1 rounded-l-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-3 rounded-l-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ height: '28px' }}
                     >
                       {isUploading ? "Posting..." : "Post"}
                     </button>
                     <button
                       onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
                       disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-1 py-1 rounded-r-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20 flex items-center justify-center"
+                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-1 rounded-r-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20 flex items-center justify-center"
+                      style={{ height: '28px' }}
                     >
                       <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
