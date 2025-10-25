@@ -15,7 +15,8 @@ export const redditRouter = router({
         
         const db = await getDb();
         if (!db) {
-          throw new Error('Database not available');
+          console.warn('[Reddit] Database not available, returning empty array');
+          return [];
         }
 
         // Fetch posts from database, sorted by creation time
@@ -44,8 +45,11 @@ export const redditRouter = router({
           domain: post.domain,
         }));
       } catch (error) {
-        console.error('Error fetching Reddit posts:', error);
-        throw new Error('Failed to fetch Reddit posts');
+        console.error('[Reddit] Error fetching Reddit posts:', error);
+        // If table doesn't exist yet, return empty array
+        // drizzle-kit push will create it on next deployment
+        console.warn('[Reddit] Returning empty array (table may not exist yet)');
+        return [];
       }
     }),
 
