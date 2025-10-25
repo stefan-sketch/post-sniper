@@ -1097,25 +1097,29 @@ export default function Home() {
                     {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
-                        className="flex items-center gap-1.5 bg-purple-500/20 border border-purple-400/30 rounded-lg px-3 py-1.5"
+                        className={`flex items-center bg-purple-500/20 border border-purple-400/30 rounded-lg ${
+                          feedColumns === 3 
+                            ? 'gap-0.5 px-1.5 py-1' 
+                            : 'gap-1.5 px-3 py-1.5'
+                        }`}
                         style={{ height: '28px' }}
                       >
                         {/* Home Team */}
-                        <div className="flex items-center gap-1">
+                        <div className={feedColumns === 3 ? 'flex items-center gap-0.5' : 'flex items-center gap-1'}>
                           {goal.homeBadge && (
                             <img 
                               src={goal.homeBadge} 
                               alt={goal.homeTeam}
-                              className="w-4 h-4 object-contain"
+                              className={feedColumns === 3 ? 'w-3 h-3 object-contain' : 'w-4 h-4 object-contain'}
                             />
                           )}
-                          <span className="text-sm font-semibold text-white">
-                            {goal.homeTeam.length > 8 ? goal.homeTeam.substring(0, 8) : goal.homeTeam}
+                          <span className={feedColumns === 3 ? 'text-xs font-semibold text-white' : 'text-sm font-semibold text-white'}>
+                            {goal.homeTeam.length > (feedColumns === 3 ? 6 : 8) ? goal.homeTeam.substring(0, feedColumns === 3 ? 6 : 8) : goal.homeTeam}
                           </span>
                         </div>
                         
                         {/* Score - highlight scoring team in green */}
-                        <div className="text-sm font-black px-1.5">
+                        <div className={feedColumns === 3 ? 'text-xs font-black px-1' : 'text-sm font-black px-1.5'}>
                           <span className={goal.scoringTeam === 'home' ? 'text-green-400' : 'text-white'}>
                             {goal.homeScore}
                           </span>
@@ -1126,21 +1130,21 @@ export default function Home() {
                         </div>
                         
                         {/* Away Team */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-semibold text-white">
-                            {goal.awayTeam.length > 8 ? goal.awayTeam.substring(0, 8) : goal.awayTeam}
+                        <div className={feedColumns === 3 ? 'flex items-center gap-0.5' : 'flex items-center gap-1'}>
+                          <span className={feedColumns === 3 ? 'text-xs font-semibold text-white' : 'text-sm font-semibold text-white'}>
+                            {goal.awayTeam.length > (feedColumns === 3 ? 6 : 8) ? goal.awayTeam.substring(0, feedColumns === 3 ? 6 : 8) : goal.awayTeam}
                           </span>
                           {goal.awayBadge && (
                             <img 
                               src={goal.awayBadge} 
                               alt={goal.awayTeam}
-                              className="w-4 h-4 object-contain"
+                              className={feedColumns === 3 ? 'w-3 h-3 object-contain' : 'w-4 h-4 object-contain'}
                             />
                           )}
                         </div>
                         
                         {/* Blinking GOAL text */}
-                        <span className="text-sm font-black text-yellow-400 animate-pulse ml-1">GOAL!</span>
+                        <span className={feedColumns === 3 ? 'text-xs font-black text-yellow-400 animate-pulse ml-0.5' : 'text-sm font-black text-yellow-400 animate-pulse ml-1'}>GOAL!</span>
                       </div>
                     ))}
                   </div>
