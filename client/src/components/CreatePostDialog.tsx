@@ -940,7 +940,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
 
               {/* Center: Page selector in a box */}
-              <div className="flex gap-1.5 px-2 py-1 bg-gray-800/40 rounded-md border border-gray-700/50">
+              <div className="flex gap-1 px-1.5 py-1 bg-gray-800/40 rounded-md border border-gray-700/50 justify-between">
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
