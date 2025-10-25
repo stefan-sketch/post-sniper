@@ -7,11 +7,13 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Login, { checkAuth } from "./pages/Login";
+import ComingSoon from "./pages/ComingSoon";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/coming-soon"} component={ComingSoon} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

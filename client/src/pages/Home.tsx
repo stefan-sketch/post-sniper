@@ -765,8 +765,35 @@ export default function Home() {
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: MATCHDAY football (iOS) or Football Toggle (Desktop) */}
+          {/* Left: MATCHDAY football (iOS) or Football Toggle/Search (Desktop) */}
           <div className="flex items-center gap-2">
+            {/* Search button - Desktop only, Pages mode only, far left */}
+            {currentView === 'pages' && (
+              <button
+                onClick={() => {
+                  // Navigate to coming soon page
+                  window.location.href = '/coming-soon';
+                }}
+                className="hidden md:flex items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors duration-200 active:scale-95"
+                title="Search"
+                style={{ background: 'none', border: 'none', padding: 0 }}
+              >
+                {/* Magnifying glass icon */}
+                <svg 
+                  className="w-[18px] h-[18px]"
+                  viewBox="0 0 24 24" 
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </button>
+            )}
+            
             {/* MATCHDAY button - iOS only, far left, works in both Feed and Pages mode */}
             <button
               onClick={() => {

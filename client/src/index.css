@@ -493,16 +493,15 @@
   font-size: 0.7rem;
 }
 
-/* Make tweet images fill edge-to-edge */
-.compact-posts .glass-card > div:last-child {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
+/* Make all images (Facebook & Twitter) fill edge-to-edge in 3-column mode */
+.compact-posts .glass-card .relative.w-full.overflow-hidden.cursor-pointer {
+  margin-left: -0.5rem !important;
+  margin-right: -0.5rem !important;
+  width: calc(100% + 1rem) !important;
 }
 
 .compact-posts .glass-card img:not(.rounded-full) {
   width: 100% !important;
-  margin: 0 !important;
   border-radius: 0 !important;
 }
 
