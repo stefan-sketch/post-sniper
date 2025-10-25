@@ -1043,48 +1043,54 @@ export default function Home() {
               {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
               <div className="relative flex-1">
                 {activeGoals.length > 0 ? (
-                  /* Goal Scores - up to 2 side by side */
-                  <div className="flex items-center justify-center gap-3">
-                    {activeGoals.map((goal) => (
+                  /* Goal Score - single goal display */
+                  <div className="flex items-center justify-center">
+                    {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
-                        className="flex items-center gap-2 bg-purple-500/20 border border-purple-400/30 rounded-lg px-3 py-2 animate-bounce"
+                        className="flex items-center gap-1.5 bg-purple-500/20 border border-purple-400/30 rounded-lg px-2 py-1"
                       >
                         {/* Home Team */}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           {goal.homeBadge && (
                             <img 
                               src={goal.homeBadge} 
                               alt={goal.homeTeam}
-                              className="w-6 h-6 object-contain"
+                              className="w-4 h-4 object-contain"
                             />
                           )}
-                          <span className="text-sm font-semibold text-white">
+                          <span className="text-xs font-semibold text-white">
                             {goal.homeTeam.length > 10 ? goal.homeTeam.substring(0, 10) : goal.homeTeam}
                           </span>
                         </div>
                         
-                        {/* Score */}
-                        <div className="text-xl font-black text-purple-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse px-2">
-                          {goal.homeScore} - {goal.awayScore}
+                        {/* Score - highlight scoring team in green */}
+                        <div className="text-sm font-black px-1.5">
+                          <span className={goal.scoringTeam === 'home' ? 'text-green-400' : 'text-white'}>
+                            {goal.homeScore}
+                          </span>
+                          <span className="text-white"> - </span>
+                          <span className={goal.scoringTeam === 'away' ? 'text-green-400' : 'text-white'}>
+                            {goal.awayScore}
+                          </span>
                         </div>
                         
                         {/* Away Team */}
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-semibold text-white">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-semibold text-white">
                             {goal.awayTeam.length > 10 ? goal.awayTeam.substring(0, 10) : goal.awayTeam}
                           </span>
                           {goal.awayBadge && (
                             <img 
                               src={goal.awayBadge} 
                               alt={goal.awayTeam}
-                              className="w-6 h-6 object-contain"
+                              className="w-4 h-4 object-contain"
                             />
                           )}
                         </div>
                         
                         {/* Goal indicator */}
-                        <span className="text-lg">⚽</span>
+                        <span className="text-sm">⚽</span>
                       </div>
                     ))}
                   </div>

@@ -14,7 +14,7 @@ interface GoalCelebration {
 }
 
 interface GoalCelebrationContextType {
-  activeGoals: GoalCelebration[]; // Up to 2 active goals
+  activeGoals: GoalCelebration[]; // Up to 1 active goal at a time
   celebrateGoal: (goal: GoalCelebration) => void;
 }
 
@@ -26,11 +26,11 @@ export function GoalCelebrationProvider({ children }: { children: ReactNode }) {
 
   const celebrateGoal = (goal: GoalCelebration) => {
     setActiveGoals(prev => {
-      // If we have space (less than 2 active goals), add it directly
-      if (prev.length < 2) {
+      // If we have space (less than 1 active goal), add it directly
+      if (prev.length < 1) {
         const newGoal = { ...goal, id: `${goal.matchId}-${Date.now()}` };
         
-        // Clear this goal after 30 seconds
+        // Clear this goal after 20 seconds
         setTimeout(() => {
           setActiveGoals(current => {
             const filtered = current.filter(g => g.id !== newGoal.id);
@@ -44,7 +44,7 @@ export function GoalCelebrationProvider({ children }: { children: ReactNode }) {
                 // Set timer for the queued goal
                 setTimeout(() => {
                   setActiveGoals(curr => curr.filter(g => g.id !== nextGoal.id));
-                }, 30000);
+                }, 20000);
                 
                 return remaining;
               }
@@ -53,11 +53,11 @@ export function GoalCelebrationProvider({ children }: { children: ReactNode }) {
             
             return filtered;
           });
-        }, 30000);
+        }, 20000);
         
         return [...prev, newGoal];
       } else {
-        // Queue it if we already have 2 active goals
+        // Queue it if we already have 1 active goal
         const newGoal = { ...goal, id: `${goal.matchId}-${Date.now()}` };
         setGoalQueue(queue => [...queue, newGoal]);
         return prev;
