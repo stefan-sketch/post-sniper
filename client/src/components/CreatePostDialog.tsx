@@ -1183,21 +1183,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               /> */}
             </div>
 
-            {/* Clear button - Show when drawing is enabled and rectangle exists */}
-            {drawingEnabled && image && !cropMode && rectangles.length > 0 && (
-              <div className="flex justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setRectangles([])}
-                  className="text-xs"
-                  title="Clear drawn box"
-                >
-                  Clear Box
-                </Button>
-              </div>
-            )}
+
 
             {/* Overlay Image Controls - DISABLED */}
             {/* {overlayImage && image && !cropMode && (
@@ -1432,14 +1418,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   {!useWatermark && (
                     <button
                       onClick={() => {
+                        // Reset image
                         setImage(null);
                         setCrop(undefined);
                         setCompletedCrop(undefined);
                         setCropMode(false);
                         setCroppedImage(null);
+                        
+                        // Reset all image editing states
                         setUseWatermark(false);
+                        setRectangles([]);
+                        setDrawingEnabled(false);
+                        setOverlayText('');
                         setUseGradient(false);
-                        setOverlayText("");
+                        setTextPosition({ x: 50, y: 50 });
+                        setTextSize(32);
+                        setTextColor('white');
+                        setIsEditingText(false);
                       }}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-600 text-white flex items-center justify-center transition-all hover:scale-110 z-20"
                       title="Remove image"
