@@ -1040,52 +1040,65 @@ export default function Home() {
         >
           <div className="flex items-center justify-center mb-2" style={{ minHeight: '28px' }}>
             {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
-            <div className="relative flex-1 flex items-center justify-center" style={{ perspective: '1000px', minHeight: '28px' }}>
+            <div className="relative flex-1 flex items-center justify-center" style={{ perspective: '1000px', height: '28px', overflow: 'visible' }}>
               <div 
-                className="relative w-full flex items-center justify-center"
+                className="relative flex items-center justify-center"
                 style={{
                   transformStyle: 'preserve-3d',
                   transition: 'transform 0.6s',
                   transform: activeGoals.length > 0 ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                  minHeight: '28px'
+                  height: '28px',
+                  display: 'inline-flex'
                 }}
               >
                 {/* Front: Facebook LIVE button */}
-                <button
-                  onClick={() => setShowPageFilter(!showPageFilter)}
-                  className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity absolute"
+                <div
                   style={{ 
-                    lineHeight: '1.5rem', 
-                    padding: 0, 
-                    background: 'none', 
-                    border: 'none', 
-                    cursor: 'pointer',
+                    position: 'absolute',
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(0deg)',
-                    opacity: activeGoals.length > 0 ? 0 : 1,
-                    pointerEvents: activeGoals.length > 0 ? 'none' : 'auto'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '28px'
                   }}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  LIVE
-                </button>
+                  <button
+                    onClick={() => setShowPageFilter(!showPageFilter)}
+                    className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity"
+                    style={{ 
+                      lineHeight: '1.5rem', 
+                      padding: 0, 
+                      background: 'none', 
+                      border: 'none', 
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    LIVE
+                  </button>
+                </div>
 
                 {/* Back: Goal Score */}
                 {activeGoals.length > 0 && (
                   <div 
-                    className="absolute"
                     style={{
+                      position: 'absolute',
                       backfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)'
+                      transform: 'rotateY(180deg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '28px'
                     }}
                   >
                     {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
                         className="flex items-center gap-1.5 bg-purple-500/20 border border-purple-400/30 rounded-lg px-3 py-1.5"
-                        style={{ minHeight: '28px' }}
+                        style={{ height: '28px' }}
                       >
                         {/* Home Team */}
                         <div className="flex items-center gap-1">
