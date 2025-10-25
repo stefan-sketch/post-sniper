@@ -1534,7 +1534,17 @@ export default function Home() {
 
       {/* Mobile: Single Column with Switchable View */}
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
-        {mobileView === 'facebook' ? (
+        {mobileView === 'matchday' ? (
+          <div className="flex flex-col h-full overflow-hidden">
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+              </div>
+            }>
+              <LiveFootballHub />
+            </Suspense>
+          </div>
+        ) : mobileView === 'facebook' ? (
           <div className="flex flex-col h-full overflow-hidden">
             {/* Clean LIVE/POPULAR toggle - redesigned from scratch */}
             <div className="flex items-center justify-between px-4 py-2">
@@ -1970,16 +1980,6 @@ export default function Home() {
             <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               <RedditFeed sort={redditSort === 'popular' ? 'top' : 'new'} />
             </div>
-          </div>
-        ) : mobileView === 'matchday' ? (
-          <div className="flex flex-col h-full overflow-hidden">
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-              </div>
-            }>
-              <LiveFootballHub />
-            </Suspense>
           </div>
         ) : null}
         
