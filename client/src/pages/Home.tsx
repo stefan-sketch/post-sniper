@@ -1538,58 +1538,46 @@ export default function Home() {
       <div className="md:hidden flex flex-col flex-1 overflow-hidden">
         {mobileView === 'facebook' ? (
           <div className="flex flex-col h-full overflow-hidden">
-            {/* Simplified LIVE/POPULAR toggle - single clean row */}
-            <div className="flex items-center justify-center gap-3 px-4 py-2">
-              {/* LIVE button */}
-              <button
-                onClick={() => setFacebookView('live')}
-                className="relative px-2 py-1 transition-all"
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                <span className={`text-[10px] font-bold tracking-wider ${
-                  facebookView === 'live' ? 'text-[#1877F2]' : 'text-gray-600'
-                }`}>
-                  LIVE
-                </span>
-                {facebookView === 'live' && (
-                  <div className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-red-500" />
-                )}
-              </button>
+            {/* Clean LIVE/POPULAR toggle - redesigned from scratch */}
+            <div className="flex items-center justify-between px-4 py-2">
+              {/* Left: LIVE/POPULAR buttons */}
+              <div className="flex items-center gap-4">
+                {/* LIVE button */}
+                <button
+                  onClick={() => setFacebookView('live')}
+                  className="relative transition-all"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                >
+                  <span className={`text-sm font-bold tracking-wide ${
+                    facebookView === 'live' ? 'text-[#1877F2]' : 'text-gray-500'
+                  }`}>
+                    LIVE
+                  </span>
+                  {facebookView === 'live' && (
+                    <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#1877F2]" />
+                  )}
+                </button>
+                
+                {/* POPULAR button */}
+                <button
+                  onClick={() => setFacebookView('popular')}
+                  className="relative transition-all"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}
+                >
+                  <span className={`text-sm font-bold tracking-wide ${
+                    facebookView === 'popular' ? 'text-[#22c55e]' : 'text-gray-500'
+                  }`}>
+                    POPULAR
+                  </span>
+                  {facebookView === 'popular' && (
+                    <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#22c55e]" />
+                  )}
+                </button>
+              </div>
               
-              {/* Minimal toggle switch */}
-              <button
-                onClick={() => setFacebookView(facebookView === 'live' ? 'popular' : 'live')}
-                className="relative w-8 h-4 rounded-full transition-colors duration-200 focus:outline-none"
-                style={{
-                  backgroundColor: facebookView === 'live' ? '#1877F2' : '#22c55e'
-                }}
-              >
-                <span
-                  className="absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform duration-200 shadow-sm"
-                  style={{
-                    transform: facebookView === 'live' ? 'translateX(2px)' : 'translateX(18px)'
-                  }}
-                />
-              </button>
-              
-              {/* POPULAR button */}
-              <button
-                onClick={() => setFacebookView('popular')}
-                className="relative px-2 py-1 transition-all"
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                <span className={`text-[10px] font-bold tracking-wider ${
-                  facebookView === 'popular' ? 'text-[#22c55e]' : 'text-gray-600'
-                }`}>
-                  POPULAR
-                </span>
-                {facebookView === 'popular' && (
-                  <div className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-[#22c55e]" />
-                )}
-              </button>
-              
-              {/* Divider */}
-              <div className="h-4 w-px bg-gray-700" />
+              {/* Right: Divider + Filter/Time button */}
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-px bg-gray-700" />
               
               {/* Filter button - always visible, changes based on mode */}
               {facebookView === 'live' ? (
@@ -1675,6 +1663,7 @@ export default function Home() {
                 )}
               </div>
               )}
+              </div>
             </div>
             {/* Printer line - thin red line where new posts emerge from */}
             <div className="relative h-0.5 bg-red-500/30 mb-2 overflow-hidden">
