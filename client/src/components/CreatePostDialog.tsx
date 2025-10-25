@@ -912,9 +912,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     <Dialog open={open} onOpenChange={handleBackdropClick}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-4" showCloseButton={false}>
         <div className="space-y-3">
-          {/* Compact Header - Two Row Design */}
-          <div className="space-y-2">
-            {/* Row 1: Window controls (left) and Download + Post buttons (right) */}
+          {/* Compact Header - Single Row Design */}
+          <div>
+            {/* Single Row: Window controls | Page selector | Download + Post */}
             <div className="flex items-center justify-between">
               {/* Left: X and - */}
               <div className="flex gap-2">
@@ -934,6 +934,38 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 >
                   <Minus className="w-4 h-4" strokeWidth={2.5} />
                 </button>
+              </div>
+
+              {/* Center: Page selector in a box */}
+              <div className="flex gap-1.5 px-2 py-1 bg-gray-800/40 rounded-md border border-gray-700/50">
+                {PAGES.map((page) => {
+                  const isSelected = selectedPage === page.id;
+                  
+                  return (
+                    <button
+                      key={page.id}
+                      onClick={() => selectPage(page.id)}
+                      className="transition-all duration-200 hover:scale-110 active:scale-95"
+                      title={page.shortName}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        padding: 0,
+                        opacity: isSelected ? 1 : 0.5,
+                        filter: isSelected ? 'brightness(1.2)' : 'brightness(1)'
+                      }}
+                    >
+                      <img 
+                        src={page.profilePicture} 
+                        alt={page.shortName}
+                        className="w-6 h-6 rounded-full object-cover"
+                        style={{
+                          border: isSelected ? '2px solid #1877F2' : '2px solid transparent'
+                        }}
+                      />
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Right: Download + Post buttons */}
@@ -1007,43 +1039,6 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   Complete
                 </button>
               )}
-            </div>
-
-            {/* Row 2: Page selector (left) and Download (right) */}
-            <div className="flex items-center justify-between">
-              {/* Left: Page icons */}
-              <div className="flex gap-2">
-                {PAGES.map((page) => {
-                  const isSelected = selectedPage === page.id;
-                  
-                  return (
-                    <button
-                      key={page.id}
-                      onClick={() => selectPage(page.id)}
-                      className="transition-all duration-200 hover:scale-110 active:scale-95"
-                      title={page.shortName}
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        padding: 0,
-                        opacity: isSelected ? 1 : 0.5,
-                        filter: isSelected ? 'brightness(1.2)' : 'brightness(1)'
-                      }}
-                    >
-                      <img 
-                        src={page.profilePicture} 
-                        alt={page.shortName}
-                        className="w-6 h-6 rounded-full object-cover"
-                        style={{
-                          border: isSelected ? '2px solid #1877F2' : '2px solid transparent'
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-
-
             </div>
           </div>
 
