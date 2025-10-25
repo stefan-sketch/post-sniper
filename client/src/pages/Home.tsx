@@ -8,6 +8,7 @@ import { Settings, Play, Pause, Bell, TrendingUp, Loader2, RefreshCw, ArrowUp, P
 import PostCard from "@/components/PostCard";
 import FacebookPageColumn from "@/components/FacebookPageColumn";
 import { RedditFeed } from "@/components/RedditFeed";
+import { ImageModal } from "@/components/ImageModal";
 
 // Lazy load heavy components for better initial load performance
 const SettingsDialog = lazy(() => import("@/components/SettingsDialog"));
@@ -2328,28 +2329,11 @@ export default function Home() {
         )}
       </Suspense>
       
-      {/* Twitter Image Modal */}
-      {expandedTwitterImage && createPortal(
-        <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setExpandedTwitterImage(null)}
-        >
-          <button
-            onClick={() => setExpandedTwitterImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all z-[10000]"
-            title="Close"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <img 
-            src={expandedTwitterImage} 
-            alt="Expanded view"
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>,
-        document.body
-      )}
+      {/* Twitter Image Modal with iOS gestures */}
+      <ImageModal 
+        imageUrl={expandedTwitterImage} 
+        onClose={() => setExpandedTwitterImage(null)} 
+      />
     </div>
   );
 }

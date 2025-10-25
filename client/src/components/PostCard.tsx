@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getOptimizedImageUrl, generateSrcSet, getImageSizes } from "@/lib/imageOptimization";
+import { ImageModal } from "@/components/ImageModal";
 
 interface PostCardProps {
   post: {
@@ -365,28 +366,11 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
       )}
     </div>
     
-    {/* Image Modal */}
-    {expandedImage && createPortal(
-      <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
-        onClick={() => setExpandedImage(null)}
-      >
-        <button
-          onClick={() => setExpandedImage(null)}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all z-[10000]"
-          title="Close"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <img 
-          src={expandedImage} 
-          alt="Expanded view"
-          className="max-w-full max-h-full object-contain"
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>,
-      document.body
-    )}
+    {/* Image Modal with iOS gestures */}
+    <ImageModal 
+      imageUrl={expandedImage} 
+      onClose={() => setExpandedImage(null)} 
+    />
     </>
   );
 }
