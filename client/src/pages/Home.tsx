@@ -1477,37 +1477,58 @@ export default function Home() {
                 </svg>
               </button>
               
-              {/* Facebook with LIVE/POPULAR toggle switch */}
-              <div className="flex items-center gap-3">
-                {/* iOS-style toggle switch */}
-                <div className="relative inline-flex items-center">
-                  <button
-                    onClick={() => setFacebookView(facebookView === 'live' ? 'popular' : 'live')}
-                    className="relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out focus:outline-none"
-                    style={{
-                      backgroundColor: facebookView === 'live' ? '#1877F2' : '#22c55e'
-                    }}
-                  >
-                    <span
-                      className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ease-in-out"
-                      style={{
-                        transform: facebookView === 'live' ? 'translateX(0)' : 'translateX(28px)'
-                      }}
-                    />
-                  </button>
-                  <span className="ml-2 text-sm font-semibold" style={{
-                    color: facebookView === 'live' ? '#1877F2' : '#22c55e'
-                  }}>
-                    {facebookView === 'live' ? 'LIVE' : 'POPULAR'}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Page filter dropdown - only for LIVE view */}
-              {facebookView === 'live' && (
-              <div className="relative">
+              {/* Redesigned LIVE/POPULAR toggle with integrated dropdowns */}
+              <div className="flex items-center justify-center gap-0 bg-[#1877F2]/20 rounded-full p-1 backdrop-blur-sm">
+                {/* LIVE button */}
                 <button
                   onClick={() => setShowPageFilter(!showPageFilter)}
+                  className="relative flex flex-col items-center px-6 py-2 transition-all"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <span className="text-sm font-bold text-[#1877F2] tracking-wide">
+                    LIVE
+                  </span>
+                  {facebookView === 'live' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-full" />
+                  )}
+                </button>
+                
+                {/* Toggle switch in middle */}
+                <button
+                  onClick={() => setFacebookView(facebookView === 'live' ? 'popular' : 'live')}
+                  className="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out focus:outline-none mx-2"
+                  style={{
+                    backgroundColor: '#1877F2'
+                  }}
+                >
+                  <span
+                    className="absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-lg"
+                    style={{
+                      transform: facebookView === 'live' ? 'translateX(2px)' : 'translateX(26px)'
+                    }}
+                  />
+                </button>
+                
+                {/* POPULAR button */}
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="relative flex flex-col items-center px-6 py-2 transition-all"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <span className="text-sm font-bold text-[#1877F2] tracking-wide">
+                    POPULAR
+                  </span>
+                  {facebookView === 'popular' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1877F2] rounded-full" />
+                  )}
+                </button>
+              </div>
+              
+              {/* Page filter dropdown - opens when tapping LIVE */}
+              {showPageFilter && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowPageFilter(false)}
                   className="page-filter-trigger text-lg font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
@@ -1558,15 +1579,15 @@ export default function Home() {
               </div>
               )}
               
-              {/* Time filter dropdown - only for POPULAR view */}
-              {facebookView === 'popular' && (
+              {/* Time filter dropdown - opens when tapping POPULAR */}
+              {showTimeFilter && (
               <div className="relative">
                 <button
-                  onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="time-filter-trigger px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
+                  onClick={() => setShowTimeFilter(false)}
+                  className="time-filter-trigger px-4 py-2 rounded-full text-sm font-medium transition-all bg-[#1877F2] hover:bg-[#1877F2]/80 text-white shadow-lg flex items-center gap-2"
                 >
                   {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
