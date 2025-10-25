@@ -1553,9 +1553,6 @@ export default function Home() {
                   }`}>
                     LIVE
                   </span>
-                  {facebookView === 'live' && (
-                    <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#1877F2]" />
-                  )}
                 </button>
                 
                 {/* POPULAR button */}
@@ -1569,9 +1566,6 @@ export default function Home() {
                   }`}>
                     POPULAR
                   </span>
-                  {facebookView === 'popular' && (
-                    <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-[#22c55e]" />
-                  )}
                 </button>
               </div>
               
@@ -1702,45 +1696,46 @@ export default function Home() {
           </div>
         ) : mobileView === 'twitter' ? (
           <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex flex-col items-center mb-3 flex-shrink-0">
-              <div className="flex items-center justify-center w-full px-4 mb-2">
-                <div className="flex items-center gap-3">
-                  <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            {/* Simplified Twitter header - centered X logo with dropdown */}
+            <div className="flex items-center justify-center px-4 py-2 mb-3 flex-shrink-0">
+              {/* Centered X logo */}
+              <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              
+              {/* Spacer */}
+              <div className="flex-1" />
+              
+              {/* Time filter dropdown on right */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="time-filter-trigger px-2 py-1 rounded text-[10px] font-bold text-white hover:bg-white/10 transition-all flex items-center gap-1"
+                >
+                  {twitterTimeFilter === 'live' ? 'LIVE' : twitterTimeFilter === 'today' ? 'TODAY' : twitterTimeFilter.toUpperCase()}
+                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                  <h2 className="text-lg font-semibold text-blue-400">
-                    X Football Feed
-                  </h2>
-                </div>
-                
-                <div className="w-9" />
-                {/* Time filter dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowTimeFilter(!showTimeFilter)}
-                    className="time-filter-trigger px-3 py-1 rounded-full text-xs font-medium transition-all bg-white/10 hover:bg-white/20 text-white shadow-lg flex items-center gap-1 border border-white/20"
-                  >
-                    {twitterTimeFilter === 'live' ? 'LIVE' : twitterTimeFilter === 'today' ? 'Today' : twitterTimeFilter}
-                  </button>
-                  {showTimeFilter && (
-                    <div className="time-filter-dropdown absolute top-full mt-1 bg-black/90 border border-white/20 rounded-lg shadow-xl z-50 min-w-[80px] backdrop-blur-sm">
-                      {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => handleTwitterTimeFilterChange(time)}
-                          className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                            twitterTimeFilter === time ? 'text-white' : 'text-gray-400'
-                          }`}
-                        >
-                          {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                </button>
+                {showTimeFilter && (
+                  <div className="time-filter-dropdown absolute top-full right-0 mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px]">
+                    {(['live', '2hr', '6hr', 'today'] as const).map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          handleTwitterTimeFilterChange(time);
+                          setShowTimeFilter(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                          twitterTimeFilter === time ? 'bg-white/20 text-white' : 'text-gray-400'
+                        }`}
+                      >
+                        {time === 'live' ? 'LIVE' : time === 'today' ? 'Today' : time}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              {/* Blue pulsing underline */}
-              <div className="w-full h-0.5 bg-blue-500 animate-pulse"></div>
             </div>
             <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
               {twitterQuery.isLoading && (
@@ -2135,7 +2130,7 @@ export default function Home() {
           >
             <div className="flex items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
               {/* Center Navigation - 3 items (Facebook, Twitter, Reddit) */}
-              <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center justify-center gap-8">
               <button
                 onClick={() => setMobileView('facebook')}
                 className={`flex items-center justify-center transition-all p-2 ${
