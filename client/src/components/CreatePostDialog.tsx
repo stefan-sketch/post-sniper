@@ -917,20 +917,22 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             <div className="flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 {/* Close and Minimize buttons - Top Left */}
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                   <button
                     onClick={handleClose}
-                    className="flex items-center justify-center p-1 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
                     title="Close and discard"
+                    style={{ background: 'none', border: 'none', padding: 0 }}
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" strokeWidth={2.5} />
                   </button>
                   <button
                     onClick={onMinimize}
-                    className="flex items-center justify-center p-1 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
                     title="Minimize"
+                    style={{ background: 'none', border: 'none', padding: 0 }}
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-4 h-4" strokeWidth={2.5} />
                   </button>
                 </div>
 
@@ -964,32 +966,33 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
             </div>
             {!isEditingTweet && (
-              <div className="flex gap-2">
-                <Button
+              <div className="flex gap-3 items-center">
+                <button
                   onClick={handleDownload}
                   disabled={!image || !selectedPage || cropMode}
-                  className="bg-gray-700 hover:bg-gray-600 text-white px-4 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                   title="Download image in aspect ratio"
+                  style={{ background: 'none', border: 'none', padding: 0 }}
                 >
-                  <Download className="h-3.5 w-3.5" />
-                </Button>
+                  <Download className="h-4 w-4" strokeWidth={2.5} />
+                </button>
                 <div className="relative flex">
-                  <Button
+                  <button
                     onClick={() => handlePost()}
                     disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed rounded-r-none"
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploading ? "Posting..." : "Post"}
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
                     disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-2 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed rounded-l-none border-l border-white/20"
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white p-1.5 rounded-md ml-1 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
-                  </Button>
+                  </button>
                   {showScheduleDropdown && (
                     <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
                       <button
