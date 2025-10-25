@@ -24,7 +24,7 @@ import { toast } from "sonner";
 export default function Home() {
   // No authentication required - public access
   const utils = trpc.useUtils();
-  const { currentGoal } = useGoalCelebration();
+  const { activeGoals } = useGoalCelebration();
   
   // Detect iOS devices
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1040,14 +1040,53 @@ export default function Home() {
         >
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
-              {/* Facebook LIVE with integrated dropdown - or Goal Score */}
-              <div className="relative">
-                {currentGoal ? (
-                  /* Goal Score Animation */
-                  <div className="flex items-center gap-2 animate-bounce">
-                    <div className="text-2xl font-black text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse">
-                      ⚽ {currentGoal.homeScore} - {currentGoal.awayScore}
-                    </div>
+              {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
+              <div className="relative flex-1">
+                {activeGoals.length > 0 ? (
+                  /* Goal Scores - up to 2 side by side */
+                  <div className="flex items-center justify-center gap-3">
+                    {activeGoals.map((goal) => (
+                      <div 
+                        key={goal.id}
+                        className="flex items-center gap-2 bg-purple-500/20 border border-purple-400/30 rounded-lg px-3 py-2 animate-bounce"
+                      >
+                        {/* Home Team */}
+                        <div className="flex items-center gap-1.5">
+                          {goal.homeBadge && (
+                            <img 
+                              src={goal.homeBadge} 
+                              alt={goal.homeTeam}
+                              className="w-6 h-6 object-contain"
+                            />
+                          )}
+                          <span className="text-sm font-semibold text-white">
+                            {goal.homeTeam.length > 10 ? goal.homeTeam.substring(0, 10) : goal.homeTeam}
+                          </span>
+                        </div>
+                        
+                        {/* Score */}
+                        <div className="text-xl font-black text-purple-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse px-2">
+                          {goal.homeScore} - {goal.awayScore}
+                        </div>
+                        
+                        {/* Away Team */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold text-white">
+                            {goal.awayTeam.length > 10 ? goal.awayTeam.substring(0, 10) : goal.awayTeam}
+                          </span>
+                          {goal.awayBadge && (
+                            <img 
+                              src={goal.awayBadge} 
+                              alt={goal.awayTeam}
+                              className="w-6 h-6 object-contain"
+                            />
+                          )}
+                        </div>
+                        
+                        {/* Goal indicator */}
+                        <span className="text-lg">⚽</span>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <button

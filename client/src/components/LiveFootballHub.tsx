@@ -531,24 +531,69 @@ export default function LiveFootballHub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
         <div className="flex items-center justify-center gap-2 flex-1">
-          {/* Test Goal Button (for demo) */}
-          <button
-            onClick={() => {
-              celebrateGoal({
-                matchId: 'test-123',
-                homeTeam: 'Arsenal',
-                awayTeam: 'Chelsea',
-                homeScore: 2,
-                awayScore: 1,
-                scoringTeam: 'home',
-                timestamp: Date.now(),
-              });
-            }}
-            className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
-            title="Test goal celebration animation"
-          >
-            Test Goal ⚽
-          </button>
+          {/* Test Goal Buttons (for demo) */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                celebrateGoal({
+                  id: '', // Will be auto-generated
+                  matchId: 'test-1',
+                  homeTeam: 'Arsenal',
+                  awayTeam: 'Chelsea',
+                  homeScore: 2,
+                  awayScore: 1,
+                  homeBadge: 'https://resources.premierleague.com/premierleague/badges/t3.svg',
+                  awayBadge: 'https://resources.premierleague.com/premierleague/badges/t8.svg',
+                  scoringTeam: 'home',
+                  timestamp: Date.now(),
+                });
+              }}
+              className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+              title="Test goal 1"
+            >
+              Goal 1 ⚽
+            </button>
+            <button
+              onClick={() => {
+                celebrateGoal({
+                  id: '', // Will be auto-generated
+                  matchId: 'test-2',
+                  homeTeam: 'Man City',
+                  awayTeam: 'Liverpool',
+                  homeScore: 1,
+                  awayScore: 2,
+                  homeBadge: 'https://resources.premierleague.com/premierleague/badges/t43.svg',
+                  awayBadge: 'https://resources.premierleague.com/premierleague/badges/t14.svg',
+                  scoringTeam: 'away',
+                  timestamp: Date.now(),
+                });
+              }}
+              className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+              title="Test goal 2"
+            >
+              Goal 2 ⚽
+            </button>
+            <button
+              onClick={() => {
+                celebrateGoal({
+                  id: '', // Will be auto-generated
+                  matchId: 'test-3',
+                  homeTeam: 'Man Utd',
+                  awayTeam: 'Spurs',
+                  homeScore: 3,
+                  awayScore: 0,
+                  homeBadge: 'https://resources.premierleague.com/premierleague/badges/t1.svg',
+                  awayBadge: 'https://resources.premierleague.com/premierleague/badges/t6.svg',
+                  scoringTeam: 'home',
+                  timestamp: Date.now(),
+                });
+              }}
+              className="px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+              title="Test goal 3 (queued)"
+            >
+              Goal 3 ⚽
+            </button>
+          </div>
           {/* Integrated MATCHDAY + Filter dropdown */}
           <div className="relative">
             <button
