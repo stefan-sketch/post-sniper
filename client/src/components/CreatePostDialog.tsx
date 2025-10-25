@@ -864,20 +864,20 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
             <div className="flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 {/* Close and Minimize buttons - Top Left */}
-                <div className="flex gap-1.5">
+                <div className="flex gap-1">
                   <button
                     onClick={handleClose}
-                    className="flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    className="flex items-center justify-center p-1 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                     title="Close and discard"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3 h-3" />
                   </button>
                   <button
                     onClick={onMinimize}
-                    className="flex items-center justify-center p-0.5 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
+                    className="flex items-center justify-center p-1 rounded-md bg-gray-800/60 backdrop-blur-sm text-gray-400 hover:text-white hover:bg-gray-800/80 transition-all duration-200 active:scale-95 border border-gray-700/50 hover:border-gray-600/50"
                     title="Minimize"
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    <Minus className="w-3 h-3" />
                   </button>
                 </div>
 
@@ -903,7 +903,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       <img 
                         src={page.profilePicture} 
                         alt={page.shortName}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-7 h-7 rounded-full object-cover"
                       />
                     </button>
                   );
