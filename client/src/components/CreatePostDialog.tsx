@@ -947,7 +947,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
 
               {/* Center: Page selector in a box */}
-              <div className="flex px-3 bg-gray-800/40 rounded-md border border-gray-700/50 justify-evenly items-center" style={{ height: '28px' }}>
+              <div className="flex gap-4 px-3 bg-gray-800/40 rounded-md border border-gray-700/50 justify-center items-center" style={{ height: '28px' }}>
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
