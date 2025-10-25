@@ -834,19 +834,26 @@ export default function Home() {
                 title={feedColumns === 2 ? 'Show Live Football Hub' : 'Hide Live Football Hub'}
                 style={{ background: 'none', border: 'none', padding: 0 }}
               >
-                {/* Football Icon */}
+                {/* Football/Soccer ball icon - matches iOS design */}
                 <svg 
-                  className="transition-all duration-300"
-                  width="20" 
-                  height="20" 
+                  className="w-[18px] h-[18px] transition-all duration-300"
                   viewBox="0 0 24 24" 
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  {/* Football/Soccer ball */}
                   <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2 L15 8 L21 9 L16 14 L12 22 L8 14 L3 9 L9 8 Z" />
+                  <path d="M12 8l-2 5h4l-2 5" />
+                  <path d="M8.5 14.5l-3 1.5" />
+                  <path d="M15.5 14.5l3 1.5" />
+                  <path d="M6.34 6.34l1.41 1.41" />
+                  <path d="M17.66 6.34l-1.41 1.41" />
+                  <path d="M4.93 17.07l1.41-1.41" />
+                  <path d="M17.66 17.66l1.41-1.41" />
+                  <path d="M6.34 17.66l-1.41 1.41" />
+                  <path d="M19.07 4.93l-1.41 1.41" />
                 </svg>
               </button>
             )}
