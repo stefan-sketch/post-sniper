@@ -852,77 +852,61 @@ select:focus {
   border: 2px solid rgba(56, 189, 248, 0.9); /* Cyan border - thinner */
 }
 
-/* Corner handles - much smaller and sleeker */
+/* Corner handles - hidden, only show edge drag lines */
 .ReactCrop__drag-handle {
   position: absolute;
-  width: 12px; /* Reduced from default ~30px */
-  height: 12px; /* Reduced from default ~30px */
-  background-color: rgba(56, 189, 248, 0.95); /* Cyan color */
-  border: 2px solid white;
-  border-radius: 2px; /* Slightly rounded */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background-color: rgba(56, 189, 248, 0.8);
+  border: none;
+  box-shadow: none;
 }
 
-/* Corner positions - adjusted for smaller handles */
-.ReactCrop__drag-handle.ord-nw {
-  top: -6px;
-  left: -6px;
-  cursor: nw-resize;
-}
-
-.ReactCrop__drag-handle.ord-ne {
-  top: -6px;
-  right: -6px;
-  cursor: ne-resize;
-}
-
-.ReactCrop__drag-handle.ord-sw {
-  bottom: -6px;
-  left: -6px;
-  cursor: sw-resize;
-}
-
+/* Corner handles - hidden */
+.ReactCrop__drag-handle.ord-nw,
+.ReactCrop__drag-handle.ord-ne,
+.ReactCrop__drag-handle.ord-sw,
 .ReactCrop__drag-handle.ord-se {
-  bottom: -6px;
-  right: -6px;
-  cursor: se-resize;
+  display: none !important;
 }
 
-/* Edge handles - smaller and more subtle */
+/* Edge handles - small drag lines */
 .ReactCrop__drag-handle.ord-n {
-  top: -6px;
+  top: -1px;
   left: 50%;
   transform: translateX(-50%);
   cursor: n-resize;
-  width: 20px; /* Slightly wider for easier grabbing */
-  height: 8px; /* Thinner */
+  width: 30px;
+  height: 2px;
+  border-radius: 1px;
 }
 
 .ReactCrop__drag-handle.ord-s {
-  bottom: -6px;
+  bottom: -1px;
   left: 50%;
   transform: translateX(-50%);
   cursor: s-resize;
-  width: 20px;
-  height: 8px;
+  width: 30px;
+  height: 2px;
+  border-radius: 1px;
 }
 
 .ReactCrop__drag-handle.ord-e {
   top: 50%;
-  right: -6px;
+  right: -1px;
   transform: translateY(-50%);
   cursor: e-resize;
-  width: 8px;
-  height: 20px;
+  width: 2px;
+  height: 30px;
+  border-radius: 1px;
 }
 
 .ReactCrop__drag-handle.ord-w {
   top: 50%;
-  left: -6px;
+  left: -1px;
   transform: translateY(-50%);
   cursor: w-resize;
-  width: 8px;
-  height: 20px;
+  width: 2px;
+  height: 30px;
+  border-radius: 1px;
 }
 
 /* Rule of thirds grid lines - more subtle */
@@ -964,11 +948,13 @@ select:focus {
   top: 66.666%;
 }
 
-/* Hover effects for handles */
-.ReactCrop__drag-handle:hover {
+/* Hover effects for edge handles only */
+.ReactCrop__drag-handle.ord-n:hover,
+.ReactCrop__drag-handle.ord-s:hover,
+.ReactCrop__drag-handle.ord-e:hover,
+.ReactCrop__drag-handle.ord-w:hover {
   background-color: rgba(56, 189, 248, 1);
-  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.5);
-  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }
 
 /* Remove the default drag bar styles */
