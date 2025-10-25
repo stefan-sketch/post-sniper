@@ -976,19 +976,13 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 >
                   <Download className="h-4 w-4" strokeWidth={2.5} />
                 </button>
-                <div className="relative flex">
-                  <button
-                    onClick={() => handlePost()}
-                    disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isUploading ? "Posting..." : "Post"}
-                  </button>
+                <div className="relative">
                   <button
                     onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
                     disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white p-1.5 rounded-md ml-1 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
+                    <span>{isUploading ? "Posting..." : "Post"}</span>
                     <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
@@ -997,10 +991,19 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
                       <button
                         onClick={() => {
-                          handlePost(5);
+                          handlePost();
                           setShowScheduleDropdown(false);
                         }}
                         className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors first:rounded-t-lg"
+                      >
+                        Post Now
+                      </button>
+                      <button
+                        onClick={() => {
+                          handlePost(5);
+                          setShowScheduleDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors"
                       >
                         Post in 5 min
                       </button>
