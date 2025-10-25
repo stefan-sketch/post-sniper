@@ -57,6 +57,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [overlayText, setOverlayText] = useState("");
   const [useGradient, setUseGradient] = useState(false);
+  const [gradientType, setGradientType] = useState<'bottom' | 'full'>('bottom');
+  const [showGradientDropdown, setShowGradientDropdown] = useState(false);
   const [textBoxPosition, setTextBoxPosition] = useState({ x: 50, y: 50 }); // percentage from top-left
   const [textBoxWidth, setTextBoxWidth] = useState(60); // percentage of image width
   const [fontSize, setFontSize] = useState(48); // base font size in pixels
@@ -373,12 +375,25 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
         // Add gradient overlay if enabled
         if (useGradient) {
-          // Start gradient higher up (50% of image) and extend to very bottom
-          const gradient = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
-          gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-          gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if (gradientType === 'bottom') {
+            // Bottom gradient only
+            const gradient = ctx.createLinearGradient(0, canvas.height * 0.5, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          } else if (gradientType === 'full') {
+            // Full vignette effect - radial gradient from center
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.max(canvas.width, canvas.height) * 0.7;
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
         }
 
         // Add text overlay if provided
@@ -547,7 +562,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = baseImage;
     });
-  }, [useGradient, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, borderRadius]);
+  }, [useGradient, gradientType, overlayText, textBoxPosition, textBoxWidth, fontSize, rectangles, borderRadius]);
 
   // Handle confirming the crop
   const handleConfirmCrop = async () => {
@@ -1112,24 +1127,65 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 <Droplet className="h-3 w-3" />
               </Button>
 
-              {/* Gradient Button */}
-              <Button
-                type="button"
-                variant={useGradient ? "default" : "outline"}
-                size="sm"
-                onClick={() => setUseGradient(!useGradient)}
-                disabled={!image || cropMode}
-                className={`flex-1 transition-all duration-200 px-2 ${
-                  !image || cropMode
-                    ? "opacity-50 cursor-not-allowed"
-                    : useGradient
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white"
-                    : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
-                }`}
-                title="Add gradient overlay"
-              >
-                <Layers className="h-3 w-3" />
-              </Button>
+              {/* Gradient Button with Dropdown */}
+              <div className="relative flex-1">
+                <Button
+                  type="button"
+                  variant={useGradient ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowGradientDropdown(!showGradientDropdown)}
+                  disabled={!image || cropMode}
+                  className={`w-full transition-all duration-200 px-2 ${
+                    !image || cropMode
+                      ? "opacity-50 cursor-not-allowed"
+                      : useGradient
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white"
+                      : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
+                  }`}
+                  title="Add gradient overlay"
+                >
+                  <Layers className="h-3 w-3" />
+                </Button>
+                {showGradientDropdown && !cropMode && image && (
+                  <div className="absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-[9999] min-w-[120px]">
+                    <button
+                      onClick={() => {
+                        setUseGradient(true);
+                        setGradientType('bottom');
+                        setShowGradientDropdown(false);
+                      }}
+                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors first:rounded-t-lg ${
+                        useGradient && gradientType === 'bottom' ? 'text-cyan-400' : 'text-white/60'
+                      }`}
+                    >
+                      Bottom
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUseGradient(true);
+                        setGradientType('full');
+                        setShowGradientDropdown(false);
+                      }}
+                      className={`w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors last:rounded-b-lg ${
+                        useGradient && gradientType === 'full' ? 'text-cyan-400' : 'text-white/60'
+                      }`}
+                    >
+                      Full
+                    </button>
+                    {useGradient && (
+                      <button
+                        onClick={() => {
+                          setUseGradient(false);
+                          setShowGradientDropdown(false);
+                        }}
+                        className="w-full px-3 py-2 text-xs font-medium text-left hover:bg-white/10 transition-colors border-t border-white/10 text-red-400 last:rounded-b-lg"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Text Button */}
               <Button
@@ -1527,7 +1583,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                         transform: 'translate(-50%, -50%)',
                         width: imgRef.current.clientWidth,
                         height: imgRef.current.clientHeight,
-                        background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)',
+                        background: gradientType === 'bottom' 
+                          ? 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)'
+                          : 'radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%)',
                       }}
                     />
                   )}
