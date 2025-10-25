@@ -1163,86 +1163,19 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               /> */}
             </div>
 
-            {/* Drawing Color Picker - Show when drawing is enabled */}
-            {drawingEnabled && image && !cropMode && (
-              <div className="space-y-2">
-                <div className="flex gap-2 items-center justify-center">
-                  <span className="text-sm text-gray-400">Color:</span>
-                <button
+            {/* Clear button - Show when drawing is enabled and rectangles exist */}
+            {drawingEnabled && image && !cropMode && rectangles.length > 0 && (
+              <div className="flex justify-center">
+                <Button
                   type="button"
-                  onClick={() => setDrawingColor('yellow')}
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    drawingColor === 'yellow' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
-                  }`}
-                  style={{ backgroundColor: '#FFD700' }}
-                  title="Yellow"
-                />
-                <button
-                  type="button"
-                  onClick={() => setDrawingColor('black')}
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    drawingColor === 'black' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
-                  }`}
-                  style={{ backgroundColor: '#FFFFFF' }}
-                  title="White"
-                />
-                <button
-                  type="button"
-                  onClick={() => setDrawingColor('burgundy')}
-                  className={`w-8 h-8 rounded-full border-2 ${
-                    drawingColor === 'burgundy' ? 'border-white ring-2 ring-cyan-500' : 'border-gray-600'
-                  }`}
-                  style={{ backgroundColor: '#800020' }}
-                  title="Burgundy"
-                />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRectangles([])}
-                    disabled={rectangles.length === 0}
-                    className="ml-2 text-xs"
-                    title="Clear rectangles"
-                  >
-                    Clear
-                  </Button>
-                </div>
-                
-                {/* Stroke Width Slider */}
-                <div className="flex gap-3 items-center justify-center px-4">
-                  <span className="text-sm text-gray-400 whitespace-nowrap">Width:</span>
-                  <input
-                    type="range"
-                    min="1"
-                    max="12"
-                    step="1"
-                    value={strokeWidth}
-                    onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                    style={{
-                      maxWidth: '200px'
-                    }}
-                  />
-                  <span className="text-sm text-white font-medium w-8 text-center">{strokeWidth}px</span>
-                </div>
-                
-                {/* Border Radius Slider */}
-                <div className="flex gap-3 items-center justify-center px-4">
-                  <span className="text-sm text-gray-400 whitespace-nowrap">Curve:</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="30"
-                    step="2"
-                    value={borderRadius}
-                    onChange={(e) => setBorderRadius(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                    style={{
-                      maxWidth: '200px'
-                    }}
-                  />
-                  <span className="text-sm text-white font-medium w-8 text-center">{borderRadius}px</span>
-                </div>
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRectangles([])}
+                  className="text-xs"
+                  title="Clear all drawn boxes"
+                >
+                  Clear Boxes
+                </Button>
               </div>
             )}
 
