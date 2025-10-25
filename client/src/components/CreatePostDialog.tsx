@@ -1120,15 +1120,15 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     }
                   }
                 }}
-                disabled={!image || cropMode}
+                disabled={!image || cropMode || !selectedPage}
                 className={`flex-1 transition-all duration-200 px-2 ${
-                  !image || cropMode
+                  !image || cropMode || !selectedPage
                     ? "opacity-50 cursor-not-allowed"
                     : drawingEnabled
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white"
                     : "border-gray-700 text-gray-300 hover:text-white hover:border-cyan-500"
                 }`}
-                title="Draw boxes"
+                title={!selectedPage ? "Select a page first" : "Draw boxes"}
               >
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <rect x="3" y="3" width="18" height="18" strokeWidth="2" rx="2" />
