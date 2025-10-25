@@ -1105,7 +1105,7 @@ export default function Home() {
                         style={{ height: '28px' }}
                       >
                         {/* Home Team */}
-                        <div className={feedColumns === 3 ? 'flex items-center gap-1' : 'flex items-center gap-1.5'}>
+                        <div className={feedColumns === 3 ? 'flex items-center gap-1 flex-1 justify-end' : 'flex items-center gap-1.5 flex-1 justify-end'}>
                           {goal.homeBadge && (
                             <img 
                               src={goal.homeBadge} 
@@ -1130,7 +1130,7 @@ export default function Home() {
                         </div>
                         
                         {/* Away Team */}
-                        <div className={feedColumns === 3 ? 'flex items-center gap-1' : 'flex items-center gap-1.5'}>
+                        <div className={feedColumns === 3 ? 'flex items-center gap-1 flex-1 justify-start' : 'flex items-center gap-1.5 flex-1 justify-start'}>
                           <span className={feedColumns === 3 ? 'text-xs font-semibold text-white' : 'text-sm font-semibold text-white'}>
                             {goal.awayTeam.length > (feedColumns === 3 ? 6 : 8) ? goal.awayTeam.substring(0, feedColumns === 3 ? 6 : 8) : goal.awayTeam}
                           </span>
@@ -1144,7 +1144,7 @@ export default function Home() {
                         </div>
                         
                         {/* Blinking GOAL text */}
-                        <span className={feedColumns === 3 ? 'text-xs font-black text-yellow-400 animate-pulse ml-1' : 'text-sm font-black text-yellow-400 animate-pulse ml-2'}>GOAL!</span>
+                        <span className={feedColumns === 3 ? 'text-xs font-black text-yellow-400 animate-pulse ml-2' : 'text-sm font-black text-yellow-400 animate-pulse ml-3'}>GOAL!</span>
                       </div>
                     ))}
                   </div>
