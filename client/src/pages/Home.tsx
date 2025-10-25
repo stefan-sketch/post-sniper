@@ -764,7 +764,7 @@ export default function Home() {
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: Switch + Settings (iOS layout) */}
+          {/* Left: Switch only (iOS layout) */}
           <div className="flex items-center gap-2">
             {/* Switch button - small icon, far left */}
             <button
@@ -790,16 +790,6 @@ export default function Home() {
                 <polyline points="7 23 3 19 7 15"/>
                 <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
               </svg>
-            </button>
-            
-            {/* Settings button - small icon, next to switch */}
-            <button
-              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
-              title="Settings"
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <Settings className="h-[18px] w-[18px]" />
             </button>
 
             {/* Football Toggle - Desktop only, Feed view only */}
@@ -847,8 +837,20 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: SDL MEDIA title */}
-          <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+          {/* Center: MATCHDAY + SDL MEDIA title */}
+          <div className="flex items-center gap-3 absolute left-1/2 transform -translate-x-1/2">
+            {/* MATCHDAY icon - iOS only */}
+            <button
+              onClick={() => setMobileView('matchday')}
+              className="md:hidden flex items-center justify-center text-gray-400 hover:text-green-500 transition-all active:scale-95"
+              title="MATCHDAY"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+              </svg>
+            </button>
+            
             {/* SDL MEDIA logo as clickable upload button with animation */}
             <button
               onClick={() => {
@@ -876,8 +878,17 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right: Drag-drop icon (desktop only) */}
+          {/* Right: Settings (iOS) or Drag-drop icon (desktop) */}
           <div className="flex items-center gap-1">
+            {/* Settings button - iOS only, far right */}
+            <button
+              onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
+              className="md:hidden flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
+              title="Settings"
+              style={{ background: 'none', border: 'none', padding: 0 }}
+            >
+              <Settings className="h-[18px] w-[18px]" />
+            </button>
             {/* Drag-drop area - desktop only */}
             <div
               onDrop={async (e) => {
@@ -1488,28 +1499,30 @@ export default function Home() {
                 </svg>
               </button>
               
-              {/* Facebook with LIVE/POPULAR toggle */}
+              {/* Facebook with LIVE/POPULAR toggle switch */}
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setFacebookView('live')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                    facebookView === 'live' 
-                      ? 'bg-[#1877F2] text-white' 
-                      : 'bg-gray-800 text-gray-400 hover:text-white'
-                  }`}
-                >
-                  LIVE
-                </button>
-                <button
-                  onClick={() => setFacebookView('popular')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                    facebookView === 'popular' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-gray-800 text-gray-400 hover:text-white'
-                  }`}
-                >
-                  POPULAR
-                </button>
+                {/* iOS-style toggle switch */}
+                <div className="relative inline-flex items-center">
+                  <button
+                    onClick={() => setFacebookView(facebookView === 'live' ? 'popular' : 'live')}
+                    className="relative w-14 h-7 rounded-full transition-colors duration-300 ease-in-out focus:outline-none"
+                    style={{
+                      backgroundColor: facebookView === 'live' ? '#1877F2' : '#22c55e'
+                    }}
+                  >
+                    <span
+                      className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ease-in-out"
+                      style={{
+                        transform: facebookView === 'live' ? 'translateX(0)' : 'translateX(28px)'
+                      }}
+                    />
+                  </button>
+                  <span className="ml-2 text-sm font-semibold" style={{
+                    color: facebookView === 'live' ? '#1877F2' : '#22c55e'
+                  }}>
+                    {facebookView === 'live' ? 'LIVE' : 'POPULAR'}
+                  </span>
+                </div>
               </div>
               
               {/* Page filter dropdown - only for LIVE view */}
@@ -1564,6 +1577,39 @@ export default function Home() {
                     })}
                   </div>
                  )}
+              </div>
+              )}
+              
+              {/* Time filter dropdown - only for POPULAR view */}
+              {facebookView === 'popular' && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowTimeFilter(!showTimeFilter)}
+                  className="time-filter-trigger px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
+                >
+                  {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showTimeFilter && (
+                  <div className="time-filter-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
+                    {(['2hr', '6hr', 'today'] as const).map((time) => (
+                      <button
+                        key={time}
+                        onClick={() => {
+                          setPopularTimeFilter(time);
+                          setShowTimeFilter(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                          popularTimeFilter === time ? 'bg-green-500/20 text-green-400' : 'text-white'
+                        }`}
+                      >
+                        {time === 'today' ? 'Today' : time}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               )}
             </div>
