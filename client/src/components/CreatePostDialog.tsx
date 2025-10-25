@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -142,13 +142,6 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
   const handlePasteFromClipboard = async () => {
     try {
-      // Request clipboard permission first
-      const permission = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
-      if (permission.state === 'denied') {
-        toast.error("Clipboard access denied. Please allow clipboard permissions.");
-        return;
-      }
-      
       const clipboardItems = await navigator.clipboard.read();
       for (const item of clipboardItems) {
         for (const type of item.types) {
@@ -921,6 +914,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   return (
     <Dialog open={open} onOpenChange={handleBackdropClick}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-4" showCloseButton={false}>
+        <DialogTitle className="sr-only">Create Post</DialogTitle>
         <div className="space-y-3">
           {/* Compact Header - Single Row Design */}
           <div>
