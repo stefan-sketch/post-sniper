@@ -767,15 +767,43 @@ export default function Home() {
         <div className="flex items-center justify-between">
           {/* Left: MATCHDAY football (iOS) or Football Toggle (Desktop) */}
           <div className="flex items-center gap-2">
-            {/* MATCHDAY button - iOS only, far left */}
+            {/* MATCHDAY button - iOS only, far left, works in both Feed and Pages mode */}
             <button
-              onClick={() => setMobileView('matchday')}
-              className="md:hidden flex items-center justify-center text-gray-400 hover:text-green-500 transition-all active:scale-95"
-              title="MATCHDAY"
+              onClick={() => {
+                if (mobileView === 'matchday') {
+                  // If already in MATCHDAY, go back to facebook
+                  setMobileView('facebook');
+                } else {
+                  // Open MATCHDAY
+                  setMobileView('matchday');
+                }
+              }}
+              className={`md:hidden flex items-center justify-center transition-all active:scale-95 ${
+                mobileView === 'matchday' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'
+              }`}
+              title={mobileView === 'matchday' ? 'Close MATCHDAY' : 'Open MATCHDAY'}
               style={{ background: 'none', border: 'none', padding: 0 }}
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
+              {/* Football/Soccer ball icon */}
+              <svg 
+                className="w-5 h-5 transition-all duration-300"
+                viewBox="0 0 24 24" 
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8l-2 3h4l-2 3" />
+                <path d="M12 2v2" />
+                <path d="M12 20v2" />
+                <path d="M4.93 4.93l1.41 1.41" />
+                <path d="M17.66 17.66l1.41 1.41" />
+                <path d="M2 12h2" />
+                <path d="M20 12h2" />
+                <path d="M6.34 17.66l-1.41 1.41" />
+                <path d="M19.07 4.93l-1.41 1.41" />
               </svg>
             </button>
             
