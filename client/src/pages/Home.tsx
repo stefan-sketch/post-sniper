@@ -1359,6 +1359,13 @@ export default function Home() {
             </div>
           </div>
           
+          {/* Blue divider line - matches Facebook column red line */}
+          {feedType === 'popular' && popularPosts.length > 0 && (
+            <div className="relative h-0.5 bg-[#1877F2]/30 mb-2 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1877F2] to-transparent animate-pulse"></div>
+            </div>
+          )}
+          
           <div 
             ref={popularScrollRef} 
             className={`space-y-3 overflow-y-auto flex-1 pr-2 hide-scrollbar relative ${feedColumns === 3 || isAnimatingOut ? 'compact-posts' : ''}`} 
@@ -1385,12 +1392,6 @@ export default function Home() {
                 {!postsQuery.isLoading && popularPosts.length === 0 && (
                   <div className="glass-card p-6 rounded-xl text-center">
                     <p className="text-muted-foreground">No popular posts in the last {popularTimeFilter}.</p>
-                  </div>
-                )}
-                {/* Printer line - thin blue line where new posts emerge from */}
-                {popularPosts.length > 0 && (
-                  <div className="sticky top-0 z-10 relative h-0.5 bg-[#1877F2]/30 mb-3 overflow-hidden flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1877F2] to-transparent animate-pulse"></div>
                   </div>
                 )}
                 {(showAllPopularPosts || !isIOS ? popularPosts : popularPosts.slice(0, 25)).map((post, index) => {
