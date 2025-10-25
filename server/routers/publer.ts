@@ -73,6 +73,7 @@ export const publerRouter = router({
       mediaId: z.string(),
       caption: z.string(),
       pages: z.array(z.enum(["footy-feed", "football-funnys", "football-away-days"])),
+      scheduledTime: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       try {
@@ -84,7 +85,7 @@ export const publerRouter = router({
         // Create post payload
         const payload = {
           bulk: {
-            state: "published",
+            state: input.scheduledTime ? "scheduled" : "published",
             posts: [
               {
                 networks: {
@@ -100,12 +101,13 @@ export const publerRouter = router({
                   },
                 },
                 accounts,
+                ...(input.scheduledTime ? { date: input.scheduledTime } : {}),
               },
             ],
           },
         };
 
-        // Post to Publer (immediate publish endpoint)
+        // Post to Publer (use schedule endpoint for both immediate and scheduled posts)
         const response = await fetch("https://app.publer.com/api/v1/posts/schedule/publish", {
           method: "POST",
           headers: {

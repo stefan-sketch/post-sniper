@@ -76,6 +76,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [canvasMode, setCanvasMode] = useState(false);
   const [isEditingTweet, setIsEditingTweet] = useState(false);
   const [canvasCompleteHandler, setCanvasCompleteHandler] = useState<(() => void) | null>(null);
+  const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
+  const [scheduledMinutes, setScheduledMinutes] = useState<number | null>(null);
 
   // Memoize the onCompleteClick callback to prevent infinite loops
   const handleCompleteClick = useCallback((handler: () => void) => {
@@ -555,7 +557,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
     }
   };
 
-  const handlePost = async () => {
+  const handlePost = async (delayMinutes?: number) => {
     // Use cropped image if available, otherwise use original image
     const imageToPost = croppedImage || image;
     
@@ -601,11 +603,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
         throw new Error(uploadResult.error || "Failed to upload media");
       }
 
+      // Calculate scheduled time if delay is specified
+      let scheduledTime: string | undefined;
+      if (delayMinutes) {
+        const now = new Date();
+        // Convert to UK time (UTC+0 or UTC+1 depending on DST)
+        const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+        ukTime.setMinutes(ukTime.getMinutes() + delayMinutes);
+        scheduledTime = ukTime.toISOString();
+        toast.info(`Post scheduled for ${delayMinutes} minutes from now (UK time)`);
+      }
+
       // Create post on selected pages
       const postResult = await createPostMutation.mutateAsync({
         mediaId: uploadResult.mediaId,
         caption,
         pages: [selectedPage],
+        scheduledTime,
       });
 
       if (!postResult.success) {
@@ -613,7 +627,11 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       }
 
       const pageName = PAGES.find(p => p.id === selectedPage)?.shortName || 'page';
-      toast.success(`Success! Posted to ${pageName}`);
+      if (delayMinutes) {
+        toast.success(`Success! Post scheduled for ${pageName} in ${delayMinutes} minutes`);
+      } else {
+        toast.success(`Success! Posted to ${pageName}`);
+      }
 
       // Reset form completely
       setImage(null);
@@ -902,13 +920,55 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-                <Button
-                  onClick={handlePost}
-                  disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                  className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUploading ? "Posting..." : "Post"}
-                </Button>
+                <div className="relative flex">
+                  <Button
+                    onClick={() => handlePost()}
+                    disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-6 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed rounded-r-none"
+                  >
+                    {isUploading ? "Posting..." : "Post"}
+                  </Button>
+                  <Button
+                    onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
+                    disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-2 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed rounded-l-none border-l border-white/20"
+                  >
+                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </Button>
+                  {showScheduleDropdown && (
+                    <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
+                      <button
+                        onClick={() => {
+                          handlePost(5);
+                          setShowScheduleDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors first:rounded-t-lg"
+                      >
+                        Post in 5 min
+                      </button>
+                      <button
+                        onClick={() => {
+                          handlePost(10);
+                          setShowScheduleDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors"
+                      >
+                        Post in 10 min
+                      </button>
+                      <button
+                        onClick={() => {
+                          handlePost(15);
+                          setShowScheduleDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors last:rounded-b-lg"
+                      >
+                        Post in 15 min
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {isEditingTweet && canvasCompleteHandler && (
