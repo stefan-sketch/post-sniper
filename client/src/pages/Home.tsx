@@ -33,6 +33,7 @@ export default function Home() {
   const [droppedImage, setDroppedImage] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'facebook' | 'twitter' | 'reddit' | 'matchday'>('facebook');
   const [facebookView, setFacebookView] = useState<'live' | 'popular'>('live');
+  const [lastTapTime, setLastTapTime] = useState(0);
 
   const [currentView, setCurrentView] = useState<'feed' | 'pages'>('feed');
   const [pagesView, setPagesView] = useState<'away-days' | 'funnys' | 'footy-feed'>('away-days');
@@ -764,34 +765,8 @@ export default function Home() {
       {/* Header */}
       <header className="mb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {/* Left: Switch only (iOS layout) */}
+          {/* Left: Football Toggle (Desktop only) */}
           <div className="flex items-center gap-2">
-            {/* Switch button - small icon, far left */}
-            <button
-              onClick={handleViewSwitch}
-              className="group relative flex items-center justify-center text-gray-400 hover:text-cyan-400 transition-colors duration-200 active:scale-95"
-              title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
-              style={{ background: 'none', border: 'none', padding: 0 }}
-            >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                className="transition-transform duration-300 group-hover:rotate-180"
-              >
-                <polyline points="17 1 21 5 17 9"/>
-                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                <polyline points="7 23 3 19 7 15"/>
-                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-              </svg>
-            </button>
-
             {/* Football Toggle - Desktop only, Feed view only */}
             {currentView === 'feed' && (
               <button
@@ -2090,7 +2065,22 @@ export default function Home() {
       {currentView === 'feed' && createPortal(
         <>
           
-          <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+          <div 
+            className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" 
+            style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+            onTouchEnd={(e) => {
+              const now = Date.now();
+              const timeSinceLastTap = now - lastTapTime;
+              
+              if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                // Double tap detected - switch to Pages view
+                e.preventDefault();
+                handleViewSwitch();
+              }
+              
+              setLastTapTime(now);
+            }}
+          >
             <div className="flex items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
               {/* Center Navigation - 3 items (Facebook, Twitter, Reddit) */}
               <div className="flex items-center justify-center gap-6">
@@ -2153,46 +2143,20 @@ export default function Home() {
                 paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                 backgroundColor: `${tintColor}15` // 15 is ~8% opacity in hex
               }}
-            >
-              <div className="flex items-center justify-between px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-                {/* Switch Button - Left Corner */}
-                <button
-                  onClick={() => {
-                    setIsViewSwitching(true);
-                    setViewTransition('to-feed');
-                    justSwitchedToFeed.current = true;
-                    // Note: On mobile, MATCHDAY is never visible, so no need to track state
-                    setTimeout(() => {
-                      setCurrentView('feed');
-                      setViewTransition('none');
-                      setTimeout(() => {
-                        setIsViewSwitching(false);
-                        setTimeout(() => {
-                          justSwitchedToFeed.current = false;
-                        }, 100);
-                      }, 600);
-                    }, 500);
-                  }}
-                  className="flex items-center justify-center p-3 rounded-full bg-gray-800/80 backdrop-blur-sm text-gray-300 hover:text-white transition-all active:scale-90"
-                  title="Switch to Feed"
-                >
-                  <svg 
-                    width="24" 
-                    height="24" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="17 1 21 5 17 9"/>
-                    <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/>
-                    <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-                  </svg>
-                </button>
+              onTouchEnd={(e) => {
+                const now = Date.now();
+                const timeSinceLastTap = now - lastTapTime;
                 
+                if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                  // Double tap detected - switch to Feed view
+                  e.preventDefault();
+                  handleViewSwitch();
+                }
+                
+                setLastTapTime(now);
+              }}
+            >
+              <div className="flex items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
                 {/* Center Navigation - 3 page selectors */}
                 <div className="flex items-center justify-center gap-8">
                 {/* Page Selector Buttons */}
