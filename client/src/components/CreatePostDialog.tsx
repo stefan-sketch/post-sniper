@@ -151,6 +151,24 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               setImage(reader.result as string);
               setCropMode(false); // Don't start in crop mode
               setCroppedImage(null);
+              
+              // Reset all image editing states when pasting a new image
+              setUseWatermark(false);
+              setRectangles([]);
+              setDrawingEnabled(false);
+              setCurrentRect(null);
+              setOverlayText('');
+              setUseGradient(false);
+              setTextBoxPosition({ x: 50, y: 50 });
+              setTextBoxWidth(60);
+              setFontSize(48);
+              setWatermarkPosition({ x: 85, y: 10 });
+              setIsEditingText(false);
+              setDrawingColor('yellow');
+              setStrokeWidth(3);
+              setBorderRadius(2);
+              setTweetOutlineColor('white');
+              
               toast.success("Image pasted from clipboard!");
             };
             reader.readAsDataURL(blob);
@@ -182,6 +200,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
           height: 100,
         });
         setCompletedCrop(undefined);
+        
+        // Reset all image editing states when replacing image
+        setUseWatermark(false);
+        setRectangles([]);
+        setDrawingEnabled(false);
+        setCurrentRect(null);
+        setOverlayText('');
+        setUseGradient(false);
+        setTextBoxPosition({ x: 50, y: 50 });
+        setTextBoxWidth(60);
+        setFontSize(48);
+        setWatermarkPosition({ x: 85, y: 10 });
+        setIsEditingText(false);
+        setDrawingColor('yellow');
+        setStrokeWidth(3);
+        setBorderRadius(2);
+        setTweetOutlineColor('white');
       };
       reader.readAsDataURL(file);
     }
@@ -205,6 +240,23 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
           height: 100,
         });
         setCompletedCrop(undefined);
+        
+        // Reset all image editing states when dropping a new image
+        setUseWatermark(false);
+        setRectangles([]);
+        setDrawingEnabled(false);
+        setCurrentRect(null);
+        setOverlayText('');
+        setUseGradient(false);
+        setTextBoxPosition({ x: 50, y: 50 });
+        setTextBoxWidth(60);
+        setFontSize(48);
+        setWatermarkPosition({ x: 85, y: 10 });
+        setIsEditingText(false);
+        setDrawingColor('yellow');
+        setStrokeWidth(3);
+        setBorderRadius(2);
+        setTweetOutlineColor('white');
       };
       reader.readAsDataURL(file);
     }
@@ -1429,12 +1481,18 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                         setUseWatermark(false);
                         setRectangles([]);
                         setDrawingEnabled(false);
+                        setCurrentRect(null);
                         setOverlayText('');
                         setUseGradient(false);
-                        setTextPosition({ x: 50, y: 50 });
-                        setTextSize(32);
-                        setTextColor('white');
+                        setTextBoxPosition({ x: 50, y: 50 });
+                        setTextBoxWidth(60);
+                        setFontSize(48);
+                        setWatermarkPosition({ x: 85, y: 10 });
                         setIsEditingText(false);
+                        setDrawingColor('yellow');
+                        setStrokeWidth(3);
+                        setBorderRadius(2);
+                        setTweetOutlineColor('white');
                       }}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500/80 hover:bg-red-600 text-white flex items-center justify-center transition-all hover:scale-110 z-20"
                       title="Remove image"
