@@ -993,7 +993,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col overflow-hidden relative">
       {/* Feed View */}
       <div 
-        className={`flex-1 flex flex-col overflow-hidden ${currentView === 'feed' ? '' : 'hidden'}`}
+        className={`flex-1 flex flex-col overflow-hidden ${currentView === 'feed' || mobileView === 'matchday' ? '' : 'hidden'}`}
         style={{
           animation: viewTransition === 'to-feed'
             ? 'slideInFromRight 0.5s ease-in-out'
@@ -1002,7 +1002,7 @@ export default function Home() {
               : 'none'
         }}
       >
-      {currentView === 'feed' && (
+      {(currentView === 'feed' || mobileView === 'matchday') && (
         <>
 
 

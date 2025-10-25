@@ -987,7 +987,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   <button
                     onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
                     disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-2 py-1.5 rounded-r-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20"
+                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-1.5 py-1.5 rounded-r-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20 flex items-center justify-center"
                   >
                     <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
