@@ -142,6 +142,13 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
   const handlePasteFromClipboard = async () => {
     try {
+      // Request clipboard permission first
+      const permission = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+      if (permission.state === 'denied') {
+        toast.error("Clipboard access denied. Please allow clipboard permissions.");
+        return;
+      }
+      
       const clipboardItems = await navigator.clipboard.read();
       for (const item of clipboardItems) {
         for (const type of item.types) {
@@ -180,7 +187,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       toast.error("No image found in clipboard");
     } catch (error) {
       console.error('Paste failed:', error);
-      toast.error("Failed to paste from clipboard");
+      toast.error("Failed to paste from clipboard. Try using Cmd+V (Mac) or Ctrl+V (Windows) instead.");
     }
   };
 
