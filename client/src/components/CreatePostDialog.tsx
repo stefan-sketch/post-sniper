@@ -841,8 +841,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       const height = Math.abs(endY - startY);
       
       // Only save if rectangle has meaningful size (at least 5px)
+      // Only allow one box - replace the previous one
       if (width > 5 && height > 5) {
-        setRectangles(prev => [...prev, { color: colorMap[drawingColor], x, y, width, height, strokeWidth, borderRadius }]);
+        setRectangles([{ color: colorMap[drawingColor], x, y, width, height, strokeWidth, borderRadius }]);
       }
       setCurrentRect(null);
     }
@@ -1163,7 +1164,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               /> */}
             </div>
 
-            {/* Clear button - Show when drawing is enabled and rectangles exist */}
+            {/* Clear button - Show when drawing is enabled and rectangle exists */}
             {drawingEnabled && image && !cropMode && rectangles.length > 0 && (
               <div className="flex justify-center">
                 <Button
@@ -1172,9 +1173,9 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                   size="sm"
                   onClick={() => setRectangles([])}
                   className="text-xs"
-                  title="Clear all drawn boxes"
+                  title="Clear drawn box"
                 >
-                  Clear Boxes
+                  Clear Box
                 </Button>
               </div>
             )}
@@ -1368,6 +1369,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 <div 
                   ref={containerRef}
                   className="relative flex justify-center"
+                  style={{ cursor: drawingEnabled ? 'crosshair' : 'default' }}
                   onMouseMove={handleMouseMove}
                   onTouchMove={handleTouchMove}
                   onMouseUp={handleMouseUp}
