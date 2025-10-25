@@ -155,6 +155,9 @@ export function ImageModal({ imageUrl, onClose }: ImageModalProps) {
           onClose();
         }
       }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Close button */}
       <button
@@ -176,9 +179,6 @@ export function ImageModal({ imageUrl, onClose }: ImageModalProps) {
           transition: isDragging ? 'none' : 'transform 0.3s ease-out',
           touchAction: 'none',
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         onClick={(e) => e.stopPropagation()}
         draggable={false}
       />
