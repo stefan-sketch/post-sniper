@@ -128,8 +128,28 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
       const x = tweetPosition.x * CANVAS_WIDTH - scaledWidth / 2;
       const y = tweetPosition.y * CANVAS_HEIGHT - scaledHeight / 2;
 
-      // Draw tweet image
+      // Draw tweet image with rounded corners
+      ctx.save();
+      
+      // Create rounded rectangle clip path for the tweet image
+      const radius = OUTLINE_RADIUS;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + scaledWidth - radius, y);
+      ctx.quadraticCurveTo(x + scaledWidth, y, x + scaledWidth, y + radius);
+      ctx.lineTo(x + scaledWidth, y + scaledHeight - radius);
+      ctx.quadraticCurveTo(x + scaledWidth, y + scaledHeight, x + scaledWidth - radius, y + scaledHeight);
+      ctx.lineTo(x + radius, y + scaledHeight);
+      ctx.quadraticCurveTo(x, y + scaledHeight, x, y + scaledHeight - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.clip();
+      
+      // Draw the tweet image (will be clipped to rounded rectangle)
       ctx.drawImage(tweetImage, x, y, scaledWidth, scaledHeight);
+      
+      ctx.restore();
 
       // Draw outline AROUND the tweet (if color selected)
       if (outlineColor) {
