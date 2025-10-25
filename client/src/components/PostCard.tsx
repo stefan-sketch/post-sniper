@@ -327,7 +327,7 @@ function PostCard({ post, showDismiss, onDismiss, reactionIncrease, hideActions,
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
-            className={`w-full h-auto object-cover transition-opacity duration-300 ${
+            className={`w-full aspect-[4/3] object-cover transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             draggable="true"
