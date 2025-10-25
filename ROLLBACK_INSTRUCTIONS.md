@@ -1,132 +1,230 @@
 # Rollback Instructions
 
-## 🔄 How to Rollback to Pre-Optimization State
+## 📍 Available Save Points
 
-If you need to revert the production optimizations, you have **3 easy options**:
+### **Latest Save Point: October 25, 2025** ⭐
+- **Tag**: `savepoint-2025-10-25`
+- **Commit**: `d87f5a5`
+- **Status**: ✅ **STABLE - All iOS improvements complete**
+
+### Previous Save Points
+- **Tag**: `pre-optimization-v1.0` (October 24, 2025) - Commit: `2c2d774`
+- **Tag**: `rollback-2025-10-25`
+- **Tag**: `rollback-2025-10-24`
+- **Tag**: `stable-20251022-1900`
 
 ---
 
-## Option 1: Rollback Using Git Tag (Recommended)
+## 🔄 How to Rollback to Latest Save Point (savepoint-2025-10-25)
+
+### Option 1: Rollback Locally (for testing)
 
 ```bash
-# View available tags
+# Navigate to project directory
+cd /home/ubuntu/post-sniper
+
+# Checkout the save point
+git checkout savepoint-2025-10-25
+
+# To return to latest version
+git checkout main
+```
+
+### Option 2: Rollback Main Branch (permanent)
+
+```bash
+# Navigate to project directory
+cd /home/ubuntu/post-sniper
+
+# Reset main branch to save point
+git reset --hard savepoint-2025-10-25
+
+# Force push to GitHub (this will trigger Railway deployment)
+git push origin main --force
+```
+
+### Option 3: Create a Rollback Branch
+
+```bash
+# Navigate to project directory
+cd /home/ubuntu/post-sniper
+
+# Create a new branch from save point
+git checkout -b rollback-branch savepoint-2025-10-25
+
+# Push to GitHub
+git push origin rollback-branch
+
+# Then manually deploy this branch on Railway
+```
+
+---
+
+## 📦 What's Included in savepoint-2025-10-25
+
+### ✅ iOS Improvements
+- **Minimalistic headers** for Facebook, Twitter, Reddit
+- **Centered logos** with clean toggles (no underlines)
+- **NEW/POPULAR toggles** for all feeds (Facebook, Twitter, Reddit)
+- **iOS image gestures**:
+  - Swipe down anywhere to close
+  - Pinch to zoom in/out (1x to 5x)
+  - Double tap to zoom
+  - Image stays centered when zooming
+  - No buggy pan/drag
+
+### ✅ Desktop Improvements
+- **Full-width images** in 3-column mode (no side/bottom padding)
+- **Search button** in Pages mode (far left, leads to "Coming Soon" page)
+- **MATCHDAY icon** matches iOS design
+- **3-column toggle** working perfectly
+
+### ✅ UI Consistency
+- **Footer height** identical on Feed and Pages views
+- **Profile pictures** same size as icons (28px × 28px)
+- **Gap-8 spacing** on both footers
+- **Clean toggles** without underlines
+
+### ✅ Bug Fixes
+- **Reddit loading** fixed (retry logic, better headers, 10s timeout)
+- **Facebook images** fill full card width in 3-column mode
+- **Image zoom** smooth and centered (no buggy behavior)
+- **Twitter header** simplified with minimalistic dropdown
+
+---
+
+## 🔍 Verify Save Point
+
+To check the save point details:
+
+```bash
+# Show save point info
+git show savepoint-2025-10-25
+
+# See all available save points
 git tag -l
 
-# Rollback to pre-optimization state
+# Compare current state to save point
+git diff savepoint-2025-10-25..HEAD
+
+# See commits since save point
+git log savepoint-2025-10-25..main --oneline
+```
+
+---
+
+## 🆘 Emergency Rollback (if Railway deployment is broken)
+
+### Method 1: Railway Dashboard
+1. Go to **Railway dashboard**
+2. Find the **deployment from commit `d87f5a5`**
+3. Click **"Redeploy"** on that specific deployment
+
+### Method 2: Git Force Push
+```bash
+cd /home/ubuntu/post-sniper
+git reset --hard savepoint-2025-10-25
+git push origin main --force
+```
+
+Railway will auto-deploy the rolled-back version in ~2 minutes.
+
+---
+
+## 📊 Rollback to Older Save Points
+
+### Rollback to pre-optimization (October 24, 2025)
+
+```bash
+# Rollback to before production optimizations
 git checkout pre-optimization-v1.0
 
-# If you want to make this the current main branch
+# Make it permanent
 git checkout main
 git reset --hard pre-optimization-v1.0
 git push origin main --force
 ```
 
-**Tag Details:**
-- **Name:** `pre-optimization-v1.0`
-- **Created:** October 24, 2025
-- **Description:** Rollback point before production optimizations
-
----
-
-## Option 2: Rollback Using Backup Branch
+### Rollback to specific date
 
 ```bash
-# Switch to backup branch
-git checkout backup-pre-optimization
+# See all tags with dates
+git tag -l --format='%(refname:short) - %(creatordate:short)'
 
-# If you want to restore main from backup
-git checkout main
-git reset --hard backup-pre-optimization
+# Rollback to specific tag
+git reset --hard <tag-name>
 git push origin main --force
 ```
-
-**Branch Details:**
-- **Name:** `backup-pre-optimization`
-- **Contains:** Exact state before optimizations started
-
----
-
-## Option 3: Rollback Specific Files Only
-
-If you only want to revert specific changes:
-
-```bash
-# Revert service worker changes
-git checkout pre-optimization-v1.0 -- client/public/sw.js
-
-# Revert image optimization
-git checkout pre-optimization-v1.0 -- server/routers/imageProxy.ts
-
-# Revert CSS changes
-git checkout pre-optimization-v1.0 -- client/src/index.css
-
-# Commit the reverted changes
-git commit -m "Revert specific optimization changes"
-git push origin main
-```
-
----
-
-## 🔍 Verify Current State
-
-To check which version you're on:
-
-```bash
-# Show current commit
-git log --oneline -1
-
-# Show all tags
-git tag -l
-
-# Show current branch
-git branch
-```
-
----
-
-## 📊 What Gets Reverted
-
-Rolling back will restore:
-
-✅ Original service worker (basic caching)  
-✅ Original image loading (no optimization)  
-✅ Original CSS (no performance enhancements)  
-✅ Original database queries (no indexes)  
-✅ Original API responses (no compression)  
-✅ Original post rendering (no virtual scrolling)  
 
 ---
 
 ## ⚠️ Important Notes
 
-1. **Database Changes:** If database indexes were added, you may need to manually drop them:
-   ```sql
-   DROP INDEX IF EXISTS idx_cached_posts_created_at;
-   DROP INDEX IF EXISTS idx_cached_posts_page_id;
-   DROP INDEX IF EXISTS idx_cached_posts_engagement;
-   ```
-
-2. **Dependencies:** After rollback, run:
+1. **Always create a new tag before major changes**:
    ```bash
-   pnpm install
-   pnpm build
+   git tag -a savepoint-YYYY-MM-DD -m "Description"
+   git push origin savepoint-YYYY-MM-DD
    ```
 
-3. **Railway Deployment:** Railway will auto-deploy the rolled-back version after you push to main
+2. **Check what will be lost before rollback**:
+   ```bash
+   git log savepoint-2025-10-25..HEAD --oneline
+   ```
+
+3. **Railway auto-deploys** after pushing to main
+
+4. **Database changes** are NOT rolled back automatically
 
 ---
 
-## 🆘 Emergency Rollback (Railway)
+## 🔧 Partial Rollback (Specific Files Only)
 
-If the app is broken in production:
+If you only want to revert specific changes:
 
-1. Go to Railway Dashboard
-2. Click on your project
-3. Go to "Deployments" tab
-4. Find the last working deployment
-5. Click "Redeploy" on that deployment
+```bash
+# Revert specific file
+git checkout savepoint-2025-10-25 -- path/to/file
 
-This immediately restores the previous working version without touching git.
+# Example: Revert image modal
+git checkout savepoint-2025-10-25 -- client/src/components/ImageModal.tsx
+
+# Commit the changes
+git commit -m "Revert ImageModal to save point"
+git push origin main
+```
+
+---
+
+## 📝 Current State Check
+
+```bash
+# Show current commit
+git log --oneline -1
+
+# Show current branch
+git branch
+
+# Show uncommitted changes
+git status
+
+# Show recent commits
+git log --oneline -10
+```
+
+---
+
+## 🎯 What Gets Restored (savepoint-2025-10-25)
+
+Rolling back to this save point restores:
+
+✅ Working Reddit feed with retry logic  
+✅ Minimalistic headers (Facebook, Twitter, Reddit)  
+✅ iOS image gestures (swipe, pinch, zoom)  
+✅ NEW/POPULAR toggles for all feeds  
+✅ Consistent footer design  
+✅ Full-width images in 3-column mode  
+✅ Search button in Pages mode  
+✅ All bug fixes up to October 25, 2025  
 
 ---
 
@@ -134,15 +232,25 @@ This immediately restores the previous working version without touching git.
 
 If you encounter issues during rollback:
 
-1. Check git status: `git status`
-2. Check current branch: `git branch`
-3. Check recent commits: `git log --oneline -10`
-4. Force clean: `git clean -fd` (removes untracked files)
+1. **Check git status**: `git status`
+2. **Check current branch**: `git branch`
+3. **Check recent commits**: `git log --oneline -10`
+4. **Force clean**: `git clean -fd` (removes untracked files)
+5. **Reset to remote**: `git fetch origin && git reset --hard origin/main`
 
 ---
 
-**Created:** October 24, 2025  
-**Rollback Point Commit:** `2c2d774`  
-**Tag:** `pre-optimization-v1.0`  
-**Backup Branch:** `backup-pre-optimization`
+## 📅 Save Point History
+
+| Date | Tag | Commit | Description |
+|------|-----|--------|-------------|
+| **2025-10-25** | `savepoint-2025-10-25` | `d87f5a5` | **Latest - All iOS improvements** ⭐ |
+| 2025-10-24 | `pre-optimization-v1.0` | `2c2d774` | Before production optimizations |
+| 2025-10-22 | `stable-20251022-1900` | - | Stable version |
+
+---
+
+**Last Updated**: October 25, 2025  
+**Current Stable Tag**: `savepoint-2025-10-25`  
+**Current Stable Commit**: `d87f5a5`
 
