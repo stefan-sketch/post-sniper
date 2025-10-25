@@ -852,9 +852,20 @@ export default function Home() {
             )}
           </div>
 
-          {/* Center: SDL MEDIA title */}
+          {/* Center: SDL MEDIA title with switch button on desktop */}
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Switch button - Desktop only, left of SDL MEDIA */}
+              <button
+                onClick={() => setCurrentView(currentView === 'feed' ? 'pages' : 'feed')}
+                className="hidden md:flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
+                title={currentView === 'feed' ? 'Switch to Pages' : 'Switch to Feed'}
+                style={{ background: 'none', border: 'none', padding: 0 }}
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12M8 12h12m-12 5h12M4 7h.01M4 12h.01M4 17h.01" />
+                </svg>
+              </button>
               {/* SDL MEDIA logo as clickable upload button with animation */}
               <button
                 onClick={() => {
@@ -886,10 +897,10 @@ export default function Home() {
 
           {/* Right: Settings (always visible) or Drag-drop icon (desktop) */}
           <div className="flex items-center gap-1">
-            {/* Settings button - always visible on mobile, hidden on desktop */}
+            {/* Settings button - always visible on both mobile and desktop */}
             <button
               onClick={() => currentView === 'feed' ? setShowSettings(true) : setShowPagesSettings(true)}
-              className="flex md:hidden items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
+              className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95"
               title="Settings"
               style={{ background: 'none', border: 'none', padding: 0 }}
             >
