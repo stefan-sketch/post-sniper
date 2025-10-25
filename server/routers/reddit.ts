@@ -11,44 +11,89 @@ export const redditRouter = router({
     }))
     .query(async ({ input }) => {
       try {
-        console.log('[Reddit] Fetching posts from database...');
+        console.log('[Reddit] Fetching posts from Reddit API...');
         
-        const db = await getDb();
-        if (!db) {
-          console.warn('[Reddit] Database not available, returning empty array');
-          return [];
+        const subreddits = ['soccercirclejerk', 'Championship', 'PremierLeague', 'soccermemes'];
+        const allPosts: any[] = [];
+        
+        for (const subreddit of subreddits) {
+          try {
+            const response = await fetch(
+              `https://www.reddit.com/r/${subreddit}/hot.json?limit=10`,
+              {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
+                },
+              }
+            );
+            
+            if (!response.ok) {
+              console.warn(`[Reddit] Failed to fetch r/${subreddit}: ${response.status}`);
+              continue;
+            }
+            
+            const data = await response.json();
+            const children = data.data?.children || [];
+            
+            const subredditPosts = children
+              .filter((child: any) => !child.data.is_video && child.data.post_hint !== 'hosted:video')
+              .map((child: any) => {
+                const post = child.data;
+                
+                // Determine post type
+                let postType: 'image' | 'link' | 'text' = 'text';
+                let domain = post.domain;
+                
+                if (post.post_hint === 'image' || post.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                  postType = 'image';
+                } else if (post.url && post.url !== post.permalink && !post.is_self) {
+                  postType = 'link';
+                }
+                
+                // Try to extract image from preview
+                let thumbnail = null;
+                if (post.preview?.images?.[0]?.source?.url) {
+                  thumbnail = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+                } else if (post.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                  thumbnail = post.url;
+                } else if (post.thumbnail && post.thumbnail.startsWith('http')) {
+                  thumbnail = post.thumbnail;
+                }
+                
+                return {
+                  id: post.id,
+                  title: post.title,
+                  author: post.author,
+                  subreddit: post.subreddit,
+                  upvotes: post.ups || 0,
+                  comments: post.num_comments || 0,
+                  created: post.created_utc * 1000,
+                  url: post.url || '',
+                  permalink: post.permalink || '',
+                  thumbnail,
+                  isVideo: false,
+                  postType,
+                  domain,
+                };
+              });
+            
+            allPosts.push(...subredditPosts);
+          } catch (err) {
+            console.warn(`[Reddit] Error fetching r/${subreddit}:`, err);
+          }
         }
-
-        // Fetch posts from database, sorted by creation time
-        const posts = await db
-          .select()
-          .from(redditPosts)
-          .orderBy(desc(redditPosts.createdAt))
-          .limit(input.limit);
-
-        console.log(`[Reddit] Successfully fetched ${posts.length} posts from database`);
         
-        // Transform to match frontend format
-        return posts.map(post => ({
-          id: post.id,
-          title: post.title,
-          author: post.author,
-          subreddit: post.subreddit,
-          upvotes: post.upvotes || 0,
-          comments: post.comments || 0,
-          created: post.createdAt.getTime(),
-          url: post.url || '',
-          permalink: post.permalink || '',
-          thumbnail: post.thumbnail,
-          isVideo: post.isVideo || false,
-          postType: post.postType || 'text',
-          domain: post.domain,
-        }));
+        // Sort by hot (combination of upvotes and recency)
+        allPosts.sort((a, b) => {
+          const aScore = a.upvotes / Math.pow((Date.now() - a.created) / 3600000 + 2, 1.5);
+          const bScore = b.upvotes / Math.pow((Date.now() - b.created) / 3600000 + 2, 1.5);
+          return bScore - aScore;
+        });
+        
+        console.log(`[Reddit] Successfully fetched ${allPosts.length} posts from ${subreddits.length} subreddits`);
+        return allPosts.slice(0, input.limit);
       } catch (error) {
         console.error('[Reddit] Error fetching Reddit posts:', error);
-        // If table doesn't exist yet, return empty array
-        // drizzle-kit push will create it on next deployment
-        console.warn('[Reddit] Returning empty array (table may not exist yet)');
         return [];
       }
     }),
