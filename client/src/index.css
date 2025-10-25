@@ -852,15 +852,16 @@ select:focus {
   border: 1px solid rgba(255, 255, 255, 0.8); /* Thin white border */
 }
 
-/* Corner handles - much smaller and sleeker */
+/* Corner handles - hidden completely */
 .ReactCrop__drag-handle {
   position: absolute;
-  width: 12px; /* Reduced from default ~30px */
-  height: 12px; /* Reduced from default ~30px */
-  background-color: rgba(56, 189, 248, 0.95); /* Cyan color */
-  border: 2px solid white;
-  border-radius: 2px; /* Slightly rounded */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  width: 12px;
+  height: 12px;
+  background-color: transparent !important; /* Make invisible */
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  opacity: 0 !important; /* Completely hidden */
 }
 
 /* Corner positions - adjusted for smaller handles */
@@ -932,11 +933,12 @@ select:focus {
   top: 66.666%;
 }
 
-/* Hover effects for handles */
+/* Hover effects for handles - disabled */
 .ReactCrop__drag-handle:hover {
-  background-color: rgba(56, 189, 248, 1);
-  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.5);
-  transform: scale(1.1);
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0 !important;
 }
 
 /* Remove the default drag bar styles */
