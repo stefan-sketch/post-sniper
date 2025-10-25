@@ -736,7 +736,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
 
   // Check if there's any meaningful content
   const hasContent = () => {
-    return !!image || !!caption.trim() || !!selectedPage || rectangles.length > 0 || !!overlayText.trim();
+    return !!image || !!caption.trim() || rectangles.length > 0 || !!overlayText.trim();
   };
 
   // Handle backdrop/ESC - minimize if content exists, otherwise close
