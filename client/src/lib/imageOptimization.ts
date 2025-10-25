@@ -68,44 +68,5 @@ export function getImageSizes(layout: 'post' | 'thumbnail' | 'full'): string {
   }
 }
 
-/**
- * Preload critical images
- */
-export function preloadImage(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = reject;
-    img.src = url;
-  });
-}
 
-/**
- * Lazy load image with Intersection Observer
- * (Already implemented in PostCard, this is a utility version)
- */
-export function lazyLoadImage(
-  img: HTMLImageElement,
-  src: string,
-  options: IntersectionObserverInit = {}
-): () => void {
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting) {
-        img.src = src;
-        observer.disconnect();
-      }
-    },
-    {
-      rootMargin: '50px',
-      threshold: 0.01,
-      ...options,
-    }
-  );
-
-  observer.observe(img);
-
-  // Return cleanup function
-  return () => observer.disconnect();
-}
 

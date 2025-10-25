@@ -7,7 +7,6 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 // import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import testSportmonksRouter from "../routers/test-sportmonks";
 import { serveStatic, setupVite } from "./vite";
 import { backgroundJobService } from "../backgroundJob";
 import { initializeDatabase } from "../initDb";
@@ -55,9 +54,6 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth disabled for Railway deployment (no authentication needed)
   // registerOAuthRoutes(app);
-  
-  // Test endpoint for Sportmonks API
-  app.use('/api', testSportmonksRouter);
   
   // tRPC API
   app.use(
