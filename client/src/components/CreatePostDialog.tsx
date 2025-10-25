@@ -944,7 +944,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       key={page.id}
                       onClick={() => selectPage(page.id)}
                       className={`
-                        flex items-center justify-center p-1 rounded-full
+                        flex items-center justify-center rounded-full
                         transition-all duration-200 hover:scale-[1.1]
                         ${isSelected 
                           ? 'shadow-[0_0_20px_rgba(24,119,242,0.8)]' 
