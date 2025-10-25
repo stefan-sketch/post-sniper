@@ -911,33 +911,31 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   return (
     <Dialog open={open} onOpenChange={handleBackdropClick}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800 p-6" showCloseButton={false}>
+        {/* macOS-style window controls - absolute positioned top-left */}
+        <div className="absolute top-4 left-4 flex gap-2 z-10">
+          <button
+            onClick={handleClose}
+            className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
+            title="Close and discard"
+            style={{ background: 'none', border: 'none', padding: 0 }}
+          >
+            <X className="w-4 h-4" strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={onMinimize}
+            className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
+            title="Minimize"
+            style={{ background: 'none', border: 'none', padding: 0 }}
+          >
+            <Minus className="w-4 h-4" strokeWidth={2.5} />
+          </button>
+        </div>
+
         <div className="space-y-4">
           {/* Header with Page Pills and Post Button */}
           <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-1">
-              <div className="flex items-center gap-2">
-                {/* Close and Minimize buttons - Top Left */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleClose}
-                    className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
-                    title="Close and discard"
-                    style={{ background: 'none', border: 'none', padding: 0 }}
-                  >
-                    <X className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={onMinimize}
-                    className="flex items-center justify-center text-gray-500 hover:text-white transition-colors duration-200 active:scale-95"
-                    title="Minimize"
-                    style={{ background: 'none', border: 'none', padding: 0 }}
-                  >
-                    <Minus className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                </div>
-
-              </div>
-              <div className="flex gap-2 flex-wrap relative">
+              <div className="flex gap-2 flex-wrap relative ml-16">
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
