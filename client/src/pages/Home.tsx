@@ -1610,9 +1610,6 @@ export default function Home() {
                   </div>
                  )}
               </div>
-              )}
-              
-              {/* Time filter dropdown - opens when tapping POPULAR */}
               ) : (
               <div className="relative">
                 <button
