@@ -18,14 +18,22 @@ export const redditRouter = router({
         
         for (const subreddit of subreddits) {
           try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
             const response = await fetch(
               `https://www.reddit.com/r/${subreddit}/hot.json?limit=10`,
               {
                 headers: {
-                  'User-Agent': 'Mozilla/5.0 (compatible; PostSniper/1.0)',
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                  'Accept': 'application/json',
+                  'Accept-Language': 'en-US,en;q=0.9',
                 },
+                signal: controller.signal,
               }
             );
+            
+            clearTimeout(timeoutId);
             
             if (!response.ok) {
               console.warn(`[Reddit] Failed to fetch r/${subreddit}: ${response.status}`);
@@ -91,6 +99,13 @@ export const redditRouter = router({
         });
         
         console.log(`[Reddit] Successfully fetched ${allPosts.length} posts from ${subreddits.length} subreddits`);
+        
+        // If no posts fetched, return empty array but don't throw error
+        if (allPosts.length === 0) {
+          console.warn('[Reddit] No posts fetched from any subreddit');
+          return [];
+        }
+        
         return allPosts.slice(0, input.limit);
       } catch (error) {
         console.error('[Reddit] Error fetching Reddit posts:', error);

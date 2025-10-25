@@ -37,7 +37,26 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   const [currentPermalink, setCurrentPermalink] = useState<string | null>(null);
 
   // Fetch posts from server using tRPC (avoids CORS)
-  const postsQuery = trpc.reddit.getPosts.useQuery({ limit: 30 });
+  const postsQuery = trpc.reddit.getPosts.useQuery(
+    { limit: 30 },
+    {
+      retry: 3,
+      retryDelay: 1000,
+      staleTime: 30000, // 30 seconds
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+  
+  // Log query state for debugging
+  React.useEffect(() => {
+    console.log('[RedditFeed] Query state:', {
+      isLoading: postsQuery.isLoading,
+      isError: postsQuery.isError,
+      error: postsQuery.error?.message,
+      dataLength: postsQuery.data?.length,
+    });
+  }, [postsQuery.isLoading, postsQuery.isError, postsQuery.data]);
 
   // Fetch comments using tRPC (server-side to avoid CORS)
   const commentsQuery = trpc.reddit.getComments.useQuery(
@@ -64,6 +83,12 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
   const posts = sortedPosts;
   const loading = postsQuery.isLoading;
   const error = postsQuery.error?.message || null;
+  
+  // Manual refetch function
+  const handleRetry = () => {
+    console.log('[RedditFeed] Manual retry triggered');
+    postsQuery.refetch();
+  };
 
 
   function toggleComments(post: RedditPost) {
@@ -88,8 +113,15 @@ export function RedditFeed({ sort = 'hot' }: RedditFeedProps) {
 
   if (error) {
     return (
-      <div className="glass-card p-6 rounded-xl text-center">
-        <p className="text-red-400">{error}</p>
+      <div className="glass-card p-6 rounded-xl text-center space-y-3">
+        <p className="text-red-400">Failed to load Reddit posts</p>
+        <p className="text-xs text-gray-400">{error}</p>
+        <button
+          onClick={handleRetry}
+          className="px-4 py-2 bg-[#FF4500] hover:bg-[#FF4500]/80 text-white rounded-lg transition-all"
+        >
+          Retry
+        </button>
       </div>
     );
   }
