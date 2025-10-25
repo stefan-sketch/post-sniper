@@ -69,7 +69,8 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
 
   const CANVAS_WIDTH = 1080;
   const CANVAS_HEIGHT = 1350;
-  const OUTLINE_WIDTH = 8;
+  const OUTLINE_WIDTH = 3;
+  const OUTLINE_RADIUS = 3;
 
   // Draw canvas whenever images, outline, position, or scale changes
   useEffect(() => {
@@ -134,13 +135,26 @@ export function CanvasEditor({ onComplete, selectedPage, tweetOutlineColor = 'wh
       if (outlineColor) {
         ctx.strokeStyle = outlineColor;
         ctx.lineWidth = OUTLINE_WIDTH;
-        // Draw outline slightly inset so it's fully visible
-        ctx.strokeRect(
-          x + OUTLINE_WIDTH / 2, 
-          y + OUTLINE_WIDTH / 2, 
-          scaledWidth - OUTLINE_WIDTH, 
-          scaledHeight - OUTLINE_WIDTH
-        );
+        
+        // Draw rounded rectangle outline
+        const rectX = x + OUTLINE_WIDTH / 2;
+        const rectY = y + OUTLINE_WIDTH / 2;
+        const rectWidth = scaledWidth - OUTLINE_WIDTH;
+        const rectHeight = scaledHeight - OUTLINE_WIDTH;
+        const radius = OUTLINE_RADIUS;
+        
+        ctx.beginPath();
+        ctx.moveTo(rectX + radius, rectY);
+        ctx.lineTo(rectX + rectWidth - radius, rectY);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + radius);
+        ctx.lineTo(rectX + rectWidth, rectY + rectHeight - radius);
+        ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - radius, rectY + rectHeight);
+        ctx.lineTo(rectX + radius, rectY + rectHeight);
+        ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - radius);
+        ctx.lineTo(rectX, rectY + radius);
+        ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
+        ctx.closePath();
+        ctx.stroke();
       }
     }
   }, [backgroundImage, tweetImage, outlineColor, tweetPosition, tweetScale, useGradient, gradientColor]);

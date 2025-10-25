@@ -69,7 +69,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [drawingEnabled, setDrawingEnabled] = useState(false);
   const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
   const [strokeWidth, setStrokeWidth] = useState(3); // Default stroke width
-  const [borderRadius, setBorderRadius] = useState(2); // Default border radius for rectangles
+  const [borderRadius, setBorderRadius] = useState(3); // Default border radius for rectangles
   const [tweetOutlineColor, setTweetOutlineColor] = useState<'white' | 'black'>('white'); // For Footy Feed tweet overlay
   const [rectangles, setRectangles] = useState<Array<{color: string, x: number, y: number, width: number, height: number, strokeWidth: number, borderRadius: number}>>([]);
   const [currentRect, setCurrentRect] = useState<{startX: number, startY: number, endX: number, endY: number} | null>(null);
