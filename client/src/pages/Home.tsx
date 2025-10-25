@@ -1602,96 +1602,6 @@ export default function Home() {
               })}
             </div>
           </div>
-        ) : mobileView === 'popular' ? (
-          <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex flex-col items-center mb-3 flex-shrink-0">
-              <div className="flex items-center justify-between w-full px-4 mb-2">
-                {/* Football icon for MATCHDAY - Left side */}
-                <button
-                  onClick={() => setMobileView('matchday')}
-                  className="flex items-center justify-center p-2 text-gray-400 hover:text-green-500 transition-all"
-                  title="MATCHDAY"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 3.5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm4 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.5 9.5c-1.86 0-3.5-1.28-3.95-3H13c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H22c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3zm-10 0c-1.86 0-3.5-1.28-3.95-3H3c-.55 0-1-.45-1-1s.45-1 1-1h.55c.45-1.72 2.09-3 3.95-3s3.5 1.28 3.95 3H12c.55 0 1 .45 1 1s-.45 1-1 1h-.55c-.45 1.72-2.09 3-3.95 3z"/>
-                  </svg>
-                </button>
-                
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-green-400 animate-pulse" />
-                  <h2 className="text-lg font-semibold text-green-400">
-                    Popular Posts
-                  </h2>
-                </div>
-                
-                <div className="w-9" />
-                <div className="relative">
-                <button
-                  onClick={() => setShowTimeFilter(!showTimeFilter)}
-                  className="time-filter-trigger px-3 py-1 rounded-full text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/50 flex items-center gap-1"
-                >
-                  {popularTimeFilter === 'today' ? 'Today' : popularTimeFilter}
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {showTimeFilter && (
-                  <div className="time-filter-dropdown absolute top-full mt-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[80px] max-w-[calc(100vw-2rem)]">
-                    {(['2hr', '6hr', 'today'] as const).map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => handlePopularTimeFilterChange(time)}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-                          popularTimeFilter === time ? 'bg-green-500/20 text-green-400' : 'text-white'
-                        }`}
-                      >
-                        {time === 'today' ? 'Today' : time}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                </div>
-              </div>
-              {/* Green pulsing underline */}
-              <div className="w-full h-0.5 bg-green-500 animate-pulse"></div>
-            </div>
-            <div className="space-y-3 overflow-y-auto flex-1 hide-scrollbar" style={{ touchAction: 'pan-y' }}>
-              {postsQuery.isLoading && (
-                <div className="glass-card p-6 rounded-xl text-center">
-                  <p className="text-muted-foreground">Loading posts...</p>
-                </div>
-              )}
-              {!postsQuery.isLoading && popularPosts.length === 0 && (
-                <div className="glass-card p-6 rounded-xl text-center">
-                  <p className="text-muted-foreground">No popular posts in the last 6 hours.</p>
-                </div>
-              )}
-              {popularPosts.map((post, index) => {
-                const currentRank = index + 1;
-                const previousRank = previousPopularRankings.get(post.id);
-                const rankingChange = previousRank ? previousRank - currentRank : undefined;
-                const reactionIncrease = post.previousReactions && post.reactions > post.previousReactions 
-                  ? post.reactions - post.previousReactions 
-                  : undefined;
-                const isNew = newPopularPostIds.has(post.id);
-                
-                return (
-                  <div
-                    key={`${post.id}-${post.reactions}-${post.kpi.page_posts_comments_count.value}-${post.kpi.page_posts_shares_count.value}-mobile-popular`}
-                    className={isNew ? 'animate-slideIn' : ''}
-                    style={{
-                      animation: isNew ? 'slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
-                    }}
-                  >
-                    <PostCard 
-                      post={post} 
-                      reactionIncrease={reactionIncrease}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         ) : mobileView === 'twitter' ? (
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex flex-col items-center mb-3 flex-shrink-0">
@@ -2132,50 +2042,18 @@ export default function Home() {
         <>
           
           <div className="md:hidden fixed left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-white/10" style={{ bottom: 0, zIndex: 9999, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-            <div className="flex items-center justify-between px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-              {/* Switch Button - Left Corner */}
-              <button
-                onClick={() => {
-                  setIsViewSwitching(true);
-                  setViewTransition('to-pages');
-                  setTimeout(() => {
-                    setCurrentView('pages');
-                    setViewTransition('none');
-                    setTimeout(() => {
-                      setIsViewSwitching(false);
-                    }, 600);
-                  }, 500);
-                }}
-                className="flex items-center justify-center p-2 text-gray-400 hover:text-white transition-all"
-                title="Switch to Pages"
-              >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <polyline points="23 4 23 10 17 10"/>
-                  <polyline points="1 20 1 14 7 14"/>
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                </svg>
-              </button>
-              
-              {/* Center Navigation - 4 items */}
+            <div className="flex items-center justify-center px-4" style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+              {/* Center Navigation - 3 items (Facebook, Twitter, Reddit) */}
               <div className="flex items-center justify-center gap-6">
               <button
-                onClick={() => setMobileView('live')}
+                onClick={() => setMobileView('facebook')}
                 className={`flex items-center justify-center transition-all p-2 ${
-                  mobileView === 'live' ? 'text-[#1877F2]' : 'text-gray-400'
+                  mobileView === 'facebook' ? 'text-[#1877F2]' : 'text-gray-400'
                 }`}
               >
                 <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
-              </button>
-              
-              <button
-                onClick={() => setMobileView('popular')}
-                className={`flex items-center justify-center transition-all p-2 ${
-                  mobileView === 'popular' ? 'text-green-500' : 'text-gray-400'
-                }`}
-              >
-                <TrendingUp className="w-7 h-7" />
               </button>
               
               <button
@@ -2200,21 +2078,6 @@ export default function Home() {
                 </svg>
               </button>
               </div>
-              
-              {/* Create Post Button - Right Corner */}
-              <button
-                onClick={() => {
-                  setDroppedImage(null);
-                  setShowCreatePost(true);
-                }}
-                className="flex items-center justify-center p-2 text-cyan-500 hover:text-cyan-400 transition-all"
-              >
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="16"/>
-                  <line x1="8" y1="12" x2="16" y2="12"/>
-                </svg>
-              </button>
             </div>
           </div>
         </>,
