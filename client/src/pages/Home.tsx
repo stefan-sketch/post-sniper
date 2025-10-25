@@ -1041,64 +1041,64 @@ export default function Home() {
           <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
             <div className="flex items-center justify-center gap-2 flex-1">
               {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
-              <div className="relative flex-1">
+              <div className="relative flex-1 flex items-center justify-center">
                 {activeGoals.length > 0 ? (
                   /* Goal Score - single goal display */
                   <div className="flex items-center justify-center">
                     {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
-                        className="flex items-center gap-1.5 bg-purple-500/20 border border-purple-400/30 rounded-lg px-2 py-1"
+                        className="flex items-center gap-1 bg-purple-500/20 border border-purple-400/30 rounded-lg px-2 py-1"
                       >
                         {/* Home Team */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           {goal.homeBadge && (
                             <img 
                               src={goal.homeBadge} 
                               alt={goal.homeTeam}
-                              className="w-4 h-4 object-contain"
+                              className="w-3.5 h-3.5 object-contain"
                             />
                           )}
                           <span className="text-xs font-semibold text-white">
-                            {goal.homeTeam.length > 10 ? goal.homeTeam.substring(0, 10) : goal.homeTeam}
+                            {goal.homeTeam.length > 8 ? goal.homeTeam.substring(0, 8) : goal.homeTeam}
                           </span>
                         </div>
                         
                         {/* Score - highlight scoring team in green */}
-                        <div className="text-sm font-black px-1.5">
+                        <div className="text-xs font-black px-1">
                           <span className={goal.scoringTeam === 'home' ? 'text-green-400' : 'text-white'}>
                             {goal.homeScore}
                           </span>
-                          <span className="text-white"> - </span>
+                          <span className="text-white">-</span>
                           <span className={goal.scoringTeam === 'away' ? 'text-green-400' : 'text-white'}>
                             {goal.awayScore}
                           </span>
                         </div>
                         
                         {/* Away Team */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5">
                           <span className="text-xs font-semibold text-white">
-                            {goal.awayTeam.length > 10 ? goal.awayTeam.substring(0, 10) : goal.awayTeam}
+                            {goal.awayTeam.length > 8 ? goal.awayTeam.substring(0, 8) : goal.awayTeam}
                           </span>
                           {goal.awayBadge && (
                             <img 
                               src={goal.awayBadge} 
                               alt={goal.awayTeam}
-                              className="w-4 h-4 object-contain"
+                              className="w-3.5 h-3.5 object-contain"
                             />
                           )}
                         </div>
                         
-                        {/* Goal indicator */}
-                        <span className="text-sm">⚽</span>
+                        {/* Blinking GOAL text */}
+                        <span className="text-xs font-black text-yellow-400 animate-pulse ml-0.5">GOAL!</span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <button
                     onClick={() => setShowPageFilter(!showPageFilter)}
-                    className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity"
-                    style={{ lineHeight: '1.5rem', margin: 0, padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
+                    className="page-filter-trigger text-base font-semibold text-[#1877F2] flex items-center gap-2 hover:opacity-80 transition-opacity mx-auto"
+                    style={{ lineHeight: '1.5rem', margin: '0 auto', padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
