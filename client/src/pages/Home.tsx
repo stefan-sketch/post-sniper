@@ -1038,13 +1038,12 @@ export default function Home() {
         <div 
           className="flex flex-col h-full overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-2" style={{ minHeight: '28px' }}>
-            <div className="flex items-center justify-center gap-2 flex-1">
-              {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
-              <div className="relative flex-1 flex items-center justify-center">
-                {activeGoals.length > 0 ? (
-                  /* Goal Score - single goal display */
-                  <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center mb-2" style={{ minHeight: '28px' }}>
+            {/* Facebook LIVE with integrated dropdown - or Goal Scores */}
+            <div className="relative flex-1 flex items-center justify-center">
+              {activeGoals.length > 0 ? (
+                /* Goal Score - single goal display */
+                <div className="flex items-center justify-center">
                     {activeGoals.slice(0, 1).map((goal) => (
                       <div 
                         key={goal.id}
@@ -1148,7 +1147,6 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            </div>
           </div>
           <div 
             ref={liveScrollRef} 
