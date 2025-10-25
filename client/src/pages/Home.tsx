@@ -2223,9 +2223,9 @@ export default function Home() {
                       className="flex items-center justify-center transition-all p-2"
                     >
                       <div 
-                        className={`h-8 w-8 rounded-full overflow-hidden flex-shrink-0 transition-all ${
+                        className={`h-7 w-7 rounded-full overflow-hidden flex-shrink-0 transition-all ${
                           isActive 
-                            ? 'ring-2 ring-white/50 scale-110' 
+                            ? 'ring-2 ring-white/50' 
                             : 'opacity-60'
                         }`}
                         style={{ 
