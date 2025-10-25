@@ -947,7 +947,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               </div>
 
               {/* Center: Page selector in a box */}
-              <div className="flex gap-1 px-1.5 py-1 bg-gray-800/40 rounded-md border border-gray-700/50 justify-between">
+              <div className="flex gap-2 px-3 bg-gray-800/40 rounded-md border border-gray-700/50 justify-between items-center" style={{ height: '28px' }}>
                 {PAGES.map((page) => {
                   const isSelected = selectedPage === page.id;
                   
@@ -968,7 +968,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       <img 
                         src={page.profilePicture} 
                         alt={page.shortName}
-                        className="w-6 h-6 rounded-full object-cover"
+                        className="w-5 h-5 rounded-full object-cover"
                         style={{
                           border: isSelected ? '2px solid #1877F2' : '2px solid transparent'
                         }}
