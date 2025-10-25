@@ -497,12 +497,19 @@
 .compact-posts .glass-card .relative.w-full.overflow-hidden.cursor-pointer {
   margin-left: -0.5rem !important;
   margin-right: -0.5rem !important;
+  margin-bottom: -0.5rem !important;
   width: calc(100% + 1rem) !important;
 }
 
 .compact-posts .glass-card img:not(.rounded-full) {
   width: 100% !important;
   border-radius: 0 !important;
+}
+
+/* Remove bottom border radius when image is at the bottom */
+.compact-posts .glass-card {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 /* Enhanced react-image-crop styling */
