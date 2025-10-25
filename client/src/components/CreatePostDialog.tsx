@@ -914,7 +914,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
         <div className="space-y-3">
           {/* Compact Header - Two Row Design */}
           <div className="space-y-2">
-            {/* Row 1: Window controls (left) and Post button (right) */}
+            {/* Row 1: Window controls (left) and Download + Post buttons (right) */}
             <div className="flex items-center justify-between">
               {/* Left: X and - */}
               <div className="flex gap-2">
@@ -936,62 +936,73 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                 </button>
               </div>
 
-              {/* Right: Post button */}
+              {/* Right: Download + Post buttons */}
               {!isEditingTweet && (
-                <div className="relative flex">
+                <div className="flex gap-2 items-center">
                   <button
-                    onClick={() => handlePost()}
-                    disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-4 py-1.5 rounded-l-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleDownload}
+                    disabled={!image || !selectedPage || cropMode}
+                    className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Download image in aspect ratio"
+                    style={{ background: 'none', border: 'none', padding: 0 }}
                   >
-                    {isUploading ? "Posting..." : "Post"}
+                    <Download className="h-4 w-4" strokeWidth={2.5} />
                   </button>
-                  <button
-                    onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
-                    disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
-                    className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-1.5 py-1.5 rounded-r-md text-sm font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20 flex items-center justify-center"
-                  >
-                    <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                  {showScheduleDropdown && (
-                    <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
-                      <button
-                        onClick={() => {
-                          handlePost(5);
-                          setShowScheduleDropdown(false);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors first:rounded-t-lg"
-                      >
-                        Post in 5 min
-                      </button>
-                      <button
-                        onClick={() => {
-                          handlePost(10);
-                          setShowScheduleDropdown(false);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors"
-                      >
-                        Post in 10 min
-                      </button>
-                      <button
-                        onClick={() => {
-                          handlePost(15);
-                          setShowScheduleDropdown(false);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors last:rounded-b-lg"
-                      >
-                        Post in 15 min
-                      </button>
-                    </div>
-                  )}
+                  <div className="relative flex">
+                    <button
+                      onClick={() => handlePost()}
+                      disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-3 py-1 rounded-l-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isUploading ? "Posting..." : "Post"}
+                    </button>
+                    <button
+                      onClick={() => setShowScheduleDropdown(!showScheduleDropdown)}
+                      disabled={isUploading || !image || !caption.trim() || !selectedPage || cropMode}
+                      className="bg-[#1877F2] hover:bg-[#1664D8] text-white px-1 py-1 rounded-r-md text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border-l border-white/20 flex items-center justify-center"
+                    >
+                      <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    {showScheduleDropdown && (
+                      <div className="absolute right-0 top-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
+                        <button
+                          onClick={() => {
+                            handlePost(5);
+                            setShowScheduleDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors first:rounded-t-lg"
+                        >
+                          Post in 5 min
+                        </button>
+                        <button
+                          onClick={() => {
+                            handlePost(10);
+                            setShowScheduleDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors"
+                        >
+                          Post in 10 min
+                        </button>
+                        <button
+                          onClick={() => {
+                            handlePost(15);
+                            setShowScheduleDropdown(false);
+                          }}
+                          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-gray-700 transition-colors last:rounded-b-lg"
+                        >
+                          Post in 15 min
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {isEditingTweet && canvasCompleteHandler && (
                 <button
                   onClick={canvasCompleteHandler}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 active:scale-95"
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 active:scale-95"
                 >
                   Complete
                 </button>
@@ -1009,38 +1020,30 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     <button
                       key={page.id}
                       onClick={() => selectPage(page.id)}
-                      className={`
-                        flex items-center justify-center p-1 rounded-full
-                        transition-all duration-200 hover:scale-[1.1]
-                        ${isSelected 
-                          ? 'ring-2 ring-[#1877F2] ring-offset-2 ring-offset-gray-900' 
-                          : 'opacity-60 hover:opacity-100'
-                        }
-                      `}
+                      className="transition-all duration-200 hover:scale-110 active:scale-95"
                       title={page.shortName}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        padding: 0,
+                        opacity: isSelected ? 1 : 0.5,
+                        filter: isSelected ? 'brightness(1.2)' : 'brightness(1)'
+                      }}
                     >
                       <img 
                         src={page.profilePicture} 
                         alt={page.shortName}
-                        className="w-7 h-7 rounded-full object-cover"
+                        className="w-6 h-6 rounded-full object-cover"
+                        style={{
+                          border: isSelected ? '2px solid #1877F2' : '2px solid transparent'
+                        }}
                       />
                     </button>
                   );
                 })}
               </div>
 
-              {/* Right: Download button */}
-              {!isEditingTweet && (
-                <button
-                  onClick={handleDownload}
-                  disabled={!image || !selectedPage || cropMode}
-                  className="flex items-center justify-center text-gray-400 hover:text-white transition-colors duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-                  title="Download image in aspect ratio"
-                  style={{ background: 'none', border: 'none', padding: 0 }}
-                >
-                  <Download className="h-4 w-4" strokeWidth={2.5} />
-                </button>
-              )}
+
             </div>
           </div>
 
