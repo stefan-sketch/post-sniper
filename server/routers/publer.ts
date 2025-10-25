@@ -11,6 +11,7 @@ const PUBLER_PAGES = {
   "footy-feed": { id: "688e7d0f74c67046be7b456d", name: "The Footy Feed" },
   "football-funnys": { id: "682a16114e1609768a2d06f3", name: "Football Funnys" },
   "football-away-days": { id: "681c989b68152b80ff38da04", name: "Football Away Days" },
+  "away-day-bible": { id: "464539010373853", name: "Away Day Bible" },
 };
 
 export const publerRouter = router({

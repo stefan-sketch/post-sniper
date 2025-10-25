@@ -11,12 +11,13 @@ import { toast } from "sonner";
 import { CanvasEditor } from "./CanvasEditor";
 
 
-type PageId = "footy-feed" | "football-funnys" | "football-away-days";
+type PageId = "footy-feed" | "football-funnys" | "football-away-days" | "away-day-bible";
 
 const PAGES: { id: PageId; name: string; watermark: string; shortName: string; profilePicture: string }[] = [
   { id: "footy-feed", name: "The Footy Feed", watermark: "/watermarks/footy-feed.png", shortName: "Footy Feed", profilePicture: "/page-icons/footy-feed.jpg" },
   { id: "football-funnys", name: "Football Funnys", watermark: "/watermarks/football-funnys.png", shortName: "Funnys", profilePicture: "/page-icons/football-funnys.jpg" },
   { id: "football-away-days", name: "Football Away Days", watermark: "/watermarks/football-away-days.png", shortName: "Away Days", profilePicture: "/page-icons/football-away-days.jpg" },
+  { id: "away-day-bible", name: "Away Day Bible", watermark: "/watermarks/away-day-bible.png", shortName: "Bible", profilePicture: "/away-day-bible.jpg" },
 ];
 
 interface CreatePostDialogProps {
@@ -67,7 +68,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
   const [isEditingText, setIsEditingText] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingEnabled, setDrawingEnabled] = useState(false);
-  const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy'>('yellow');
+  const [drawingColor, setDrawingColor] = useState<'yellow' | 'black' | 'burgundy' | 'green'>('yellow');
   const [strokeWidth, setStrokeWidth] = useState(3); // Default stroke width
   const [borderRadius, setBorderRadius] = useState(3); // Default border radius for rectangles
   const [tweetOutlineColor, setTweetOutlineColor] = useState<'white' | 'black'>('white'); // For Footy Feed tweet overlay
@@ -479,7 +480,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
               const borderColorMap = {
                 'yellow': '#FFD700',
                 'black': '#000000',
-                'burgundy': '#800020'
+                'burgundy': '#800020',
+                'green': '#00FF00'
               };
               const scaledBorderWidth = (overlayImageBorderWidth / imgWidth) * canvas.width;
               
@@ -884,7 +886,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
       const colorMap = {
         'yellow': '#FFD700',
         'black': '#FFFFFF',
-        'burgundy': '#800020'
+        'burgundy': '#800020',
+        'green': '#00FF00'
       };
       const { startX, startY, endX, endY } = currentRect;
       const x = Math.min(startX, endX);
@@ -1181,6 +1184,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                         setDrawingColor('black'); // Will render as white
                       } else if (selectedPage === 'football-away-days') {
                         setDrawingColor('burgundy');
+                      } else if (selectedPage === 'away-day-bible') {
+                        setDrawingColor('green');
                       }
                     }
                   }
@@ -1724,7 +1729,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                     const borderColorMap = {
                       'yellow': '#FFD700',
                       'black': '#000000',
-                      'burgundy': '#800020'
+                      'burgundy': '#800020',
+                      'green': '#00FF00'
                     };
                     
                     return (
@@ -1790,6 +1796,8 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                           currentColor = '#FFFFFF'; // White
                         } else if (selectedPage === 'football-away-days') {
                           currentColor = '#800020'; // Burgundy
+                        } else if (selectedPage === 'away-day-bible') {
+                          currentColor = '#00FF00'; // Bright green
                         }
                         
                         return (
@@ -1813,7 +1821,7 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                         const y = Math.min(currentRect.startY, currentRect.endY);
                         const width = Math.abs(currentRect.endX - currentRect.startX);
                         const height = Math.abs(currentRect.endY - currentRect.startY);
-                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#FFFFFF' : '#800020';
+                        const color = drawingColor === 'yellow' ? '#FFD700' : drawingColor === 'black' ? '#FFFFFF' : drawingColor === 'burgundy' ? '#800020' : '#00FF00';
                         return (
                           <rect
                             x={x}
