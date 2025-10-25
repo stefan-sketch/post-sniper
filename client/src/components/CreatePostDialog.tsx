@@ -1703,20 +1703,30 @@ export function CreatePostDialog({ open, onOpenChange, onMinimize, initialImage 
                       }}
                     >
                       {/* Render completed rectangles */}
-                      {rectangles.map((rect, i) => (
-                        <rect
-                          key={i}
-                          x={rect.x}
-                          y={rect.y}
-                          width={rect.width}
-                          height={rect.height}
-                          fill="none"
-                          stroke={rect.color}
-                          strokeWidth={rect.strokeWidth}
-                          rx={rect.borderRadius}
-                          ry={rect.borderRadius}
-                        />
-                      ))}
+                      {rectangles.map((rect, i) => {
+                        // Determine color based on currently selected page
+                        let currentColor = '#FFD700'; // Default yellow
+                        if (selectedPage === 'footy-feed') {
+                          currentColor = '#FFFFFF'; // White
+                        } else if (selectedPage === 'football-away-days') {
+                          currentColor = '#800020'; // Burgundy
+                        }
+                        
+                        return (
+                          <rect
+                            key={i}
+                            x={rect.x}
+                            y={rect.y}
+                            width={rect.width}
+                            height={rect.height}
+                            fill="none"
+                            stroke={currentColor}
+                            strokeWidth={rect.strokeWidth}
+                            rx={rect.borderRadius}
+                            ry={rect.borderRadius}
+                          />
+                        );
+                      })}
                       {/* Render current rectangle being drawn */}
                       {currentRect && (() => {
                         const x = Math.min(currentRect.startX, currentRect.endX);
